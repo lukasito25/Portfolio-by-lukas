@@ -13,15 +13,12 @@ export function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/80">
+    <header className="sticky top-0 z-50 w-full border-b border-purple-200/50 bg-white/80 backdrop-blur-md shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link
-            href="/"
-            className="text-xl font-bold text-slate-900 dark:text-slate-50"
-          >
-            Portfolio
+          <Link href="/" className="text-xl font-bold gradient-text">
+            Lukas Hosala
           </Link>
 
           {/* Desktop Navigation */}
@@ -31,10 +28,10 @@ export function Navigation() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'text-sm font-medium transition-colors hover:text-slate-900 dark:hover:text-slate-50',
+                  'text-sm font-medium transition-colors hover:text-purple-600',
                   pathname === item.href
-                    ? 'text-slate-900 dark:text-slate-50'
-                    : 'text-slate-600 dark:text-slate-400'
+                    ? 'text-purple-600 font-semibold'
+                    : 'text-gray-600'
                 )}
               >
                 {item.label}
