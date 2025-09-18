@@ -1,0 +1,290 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// NextAuth.js required models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // For credentials authentication
+  role          Role      @default(USER)
+  accounts      Account[]
+  sessions      Session[]
+
+  // Portfolio content relationships
+  projects      Project[]
+  blogPosts     BlogPost[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Portfolio content models
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  content     String
+  excerpt     String?
+
+  // Media and assets
+  thumbnail   String?
+  images      String? // JSON string of image URLs
+  demoUrl     String?
+  githubUrl   String?
+
+  // Metadata
+  technologies Technology[] @relation("ProjectTechnologies")
+  category    String?
+  status      ProjectStatus @default(DRAFT)
+  featured    Boolean   @default(false)
+  sortOrder   Int       @default(0)
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Author
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+
+  // Analytics
+  views       Int       @default(0)
+  likes       Int       @default(0)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String
+  excerpt     String?
+
+  // Media
+  thumbnail   String?
+
+  // Metadata
+  tags        Tag[]     @relation("BlogPostTags")
+  category    String?
+  status      PostStatus @default(DRAFT)
+  featured    Boolean   @default(false)
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Author
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+
+  // Analytics
+  views       Int       @default(0)
+  likes       Int       @default(0)
+  readTime    Int?      // estimated read time in minutes
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+}
+
+model Technology {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  icon        String?   // URL or icon identifier
+  color       String?   // hex color code
+  category    String?   // e.g., "Frontend", "Backend", "Database"
+  level       SkillLevel @default(BEGINNER)
+
+  projects    Project[] @relation("ProjectTechnologies")
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Tag {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  slug      String     @unique
+  color     String?    // hex color code
+
+  blogPosts BlogPost[] @relation("BlogPostTags")
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model ContactSubmission {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  subject     String?
+  message     String
+  phone       String?
+  company     String?
+
+  // Status tracking
+  status      ContactStatus @default(NEW)
+  responded   Boolean   @default(false)
+  respondedAt DateTime?
+
+  // Spam protection
+  ipAddress   String?
+  userAgent   String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Newsletter {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String?
+  subscribed  Boolean  @default(true)
+  confirmed   Boolean  @default(false)
+
+  // Tracking
+  source      String?  // where they subscribed from
+  ipAddress   String?
+
+  subscribedAt DateTime @default(now())
+  confirmedAt  DateTime?
+  unsubscribedAt DateTime?
+}
+
+model Analytics {
+  id          String   @id @default(cuid())
+
+  // Page analytics
+  path        String
+  title       String?
+
+  // User info (anonymized)
+  sessionId   String
+  ipAddress   String?
+  userAgent   String?
+  country     String?
+  city        String?
+
+  // Referrer info
+  referrer    String?
+  source      String?   // e.g., "google", "direct", "github"
+  medium      String?   // e.g., "organic", "social", "referral"
+  campaign    String?
+
+  // Engagement metrics
+  duration    Int?      // time spent on page in seconds
+  bounce      Boolean   @default(false)
+
+  createdAt   DateTime  @default(now())
+
+  @@index([path])
+  @@index([sessionId])
+  @@index([createdAt])
+}
+
+model MediaFile {
+  id          String   @id @default(cuid())
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int      // file size in bytes
+  url         String   // URL to access the file
+  alt         String?  // alt text for images
+
+  // Metadata
+  width       Int?     // for images
+  height      Int?     // for images
+
+  // Organization
+  folder      String?  // virtual folder structure
+  tags        String? // JSON string for categorization
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Enums
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ProjectStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum ContactStatus {
+  NEW
+  READ
+  RESPONDED
+  ARCHIVED
+}
