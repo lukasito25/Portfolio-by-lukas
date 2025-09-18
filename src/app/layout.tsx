@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { Navigation } from '@/components/ui/navigation'
 import { Footer } from '@/components/ui/footer'
+import { AIChatbot } from '@/components/ai-chatbot'
+import { AnalyticsProvider } from '@/components/analytics-provider'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -15,15 +17,22 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Portfolio - Web Developer',
+  title: 'Lukas Hosala - Product Manager & Technical Leader',
   description:
-    'A modern portfolio showcasing web development projects and skills.',
-  keywords: ['web development', 'portfolio', 'React', 'Next.js', 'TypeScript'],
-  authors: [{ name: 'Portfolio Owner' }],
+    'Senior Product Manager specializing in AI/ML integration, data-driven decision making, and cross-functional team leadership. 10+ years experience launching products that drive business growth.',
+  keywords: [
+    'product management',
+    'AI/ML',
+    'data analytics',
+    'technical leadership',
+    'product strategy',
+    'growth optimization',
+  ],
+  authors: [{ name: 'Lukas Hosala' }],
   openGraph: {
-    title: 'Portfolio - Web Developer',
+    title: 'Lukas Hosala - Product Manager & Technical Leader',
     description:
-      'A modern portfolio showcasing web development projects and skills.',
+      'Senior Product Manager specializing in AI/ML integration, data-driven decision making, and cross-functional team leadership.',
     type: 'website',
   },
 }
@@ -38,11 +47,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="flex min-h-screen flex-col">
-          <Navigation />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
+        <AnalyticsProvider>
+          <div className="flex min-h-screen flex-col">
+            <Navigation />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <AIChatbot />
+          </div>
+        </AnalyticsProvider>
       </body>
     </html>
   )

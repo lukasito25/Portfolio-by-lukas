@@ -90,3 +90,123 @@ export const POST = withRateLimit(async (req: NextRequest) => {
     return createErrorResponse('Failed to record analytics', 500)
   }
 })
+
+// GET /api/analytics - Get analytics data (admin only)
+export const GET = withRateLimit(async (req: NextRequest) => {
+  try {
+    // TODO: Add authentication check for admin access
+
+    const url = new URL(req.url)
+    const timeframe = url.searchParams.get('timeframe') || '30d'
+    const page = parseInt(url.searchParams.get('page') || '1')
+    const limit = parseInt(url.searchParams.get('limit') || '50')
+
+    const skip = (page - 1) * limit
+
+    // Calculate date range
+    const now = new Date()
+    const startDate = new Date()
+
+    switch (timeframe) {
+      case '1d':
+        startDate.setDate(now.getDate() - 1)
+        break
+      case '7d':
+        startDate.setDate(now.getDate() - 7)
+        break
+      case '30d':
+        startDate.setDate(now.getDate() - 30)
+        break
+      case '90d':
+        startDate.setDate(now.getDate() - 90)
+        break
+      default:
+        startDate.setDate(now.getDate() - 30)
+    }
+
+    // Get analytics data
+    const [analytics, total] = await Promise.all([
+      prisma.analytics.findMany({
+        where: {
+          createdAt: {
+            gte: startDate,
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      prisma.analytics.count({
+        where: {
+          createdAt: {
+            gte: startDate,
+          },
+        },
+      }),
+    ])
+
+    // Get summary statistics
+    const stats = await prisma.analytics.groupBy({
+      by: ['path'],
+      where: {
+        createdAt: {
+          gte: startDate,
+        },
+      },
+      _count: {
+        id: true,
+      },
+      _avg: {
+        duration: true,
+      },
+      orderBy: {
+        _count: {
+          id: 'desc',
+        },
+      },
+      take: 10,
+    })
+
+    // Get source statistics
+    const sources = await prisma.analytics.groupBy({
+      by: ['source'],
+      where: {
+        createdAt: {
+          gte: startDate,
+        },
+        source: {
+          not: null,
+        },
+      },
+      _count: {
+        id: true,
+      },
+      orderBy: {
+        _count: {
+          id: 'desc',
+        },
+      },
+    })
+
+    return createApiResponse({
+      analytics,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+      stats: {
+        topPages: stats,
+        topSources: sources,
+        totalViews: total,
+        timeframe,
+      },
+    })
+  } catch (error) {
+    console.error('Error fetching analytics:', error)
+    return createErrorResponse('Failed to fetch analytics', 500)
+  }
+})

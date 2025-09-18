@@ -1,0 +1,27 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "env": {
+    "NEXTAUTH_SECRET": "@nextauth_secret",
+    "NEXTAUTH_URL": "@nextauth_url",
+    "ADMIN_EMAIL": "@admin_email",
+    "ADMIN_PASSWORD": "@admin_password",
+    "DATABASE_URL": "@database_url",
+    "RESEND_API_KEY": "@resend_api_key",
+    "EMAIL_FROM": "@email_from",
+    "RATE_LIMIT_ENABLED": "true"
+  },
+  "functions": {
+    "src/app/api/**": {
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ]
+}
