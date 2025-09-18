@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { authOptions } from '@/lib/auth'
+import { AnalyticsDashboard } from '@/components/analytics-dashboard'
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions)
@@ -249,9 +250,12 @@ export default async function AdminDashboard() {
               </div>
               <div className="bg-gray-50 px-5 py-3">
                 <div className="text-sm">
-                  <span className="font-medium text-red-700">
-                    Tracking Active
-                  </span>
+                  <Link
+                    href="/admin/analytics"
+                    className="font-medium text-red-700 hover:text-red-900"
+                  >
+                    View Dashboard →
+                  </Link>
                 </div>
               </div>
             </div>
