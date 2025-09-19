@@ -157,10 +157,14 @@ async function main() {
 
   const createdTechnologies = []
   for (const tech of technologies) {
+    const techData = {
+      ...tech,
+      level: tech.level as any, // Type cast to work with Prisma enum
+    }
     const technology = await prisma.technology.upsert({
       where: { slug: tech.slug },
-      update: tech,
-      create: tech,
+      update: techData,
+      create: techData,
     })
     createdTechnologies.push(technology)
   }
