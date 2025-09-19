@@ -39,27 +39,32 @@ export default function Home() {
           <div className="mb-8 cosmic-float">
             <span className="inline-flex items-center px-6 py-3 bg-white/70 backdrop-blur-sm border border-purple-200 text-purple-800 text-sm font-medium rounded-full shadow-lg">
               <Sparkles className="w-4 h-4 mr-2" />
-              Senior Product Manager • Technical Leader • AI Strategist
+              Senior Product Manager • 8+ Years Experience • International Background
             </span>
           </div>
 
           {/* Main Headline */}
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
-            <span className="gradient-text cosmic-glow">
-              Driving Product Innovation
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-8 leading-[1.1] tracking-tight">
+            <span className="block mb-2">
+              <span className="gradient-text cosmic-glow">Building Digital</span>
             </span>
-            <br />
-            <span className="text-gray-900">Through Data & Technology</span>
+            <span className="block mb-2">
+              <span className="gradient-text cosmic-glow">Experiences</span>
+            </span>
+            <span className="block">
+              <span className="text-gray-900 dark:text-gray-100">
+                That Connect & Scale
+              </span>
+            </span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-xl md:text-2xl text-gray-700 mb-12 max-w-4xl mx-auto leading-relaxed">
-            Transforming complex technical challenges into user-centric
-            solutions that scale. I&apos;ve led cross-functional teams to
-            deliver products that increased user engagement by{' '}
-            <span className="font-bold text-purple-600 cosmic-pulse">340%</span>{' '}
-            and reduced customer acquisition costs by{' '}
-            <span className="font-bold text-green-600 cosmic-pulse">65%</span>.
+            Senior Product Manager with 8+ years of international experience at adidas Digital Sports and fintech startups.
+            Leading cross-functional teams of up to{' '}
+            <span className="font-bold text-purple-600 cosmic-pulse">13 personnel</span>{' '}
+            to deliver products that serve{' '}
+            <span className="font-bold text-green-600 cosmic-pulse">165M+ users</span> globally.
           </p>
 
           {/* CTA Buttons */}
@@ -91,26 +96,26 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             {[
               {
-                value: '15+',
-                label: 'Products Launched',
+                value: '8+',
+                label: 'Years Experience',
                 icon: <Rocket className="w-6 h-6" />,
                 color: 'text-blue-600',
               },
               {
-                value: '$50M+',
-                label: 'Revenue Generated',
-                icon: <TrendingUp className="w-6 h-6" />,
-                color: 'text-green-600',
-              },
-              {
-                value: '2M+',
-                label: 'Users Impacted',
+                value: '165M+',
+                label: 'Users Reached',
                 icon: <Users className="w-6 h-6" />,
                 color: 'text-purple-600',
               },
               {
-                value: '95%',
-                label: 'Team Satisfaction',
+                value: '13',
+                label: 'Max Team Size',
+                icon: <Target className="w-6 h-6" />,
+                color: 'text-green-600',
+              },
+              {
+                value: '3',
+                label: 'Countries',
                 icon: <Star className="w-6 h-6" />,
                 color: 'text-orange-600',
               },
@@ -146,53 +151,53 @@ export default function Home() {
               Core <span className="gradient-text">Competencies</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              A unique blend of strategic product thinking, technical depth, and
-              leadership experience that drives measurable business outcomes.
+              8+ years of international product management experience across digital sports,
+              e-commerce, and fintech, with expertise in agile methodologies and team leadership.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                icon: <Brain className="w-8 h-8" />,
-                title: 'AI-Powered Product Strategy',
+                icon: <Users className="w-8 h-8" />,
+                title: 'Team Leadership & Management',
                 description:
-                  'Leveraging machine learning and data science to build intelligent products that adapt and evolve with user behavior.',
+                  'Leading cross-functional teams of up to 13 personnel including external freelancers across multiple locations and time zones.',
                 color: 'from-purple-500 to-blue-500',
               },
               {
                 icon: <BarChart3 className="w-8 h-8" />,
-                title: 'Data-Driven Decision Making',
+                title: 'Digital Product Development',
                 description:
-                  'Converting complex analytics into actionable insights that drive 40%+ improvements in key product metrics.',
+                  'Full product lifecycle management from conception to launch, including website redesigns, admin portals, and mobile applications.',
                 color: 'from-blue-500 to-teal-500',
               },
               {
-                icon: <Users className="w-8 h-8" />,
-                title: 'Cross-Functional Leadership',
+                icon: <Target className="w-8 h-8" />,
+                title: 'Agile Methodology',
                 description:
-                  'Building and scaling high-performing teams across engineering, design, marketing, and data science disciplines.',
+                  'Expert in agile development processes, sprint planning, and iterative product delivery across international teams.',
                 color: 'from-teal-500 to-green-500',
               },
               {
-                icon: <Target className="w-8 h-8" />,
-                title: 'Market Strategy & Positioning',
+                icon: <Brain className="w-8 h-8" />,
+                title: 'Strategic Management',
                 description:
-                  'Identifying market opportunities and positioning products for maximum competitive advantage and growth.',
+                  'MBA-level strategic thinking with Level 7 Diploma in Strategic Management and Leadership, driving business outcomes.',
                 color: 'from-green-500 to-yellow-500',
               },
               {
                 icon: <TrendingUp className="w-8 h-8" />,
-                title: 'Growth & Optimization',
+                title: 'SEO & Marketing Integration',
                 description:
-                  'Implementing growth frameworks that consistently deliver 200%+ user acquisition and retention improvements.',
+                  'Creating product roadmaps with integrated SEO optimization and marketing strategies for maximum reach and engagement.',
                 color: 'from-yellow-500 to-orange-500',
               },
               {
                 icon: <Lightbulb className="w-8 h-8" />,
-                title: 'Innovation & Future Vision',
+                title: 'Tech Stack Modernization',
                 description:
-                  'Anticipating market trends and building products that define the next generation of user experiences.',
+                  'Managing complex website redesigns on new technology stacks, rebranding initiatives, and technical migration projects.',
                 color: 'from-orange-500 to-red-500',
               },
             ].map((competency, index) => (

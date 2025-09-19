@@ -24,9 +24,9 @@ import {
 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Product Management Insights - Leadership Blog',
+  title: 'Blog - Lukas Hosala | Product Management Insights',
   description:
-    'Strategic insights on product management, AI integration, team leadership, and building products that scale. Practical advice from a seasoned PM.',
+    'Real insights from 8+ years at adidas Digital Sports and fintech startups. International team leadership, digital product management, and scaling to 165M+ users.',
 }
 
 export default function BlogPage() {
@@ -36,17 +36,17 @@ export default function BlogPage() {
         {/* Hero Section */}
         <section className="text-center mb-16">
           <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-            Product Leadership Insights
+            Insights from the Field
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto mb-8">
-            Strategic thinking, technical insights, and practical lessons from
-            building products that users love and businesses depend on. Join
-            10,000+ product professionals who read my weekly insights.
+            Real stories and lessons learned from 8+ years managing international teams
+            at adidas Digital Sports and fintech startups. From leading teams of 13
+            across multiple countries to serving 165M+ users globally.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg">Subscribe to Weekly Insights</Button>
+            <Button size="lg">Latest Articles</Button>
             <Button variant="outline" size="lg">
-              View All Posts
+              About My Experience
             </Button>
           </div>
         </section>
@@ -60,26 +60,25 @@ export default function BlogPage() {
                   Featured Article
                 </Badge>
                 <h2 className="text-3xl lg:text-4xl font-bold mb-6">
-                  The AI Product Manager's Playbook: From Strategy to Execution
+                  Managing International Teams: Lessons from Leading 13 People Across Multiple Time Zones
                 </h2>
                 <p className="text-lg text-slate-600 dark:text-slate-300 mb-6">
-                  A comprehensive guide to building AI-powered products that
-                  deliver real business value. Learn how to navigate technical
-                  complexity, manage stakeholder expectations, and measure
-                  success in the age of machine learning.
+                  Real insights from my experience leading cross-functional teams of up to 13 personnel
+                  at adidas Digital Sports. From managing external freelancers to coordinating complex
+                  website redesigns across multiple locations while serving 165M+ users globally.
                 </p>
                 <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400 mb-6">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    <span>December 15, 2024</span>
+                    <span>January 15, 2025</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
-                    <span>12 min read</span>
+                    <span>8 min read</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    <span>2.3K views</span>
+                    <span>From personal experience</span>
                   </div>
                 </div>
                 <Button size="lg" className="group">
@@ -98,14 +97,14 @@ export default function BlogPage() {
                   <CardContent>
                     <ul className="text-sm space-y-2 text-slate-600 dark:text-slate-400">
                       <li>
-                        • How to build AI features that users actually want
+                        • Communication strategies across multiple time zones
                       </li>
-                      <li>• Managing technical debt in ML-powered products</li>
+                      <li>• Managing external freelancers and internal teams</li>
                       <li>
-                        • Measuring success beyond traditional product metrics
+                        • Coordinating complex technical migrations with zero downtime
                       </li>
                       <li>
-                        • Building data-driven feedback loops for AI products
+                        • Building trust and accountability in distributed teams
                       </li>
                     </ul>
                   </CardContent>
@@ -130,17 +129,17 @@ export default function BlogPage() {
               <CardHeader>
                 <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-2">
                   <Calendar className="h-4 w-4" />
-                  <span>December 8, 2024</span>
+                  <span>January 8, 2025</span>
                   <span>•</span>
                   <Clock className="h-4 w-4" />
-                  <span>8 min read</span>
+                  <span>6 min read</span>
                 </div>
                 <CardTitle className="text-xl group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  Building Cross-Functional Teams That Actually Work
+                  From Slovakia to Global Scale: My Journey in Product Management
                 </CardTitle>
                 <CardDescription className="text-base">
-                  The practical guide to creating high-performing product teams
-                  across engineering, design, and business.
+                  How I went from Sport Management graduate to leading international
+                  product teams at adidas Digital Sports serving 165M+ users.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -170,23 +169,23 @@ export default function BlogPage() {
                   <span>10 min read</span>
                 </div>
                 <CardTitle className="text-xl group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  The Product-Market Fit Framework for B2B SaaS
+                  Building StagStrat: From Concept to Algorithmic Trading Platform
                 </CardTitle>
                 <CardDescription className="text-base">
-                  A systematic approach to finding and measuring product-market
-                  fit in complex B2B environments.
+                  The journey of creating a fintech startup from scratch as Head of Product,
+                  including roadmap development and go-to-market strategy.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400 mb-4">
-                  Product-market fit in B2B is different from B2C. Here's a
-                  framework I've used to achieve PMF for three different B2B
-                  products, including the metrics that actually matter.
+                  As Head of Product at StagStrat, I orchestrated the complete product lifecycle
+                  of an algorithmic trading platform. From initial concept to production launch,
+                  here's how we built a revolutionary trading solution.
                 </p>
                 <div className="flex items-center justify-between">
                   <div className="flex gap-2">
-                    <Badge variant="outline">Product Strategy</Badge>
-                    <Badge variant="outline">B2B SaaS</Badge>
+                    <Badge variant="outline">FinTech</Badge>
+                    <Badge variant="outline">Startup</Badge>
                   </div>
                   <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 group-hover:translate-x-1 transition-all" />
                 </div>
@@ -204,23 +203,23 @@ export default function BlogPage() {
                   <span>6 min read</span>
                 </div>
                 <CardTitle className="text-xl group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  Why Most A/B Tests Fail (And How to Fix Them)
+                  Zero Downtime Migration: Lessons from adidas Digital Sports
                 </CardTitle>
                 <CardDescription className="text-base">
-                  Common mistakes that invalidate your experiments and a
-                  checklist for running tests that actually matter.
+                  How we migrated a platform serving 165M+ users to a new tech stack
+                  without a single minute of downtime.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400 mb-4">
-                  85% of A/B tests I've reviewed had fundamental flaws that made
-                  their results meaningless. Here's how to avoid the most common
-                  pitfalls and build a testing culture that drives real growth.
+                  Leading the technical migration of the Runtastic website while serving
+                  165M+ global users taught me that successful migrations aren't about
+                  the technology—they're about risk management and team coordination.
                 </p>
                 <div className="flex items-center justify-between">
                   <div className="flex gap-2">
-                    <Badge variant="outline">Data Analysis</Badge>
-                    <Badge variant="outline">Growth</Badge>
+                    <Badge variant="outline">Tech Migration</Badge>
+                    <Badge variant="outline">Risk Management</Badge>
                   </div>
                   <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 group-hover:translate-x-1 transition-all" />
                 </div>
@@ -238,23 +237,23 @@ export default function BlogPage() {
                   <span>9 min read</span>
                 </div>
                 <CardTitle className="text-xl group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  From 0 to Product-Market Fit: The Complete Playbook
+                  Managing External Teams: Insights from Leading 13 Personnel
                 </CardTitle>
                 <CardDescription className="text-base">
-                  Step-by-step guide to building your first product, from
-                  initial hypothesis to sustainable growth.
+                  Real strategies for coordinating external freelancers and
+                  internal teams across multiple locations and time zones.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400 mb-4">
-                  I've taken three products from idea to PMF. This playbook
-                  covers the frameworks, processes, and mindset shifts that made
-                  the difference between failure and breakthrough success.
+                  At adidas, I managed teams of up to 13 personnel including external freelancers
+                  across multiple locations. Here's what I learned about building trust,
+                  maintaining quality, and delivering complex projects with distributed teams.
                 </p>
                 <div className="flex items-center justify-between">
                   <div className="flex gap-2">
-                    <Badge variant="outline">0→1 Products</Badge>
-                    <Badge variant="outline">Startup</Badge>
+                    <Badge variant="outline">Team Management</Badge>
+                    <Badge variant="outline">Remote Work</Badge>
                   </div>
                   <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 group-hover:translate-x-1 transition-all" />
                 </div>
@@ -266,26 +265,26 @@ export default function BlogPage() {
         {/* Popular Topics */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-8 text-center">
-            Popular Topics
+            Areas of Expertise
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             <Card className="text-center group hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Brain className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <CardTitle>AI & Product Management</CardTitle>
-                <CardDescription>12 articles</CardDescription>
+                <CardTitle>International Team Leadership</CardTitle>
+                <CardDescription>Leading 13+ personnel across multiple countries</CardDescription>
               </CardHeader>
             </Card>
 
             <Card className="text-center group hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
+                  <Target className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
-                <CardTitle>Team Leadership</CardTitle>
-                <CardDescription>8 articles</CardDescription>
+                <CardTitle>Digital Sports & E-commerce</CardTitle>
+                <CardDescription>8+ years at adidas Digital Sports</CardDescription>
               </CardHeader>
             </Card>
 
@@ -294,18 +293,18 @@ export default function BlogPage() {
                 <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
-                <CardTitle>Growth Strategy</CardTitle>
-                <CardDescription>15 articles</CardDescription>
+                <CardTitle>FinTech & Algorithmic Trading</CardTitle>
+                <CardDescription>Head of Product at StagStrat startup</CardDescription>
               </CardHeader>
             </Card>
 
             <Card className="text-center group hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Target className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                  <Brain className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                 </div>
-                <CardTitle>Product Strategy</CardTitle>
-                <CardDescription>18 articles</CardDescription>
+                <CardTitle>Tech Stack Migration</CardTitle>
+                <CardDescription>Zero downtime migrations for 165M+ users</CardDescription>
               </CardHeader>
             </Card>
 
@@ -314,8 +313,8 @@ export default function BlogPage() {
                 <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <BarChart3 className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
-                <CardTitle>Data & Analytics</CardTitle>
-                <CardDescription>10 articles</CardDescription>
+                <CardTitle>SEO & Marketing Integration</CardTitle>
+                <CardDescription>Product roadmaps with marketing strategy</CardDescription>
               </CardHeader>
             </Card>
 
@@ -324,30 +323,31 @@ export default function BlogPage() {
                 <div className="w-12 h-12 bg-teal-100 dark:bg-teal-900 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Lightbulb className="h-6 w-6 text-teal-600 dark:text-teal-400" />
                 </div>
-                <CardTitle>Innovation</CardTitle>
-                <CardDescription>7 articles</CardDescription>
+                <CardTitle>Agile & Strategic Management</CardTitle>
+                <CardDescription>MBA + Level 7 Strategic Management</CardDescription>
               </CardHeader>
             </Card>
           </div>
         </section>
 
-        {/* Newsletter CTA */}
+        {/* Connect CTA */}
         <section className="text-center">
           <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-8 lg:p-12">
-            <h2 className="text-3xl font-bold mb-4">Stay Ahead of the Curve</h2>
+            <h2 className="text-3xl font-bold mb-4">Let's Connect</h2>
             <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-8">
-              Join 10,000+ product leaders who get my weekly insights on
-              building products that matter. Real strategies, practical
-              frameworks, and lessons learned from the trenches.
+              Interested in discussing international team leadership, product strategy, or digital transformation?
+              I'd love to share insights from my 8+ years of experience at adidas Digital Sports and fintech startups.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg">Subscribe to Weekly Insights</Button>
+              <Button size="lg">
+                <Link href="/contact">Get in Touch</Link>
+              </Button>
               <Button variant="outline" size="lg">
-                Browse Archive
+                <Link href="/about">Learn About My Experience</Link>
               </Button>
             </div>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
-              No spam, ever. Unsubscribe anytime.
+              Based in Volterra, Italy • Available for consulting and collaboration
             </p>
           </div>
         </section>

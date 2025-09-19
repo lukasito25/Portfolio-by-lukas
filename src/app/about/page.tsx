@@ -18,9 +18,9 @@ import {
 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'About - Product Leader & Technical Strategist',
+  title: 'About - Lukas Hosala | Senior Product Manager',
   description:
-    'Senior Product Manager with deep technical expertise, specializing in AI/ML products, data-driven decision making, and cross-functional team leadership.',
+    'Senior Product Manager with 8+ years of international experience at adidas Digital Sports and fintech startups. MBA graduate specializing in digital product development and team leadership.',
 }
 
 export default function AboutPage() {
@@ -32,25 +32,24 @@ export default function AboutPage() {
           <div className="flex flex-col lg:flex-row gap-12 items-start">
             <div className="lg:w-2/3">
               <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-                Building Products That Matter
+                From Slovakia to Global Scale
               </h1>
               <div className="prose prose-lg dark:prose-invert mb-8">
                 <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-                  I'm a Senior Product Manager who bridges the gap between
-                  ambitious vision and technical reality. With a unique
-                  combination of deep technical expertise and strategic business
-                  acumen, I've spent the last decade transforming complex
-                  challenges into elegant solutions that users love and
-                  businesses thrive on.
+                  I'm Lukas Hosala, a Senior Product Manager with 8+ years of international experience
+                  spanning digital sports, e-commerce, and fintech. Based in Volterra, Italy, I've led
+                  cross-functional teams of up to 13 personnel across multiple locations, delivering
+                  products that serve 165M+ users globally at companies like adidas Digital Sports and
+                  algorithmic trading startup StagStrat.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 mb-6">
-                <Badge variant="secondary">Product Strategy</Badge>
-                <Badge variant="secondary">AI/ML Integration</Badge>
-                <Badge variant="secondary">Data Analytics</Badge>
                 <Badge variant="secondary">Team Leadership</Badge>
-                <Badge variant="secondary">Growth Optimization</Badge>
-                <Badge variant="secondary">Technical Architecture</Badge>
+                <Badge variant="secondary">Digital Product Management</Badge>
+                <Badge variant="secondary">Agile Methodology</Badge>
+                <Badge variant="secondary">Strategic Management</Badge>
+                <Badge variant="secondary">SEO & Marketing</Badge>
+                <Badge variant="secondary">Tech Stack Migration</Badge>
               </div>
             </div>
             <div className="lg:w-1/3">
@@ -65,25 +64,25 @@ export default function AboutPage() {
                     <span className="text-sm text-slate-600 dark:text-slate-400">
                       Years of Experience
                     </span>
-                    <span className="font-semibold">10+</span>
+                    <span className="font-semibold">8+</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-slate-600 dark:text-slate-400">
-                      Products Launched
+                      Global Users Reached
                     </span>
-                    <span className="font-semibold">15+</span>
+                    <span className="font-semibold">165M+</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-slate-600 dark:text-slate-400">
-                      Teams Led
+                      Max Team Size
                     </span>
-                    <span className="font-semibold">50+</span>
+                    <span className="font-semibold">13</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-slate-600 dark:text-slate-400">
-                      Revenue Impact
+                      Countries Worked
                     </span>
-                    <span className="font-semibold">$50M+</span>
+                    <span className="font-semibold">3</span>
                   </div>
                 </CardContent>
               </Card>
@@ -96,9 +95,9 @@ export default function AboutPage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Leadership Philosophy</h2>
             <p className="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
-              Product management is about empowering people to build something
-              meaningful together. My approach combines data-driven insights
-              with human empathy to create products that solve real problems.
+              From managing teams of 13 across multiple countries to serving 165M+ users globally,
+              I've learned that great products come from empowered teams with clear vision.
+              My approach combines agile methodology with strategic thinking and international perspective.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
@@ -107,13 +106,13 @@ export default function AboutPage() {
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
                   <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <CardTitle>People-First Leadership</CardTitle>
+                <CardTitle>International Team Leadership</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400">
-                  Great products come from great teams. I focus on creating
-                  psychological safety, clear communication, and shared
-                  ownership that empowers everyone to do their best work.
+                  Leading cross-functional teams of up to 13 personnel across multiple locations
+                  and time zones. I focus on clear communication, cultural awareness, and
+                  agile methodologies to deliver world-class products.
                 </p>
               </CardContent>
             </Card>
@@ -122,13 +121,13 @@ export default function AboutPage() {
                 <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
                   <Brain className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
-                <CardTitle>Evidence-Based Decisions</CardTitle>
+                <CardTitle>Strategic Product Thinking</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400">
-                  Every decision is backed by data, user research, and market
-                  insights. I build robust measurement frameworks that turn
-                  assumptions into validated learnings.
+                  MBA-level strategic management combined with hands-on product experience.
+                  I create comprehensive product roadmaps with integrated SEO optimization
+                  and marketing strategies for maximum business impact.
                 </p>
               </CardContent>
             </Card>
@@ -137,13 +136,13 @@ export default function AboutPage() {
                 <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4">
                   <Target className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
-                <CardTitle>Impact-Driven Execution</CardTitle>
+                <CardTitle>Global Scale Execution</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400">
-                  Features don't matter—outcomes do. I align teams around clear
-                  metrics and business objectives, ensuring every effort drives
-                  measurable value for users and the company.
+                  From startup to enterprise scale - delivering products that serve 165M+ users
+                  globally while managing complex technical migrations and maintaining
+                  zero downtime for critical business operations.
                 </p>
               </CardContent>
             </Card>
@@ -167,49 +166,48 @@ export default function AboutPage() {
                       Senior Product Manager
                     </CardTitle>
                     <CardDescription className="text-base">
-                      TechCorp Inc. • 2021 - Present • San Francisco, CA
+                      Runtastic GmbH | adidas Digital Sports • 2022 - 2025 • Austria
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="mb-4 text-slate-600 dark:text-slate-400">
-                  Leading product strategy for AI-powered analytics platform
-                  serving 500K+ users. Spearheaded the integration of machine
-                  learning algorithms that improved user engagement by 340% and
-                  reduced churn by 45%.
+                  Led comprehensive website redesign and technology stack migration for adidas Digital Sports.
+                  Managed cross-functional teams across multiple locations to deliver rebranded content,
+                  new tech stack, and integrated SEO marketing strategy serving 165M+ global users.
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
                     <div className="font-semibold text-lg text-blue-600 dark:text-blue-400">
-                      340%
+                      165M+
                     </div>
                     <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Engagement Increase
+                      Global Users
                     </div>
                   </div>
                   <div className="text-center">
                     <div className="font-semibold text-lg text-green-600 dark:text-green-400">
-                      $15M
+                      13
                     </div>
                     <div className="text-sm text-slate-600 dark:text-slate-400">
-                      ARR Growth
+                      Team Size
                     </div>
                   </div>
                   <div className="text-center">
                     <div className="font-semibold text-lg text-purple-600 dark:text-purple-400">
-                      45%
+                      18mo
                     </div>
                     <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Churn Reduction
+                      Project Duration
                     </div>
                   </div>
                   <div className="text-center">
                     <div className="font-semibold text-lg text-orange-600 dark:text-orange-400">
-                      12
+                      Zero
                     </div>
                     <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Team Members
+                      Downtime
                     </div>
                   </div>
                 </div>
@@ -223,25 +221,24 @@ export default function AboutPage() {
                     <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
                   <div className="flex-1">
-                    <CardTitle className="text-xl">Product Manager</CardTitle>
+                    <CardTitle className="text-xl">Head of Product</CardTitle>
                     <CardDescription className="text-base">
-                      GrowthTech Solutions • 2019 - 2021 • Austin, TX
+                      StagStrat | Algorithmic Trading Startup • 2022 - Present • Remote
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="mb-4 text-slate-600 dark:text-slate-400">
-                  Built and launched a B2B SaaS marketing automation platform
-                  from 0 to 1. Led cross-functional team of 8 through product
-                  discovery, MVP development, and initial market penetration,
-                  achieving $2M ARR within 18 months.
+                  Orchestrating development and product lifecycle of algorithmic trading platform.
+                  Created comprehensive product roadmap, launched complete website, and implemented
+                  SEO optimization plan for revolutionary trading solutions in the fintech space.
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">0 to 1 Product</Badge>
-                  <Badge variant="outline">B2B SaaS</Badge>
-                  <Badge variant="outline">Marketing Automation</Badge>
-                  <Badge variant="outline">Go-to-Market Strategy</Badge>
+                  <Badge variant="outline">Product Strategy</Badge>
+                  <Badge variant="outline">FinTech</Badge>
+                  <Badge variant="outline">Website Launch</Badge>
+                  <Badge variant="outline">SEO Optimization</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -250,24 +247,23 @@ export default function AboutPage() {
               <CardHeader>
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                    <GraduationCap className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                    <Briefcase className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="flex-1">
                     <CardTitle className="text-xl">
-                      Technical Product Analyst
+                      Product Manager
                     </CardTitle>
                     <CardDescription className="text-base">
-                      DataDriven Inc. • 2017 - 2019 • Seattle, WA
+                      adidas International Marketing B.V. • 2019 - 2022 • Netherlands
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400">
-                  Started my product career analyzing user behavior and building
-                  data pipelines for a consumer fintech app. Developed expertise
-                  in SQL, Python, and statistical analysis while working closely
-                  with engineering teams to implement A/B testing frameworks.
+                  Led development teams of up to 13 personnel including external freelancers.
+                  Managed multiple products including third-party tool Sprinklr and in-house
+                  developed social commerce engine (adiSCom) for global e-commerce operations.
                 </p>
               </CardContent>
             </Card>

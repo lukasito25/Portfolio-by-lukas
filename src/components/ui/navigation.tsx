@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { cn } from '@/lib/utils'
 import { mainNavigation } from '@/data/navigation'
 import { Menu, X } from 'lucide-react'
@@ -22,36 +23,41 @@ export function Navigation() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {mainNavigation.map(item => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'text-sm font-medium transition-colors hover:text-purple-600',
-                  pathname === item.href
-                    ? 'text-purple-600 font-semibold'
-                    : 'text-gray-600'
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <div className="flex items-center gap-2">
+            <nav className="hidden md:flex items-center space-x-8">
+              {mainNavigation.map(item => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    'text-sm font-medium transition-colors hover:text-purple-600',
+                    pathname === item.href
+                      ? 'text-purple-600 font-semibold'
+                      : 'text-gray-600 dark:text-gray-300'
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
 
-          {/* Mobile menu button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </Button>
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
+            {/* Mobile menu button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}

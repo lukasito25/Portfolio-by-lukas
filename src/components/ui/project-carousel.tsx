@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import Image from 'next/image'
 import {
   ChevronLeft,
   ChevronRight,
@@ -41,179 +42,179 @@ interface ProjectData {
 const sampleProjects: ProjectData[] = [
   {
     id: '1',
-    title: 'AI-Powered Analytics Platform',
+    title: 'adidas Runtastic Website Redesign',
     description:
-      'Revolutionary analytics platform leveraging machine learning for predictive insights and automated decision-making.',
+      'Complete website redesign and migration to new tech stack for adidas Digital Sports, serving 165M+ global users.',
     longDescription:
-      'Led the development of an enterprise-grade analytics platform that transforms raw data into actionable insights using advanced ML algorithms. The platform reduced manual analysis time by 85% and improved forecast accuracy by 40%.',
+      'Led the comprehensive redesign and technical migration of the Runtastic website as Senior Product Manager at adidas Digital Sports. Managed cross-functional teams across multiple locations to deliver rebranded content, new technology stack, and integrated SEO marketing strategy.',
     image:
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&h=600&fit=crop',
     technologies: [
       'React',
       'TypeScript',
-      'Python',
-      'TensorFlow',
-      'AWS',
+      'Next.js',
+      'Node.js',
       'PostgreSQL',
+      'Docker',
     ],
     metrics: [
       {
-        label: 'Revenue Impact',
-        value: '$15M ARR',
-        icon: <DollarSign className="w-4 h-4" />,
-        color: 'text-green-600',
-      },
-      {
-        label: 'User Growth',
-        value: '340%',
-        icon: <TrendingUp className="w-4 h-4" />,
-        color: 'text-blue-600',
-      },
-      {
-        label: 'Active Users',
-        value: '50K+',
+        label: 'Global Users',
+        value: '165M+',
         icon: <Users className="w-4 h-4" />,
         color: 'text-purple-600',
       },
+      {
+        label: 'Team Size',
+        value: '13',
+        icon: <TrendingUp className="w-4 h-4" />,
+        color: 'text-green-600',
+      },
+      {
+        label: 'Duration',
+        value: '18mo',
+        icon: <Star className="w-4 h-4" />,
+        color: 'text-blue-600',
+      },
     ],
     links: {
-      demo: 'https://demo.example.com',
-      case_study: '/work#ai-analytics',
+      demo: 'https://www.runtastic.com',
+      case_study: '/work#runtastic-redesign',
     },
-    category: 'AI/ML',
+    category: 'Digital Sports',
     featured: true,
     status: 'completed',
   },
   {
     id: '2',
-    title: 'Global E-commerce Marketplace',
+    title: 'StagStrat Algorithmic Trading Platform',
     description:
-      'Multi-vendor marketplace platform serving 15 international markets with advanced logistics and payment integration.',
+      'Head of Product for algorithmic trading startup, orchestrating development and complete website launch from concept to production.',
     longDescription:
-      'Architected and launched a comprehensive e-commerce solution supporting multiple currencies, languages, and payment methods. Achieved 200% revenue growth within 18 months of launch.',
+      'As Head of Product at StagStrat, orchestrated the complete product lifecycle of an algorithmic trading platform. Created comprehensive product roadmap, launched website, and implemented SEO optimization strategies for a revolutionary trading solution.',
     image:
-      'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=600&fit=crop',
     technologies: [
-      'Next.js',
-      'Node.js',
-      'Stripe',
-      'MongoDB',
-      'Redis',
+      'React',
+      'Python',
+      'FastAPI',
+      'PostgreSQL',
+      'WebSocket',
       'Docker',
     ],
     metrics: [
       {
-        label: 'Markets Served',
-        value: '15',
-        icon: <Star className="w-4 h-4" />,
-        color: 'text-yellow-600',
-      },
-      {
-        label: 'Revenue Growth',
-        value: '200%',
+        label: 'Platform Launch',
+        value: '100%',
         icon: <TrendingUp className="w-4 h-4" />,
         color: 'text-green-600',
       },
       {
-        label: 'Transactions',
-        value: '1M+',
-        icon: <DollarSign className="w-4 h-4" />,
+        label: 'Product Strategy',
+        value: 'Full',
+        icon: <Star className="w-4 h-4" />,
         color: 'text-blue-600',
+      },
+      {
+        label: 'Time to Market',
+        value: '12mo',
+        icon: <Users className="w-4 h-4" />,
+        color: 'text-purple-600',
       },
     ],
     links: {
-      demo: 'https://marketplace.example.com',
-      github: 'https://github.com/example/marketplace',
+      demo: 'https://www.stagstrat.com',
+      case_study: '/work#stagstrat-platform',
     },
-    category: 'E-commerce',
+    category: 'FinTech',
     featured: true,
     status: 'completed',
   },
   {
     id: '3',
-    title: 'Smart Workflow Automation',
+    title: 'adidas Internal Admin Portal',
     description:
-      'Enterprise automation platform that streamlines business processes using AI-driven workflow optimization.',
+      'Product lifecycle management for adidas internal administration portal, streamlining operations across international teams.',
     longDescription:
-      'Developed an intelligent automation system that analyzes business processes and suggests optimizations. Delivered 60% efficiency improvements across Fortune 500 client operations.',
+      'Managed the complete product lifecycle for adidas internal admin portal, focusing on operational efficiency and user experience improvements. Led development teams to deliver tools that enhanced productivity for internal stakeholders globally.',
     image:
-      'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
     technologies: [
-      'Vue.js',
-      'FastAPI',
-      'scikit-learn',
-      'PostgreSQL',
-      'Kubernetes',
-      'GCP',
+      'Angular',
+      'Java',
+      'Spring Boot',
+      'MySQL',
+      'Redis',
+      'Jenkins',
     ],
     metrics: [
       {
-        label: 'Efficiency Gain',
-        value: '60%',
-        icon: <TrendingUp className="w-4 h-4" />,
-        color: 'text-green-600',
-      },
-      {
-        label: 'Enterprise Clients',
-        value: '50+',
+        label: 'Internal Users',
+        value: '1000+',
         icon: <Users className="w-4 h-4" />,
         color: 'text-purple-600',
       },
       {
-        label: 'Cost Savings',
-        value: '$5M+',
-        icon: <DollarSign className="w-4 h-4" />,
+        label: 'Efficiency Gain',
+        value: '+45%',
+        icon: <TrendingUp className="w-4 h-4" />,
+        color: 'text-green-600',
+      },
+      {
+        label: 'Global Reach',
+        value: '25+',
+        icon: <Star className="w-4 h-4" />,
         color: 'text-blue-600',
       },
     ],
     links: {
-      case_study: '/work#workflow-automation',
+      case_study: '/work#adidas-admin-portal',
     },
-    category: 'Enterprise',
+    category: 'Enterprise Software',
     featured: false,
     status: 'completed',
   },
   {
     id: '4',
-    title: 'Mobile-First Social Platform',
+    title: 'Social Commerce Engine (adiSCom)',
     description:
-      'Next-generation social networking app focused on authentic connections and community building.',
+      'Product management for in-house developed social commerce engine and third-party tool Sprinklr integration at adidas.',
     longDescription:
-      'Led product strategy for a mobile-first social platform emphasizing genuine interactions over engagement metrics. Achieved 4.8/5 App Store rating and 100K+ downloads in first quarter.',
+      'Led product management for multiple products including the in-house developed social commerce engine (adiSCom) and third-party tool Sprinklr. Managed external teams and coordinated complex integrations to enhance social media presence and e-commerce capabilities.',
     image:
-      'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop',
     technologies: [
-      'React Native',
+      'Vue.js',
+      'Node.js',
       'GraphQL',
-      'Apollo',
-      'Firebase',
-      'Swift',
-      'Kotlin',
+      'MongoDB',
+      'Sprinklr API',
+      'AWS',
     ],
     metrics: [
       {
-        label: 'App Store Rating',
-        value: '4.8/5',
-        icon: <Star className="w-4 h-4" />,
-        color: 'text-yellow-600',
+        label: 'Social Platforms',
+        value: '10+',
+        icon: <TrendingUp className="w-4 h-4" />,
+        color: 'text-green-600',
       },
       {
-        label: 'Downloads',
-        value: '100K+',
+        label: 'Team Management',
+        value: '13',
         icon: <Users className="w-4 h-4" />,
         color: 'text-purple-600',
       },
       {
-        label: 'Engagement',
-        value: '85%',
-        icon: <TrendingUp className="w-4 h-4" />,
-        color: 'text-green-600',
+        label: 'Integration Success',
+        value: '100%',
+        icon: <Star className="w-4 h-4" />,
+        color: 'text-blue-600',
       },
     ],
     links: {
-      demo: 'https://apps.apple.com/app/example',
+      case_study: '/work#social-commerce-engine',
     },
-    category: 'Mobile',
+    category: 'Social Commerce',
     featured: false,
     status: 'completed',
   },
@@ -274,10 +275,13 @@ export function ProjectCarousel() {
           {/* Image Section */}
           <div className="relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-blue-500/20 z-10" />
-            <img
+            <Image
               src={currentProject.image}
               alt={currentProject.title}
-              className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+              fill
+              className="object-cover transition-transform duration-700 hover:scale-110"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              priority={currentIndex === 0}
             />
 
             {/* Status Badge */}

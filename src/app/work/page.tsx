@@ -23,9 +23,9 @@ import {
 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Case Studies - Product Leadership Portfolio',
+  title: 'Work & Case Studies - Lukas Hosala | Senior Product Manager',
   description:
-    'Detailed case studies showcasing strategic product management, technical leadership, and measurable business impact across diverse industries.',
+    'Real case studies from 8+ years at adidas Digital Sports and fintech startups. Product management experience serving 165M+ users globally.',
 }
 
 export default function WorkPage() {
@@ -35,19 +35,18 @@ export default function WorkPage() {
         {/* Hero Section */}
         <section className="text-center mb-16">
           <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-            Product Leadership in Action
+            Real Projects, Real Impact
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto mb-8">
-            Explore detailed case studies that demonstrate how strategic
-            thinking, technical expertise, and user-centered design come
-            together to create products that drive real business impact.
+            Explore authentic case studies from my 8+ years in product management at adidas Digital Sports,
+            fintech startups, and international teams. Real projects serving 165M+ users globally.
           </p>
           <div className="flex flex-wrap justify-center gap-2">
-            <Badge variant="secondary">B2B SaaS</Badge>
-            <Badge variant="secondary">AI/ML Products</Badge>
-            <Badge variant="secondary">Mobile Apps</Badge>
-            <Badge variant="secondary">Enterprise Solutions</Badge>
-            <Badge variant="secondary">0→1 Products</Badge>
+            <Badge variant="secondary">Digital Sports</Badge>
+            <Badge variant="secondary">FinTech</Badge>
+            <Badge variant="secondary">Website Redesigns</Badge>
+            <Badge variant="secondary">Team Leadership</Badge>
+            <Badge variant="secondary">International Teams</Badge>
           </div>
         </section>
 
@@ -60,27 +59,25 @@ export default function WorkPage() {
                   Featured Case Study
                 </Badge>
                 <h2 className="text-3xl lg:text-4xl font-bold mb-6">
-                  AI-Powered Analytics Platform: From Concept to $15M ARR
+                  adidas Runtastic Website Redesign: Serving 165M+ Global Users
                 </h2>
                 <p className="text-lg text-slate-600 dark:text-slate-300 mb-6">
-                  Led the complete product development of an AI-driven analytics
-                  platform that transformed how enterprise clients understand
-                  their data. Through strategic ML implementation and
-                  user-centric design, we achieved 340% increase in user
-                  engagement and 65% reduction in CAC.
+                  Led the comprehensive website redesign and technology stack migration for adidas Digital Sports.
+                  Managed cross-functional teams across multiple locations to deliver rebranded content, new tech stack,
+                  and integrated SEO marketing strategy for one of the world's largest fitness platforms.
                 </p>
                 <div className="flex flex-wrap gap-4 mb-8">
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-green-600" />
-                    <span className="font-medium">340% Engagement Growth</span>
+                    <Users className="h-5 w-5 text-purple-600" />
+                    <span className="font-medium">165M+ Global Users</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-blue-600" />
-                    <span className="font-medium">65% CAC Reduction</span>
+                    <Target className="h-5 w-5 text-green-600" />
+                    <span className="font-medium">13-Person Team</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-purple-600" />
-                    <span className="font-medium">$15M ARR</span>
+                    <Globe className="h-5 w-5 text-blue-600" />
+                    <span className="font-medium">Multiple Locations</span>
                   </div>
                 </div>
                 <Button size="lg" className="group">
@@ -97,9 +94,8 @@ export default function WorkPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
-                      Enterprise clients struggled with fragmented data insights
-                      and manual reporting processes, leading to delayed
-                      decision-making and missed opportunities.
+                      Complete website redesign and migration to new technology stack for adidas Digital Sports,
+                      while maintaining service for 165M+ global users and ensuring zero downtime during the transition.
                     </p>
                   </CardContent>
                 </Card>
@@ -111,9 +107,8 @@ export default function WorkPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
-                      Built an AI-powered analytics platform with predictive
-                      capabilities, automated insights generation, and intuitive
-                      visualization tools.
+                      Led cross-functional teams across multiple locations, coordinated rebranded content delivery,
+                      managed technical migration, and implemented integrated SEO marketing strategies.
                     </p>
                   </CardContent>
                 </Card>
@@ -125,9 +120,8 @@ export default function WorkPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
-                      Reduced time-to-insight by 85%, increased user engagement
-                      by 340%, and generated $15M in new annual recurring
-                      revenue.
+                      Successfully launched new platform serving 165M+ users globally, improved site performance,
+                      enhanced SEO visibility, and delivered seamless user experience migration.
                     </p>
                   </CardContent>
                 </Card>
@@ -139,63 +133,63 @@ export default function WorkPage() {
         {/* Case Studies Grid */}
         <section className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">More Case Studies</h2>
+            <h2 className="text-3xl font-bold mb-4">Additional Projects</h2>
             <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Each project represents a unique challenge solved through
-              strategic product thinking and technical execution.
+              Real projects from my experience at adidas International Marketing B.V.,
+              StagStrat, and enterprise product management roles.
             </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">
-            {/* Case Study 2: Mobile App */}
+            {/* Case Study 2: StagStrat */}
             <Card className="group hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
-                    <Smartphone className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
                   <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
                 </div>
                 <CardTitle className="text-xl">
-                  Mobile-First B2C Product Launch
+                  StagStrat Algorithmic Trading Platform
                 </CardTitle>
                 <CardDescription className="text-base">
-                  From 0→1 Mobile App • Consumer Finance • 2019-2021
+                  Head of Product • FinTech Startup • 2022-Present
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400 mb-6">
-                  Launched a mobile-first personal finance app that achieved
-                  100K+ downloads in first 6 months. Led product strategy, user
-                  research, and cross-platform development coordination.
+                  Orchestrated complete product lifecycle for algorithmic trading startup.
+                  Led website launch, product roadmap creation, and SEO optimization
+                  strategy for revolutionary trading solutions.
                 </p>
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
                     <div className="font-semibold text-lg text-green-600 dark:text-green-400">
-                      100K+
+                      100%
                     </div>
                     <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Downloads
+                      Platform Launch
                     </div>
                   </div>
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
                     <div className="font-semibold text-lg text-blue-600 dark:text-blue-400">
-                      4.8/5
+                      12mo
                     </div>
                     <div className="text-sm text-slate-600 dark:text-slate-400">
-                      App Rating
+                      Time to Market
                     </div>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">Mobile Strategy</Badge>
-                  <Badge variant="outline">UX Research</Badge>
-                  <Badge variant="outline">Growth Marketing</Badge>
+                  <Badge variant="outline">Product Strategy</Badge>
+                  <Badge variant="outline">SEO Marketing</Badge>
+                  <Badge variant="outline">FinTech</Badge>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Case Study 3: Enterprise SaaS */}
+            {/* Case Study 3: adidas Admin Portal */}
             <Card className="group hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -205,39 +199,39 @@ export default function WorkPage() {
                   <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
                 </div>
                 <CardTitle className="text-xl">
-                  Enterprise Workflow Automation
+                  adidas Internal Admin Portal
                 </CardTitle>
                 <CardDescription className="text-base">
-                  B2B SaaS Platform • Enterprise • 2020-2022
+                  Enterprise Software • adidas • 2022-2025
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400 mb-6">
-                  Redesigned enterprise workflow platform serving 50+ Fortune
-                  500 companies. Improved user efficiency by 60% and reduced
-                  customer support tickets by 40% through better UX design.
+                  Product lifecycle management for adidas internal administration portal.
+                  Enhanced operational efficiency and user experience for internal
+                  stakeholders across global teams.
                 </p>
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
                     <div className="font-semibold text-lg text-purple-600 dark:text-purple-400">
-                      60%
+                      1000+
                     </div>
                     <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Efficiency Gain
+                      Internal Users
                     </div>
                   </div>
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
                     <div className="font-semibold text-lg text-orange-600 dark:text-orange-400">
-                      50+
+                      25+
                     </div>
                     <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Enterprise Clients
+                      Countries
                     </div>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">Enterprise UX</Badge>
-                  <Badge variant="outline">Workflow Design</Badge>
+                  <Badge variant="outline">Enterprise Software</Badge>
+                  <Badge variant="outline">Global Teams</Badge>
                   <Badge variant="outline">Customer Success</Badge>
                 </div>
               </CardContent>
