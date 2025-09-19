@@ -1,6 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lukas Hosala - Portfolio Website
+
+This is the professional portfolio website of Lukas Hosala, Senior Product Manager with 8+ years of international experience at adidas Digital Sports and fintech startups.
+
+## 🚀 Features
+
+- **Authentic Content**: Real experience and projects from 8+ years in product management
+- **Content Editor**: Built-in admin panel at `/admin/editor` for real-time content editing
+- **Dark/Light Theme**: Cosmic purple theme with full dark mode support
+- **Responsive Design**: Optimized for all devices
+- **Performance Optimized**: Next.js 15 with Turbopack
+
+## 🛠 Built With
+
+- **Next.js 15** with App Router and Turbopack
+- **TypeScript** for type safety
+- **Tailwind CSS** for styling
+- **Radix UI** for components
+- **Prisma** for future database features
+
+This is a [Next.js](https://nextjs.org) project.
 
 ## Getting Started
+
+## 📝 Content Management
+
+Access the content editor at `/admin/editor` to:
+
+- Edit homepage hero content and metrics
+- Update about page and professional journey
+- Manage blog articles and featured content
+- Modify work projects and case studies
+
+Content is saved locally in your browser and can be exported/imported as JSON.
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. Connect your GitHub repository to Vercel
+2. Add environment variable: `DATABASE_URL="file:./dev.db"`
+3. Deploy automatically
+
+### Environment Variables
+
+Required for deployment:
+
+```
+DATABASE_URL="file:./dev.db"
+```
+
+Optional for enhanced features:
+
+```
+NEXTAUTH_URL="https://your-domain.com"
+ANALYTICS_ENABLED="true"
+```
+
+## 🔧 Development
 
 First, run the development server:
 
