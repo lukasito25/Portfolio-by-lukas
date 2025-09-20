@@ -8,13 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import {
-  Briefcase,
-  Users,
-  TrendingUp,
-  Brain,
-  Target,
-} from 'lucide-react'
+import { Briefcase, Users, TrendingUp, Brain, Target } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'About - Lukas Hosala | Senior Product Manager',
@@ -35,11 +29,13 @@ export default function AboutPage() {
               </h1>
               <div className="prose prose-lg dark:prose-invert mb-8">
                 <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-                  I'm Lukas Hosala, a Senior Product Manager with 8+ years of international experience
-                  spanning digital sports, e-commerce, and fintech. Based in Volterra, Italy, I've led
-                  cross-functional teams of up to 13 personnel across multiple locations, delivering
-                  products that serve 165M+ users globally at companies like adidas Digital Sports and
-                  algorithmic trading startup StagStrat.
+                  I'm Lukas Hosala, a Senior Product Manager with 8+ years of
+                  international experience spanning digital sports, e-commerce,
+                  and fintech. Based in Volterra, Italy, I've led
+                  cross-functional teams of up to 13 personnel across multiple
+                  locations, delivering products that serve 165M+ users globally
+                  at companies like adidas Digital Sports and algorithmic
+                  trading startup StagStrat.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 mb-6">
@@ -94,9 +90,10 @@ export default function AboutPage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Leadership Philosophy</h2>
             <p className="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
-              From managing teams of 13 across multiple countries to serving 165M+ users globally,
-              I've learned that great products come from empowered teams with clear vision.
-              My approach combines agile methodology with strategic thinking and international perspective.
+              From managing teams of 13 across multiple countries to serving
+              165M+ users globally, I've learned that great products come from
+              empowered teams with clear vision. My approach combines agile
+              methodology with strategic thinking and international perspective.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
@@ -109,9 +106,10 @@ export default function AboutPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400">
-                  Leading cross-functional teams of up to 13 personnel across multiple locations
-                  and time zones. I focus on clear communication, cultural awareness, and
-                  agile methodologies to deliver world-class products.
+                  Leading cross-functional teams of up to 13 personnel across
+                  multiple locations and time zones. I focus on clear
+                  communication, cultural awareness, and agile methodologies to
+                  deliver world-class products.
                 </p>
               </CardContent>
             </Card>
@@ -124,9 +122,10 @@ export default function AboutPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400">
-                  MBA-level strategic management combined with hands-on product experience.
-                  I create comprehensive product roadmaps with integrated SEO optimization
-                  and marketing strategies for maximum business impact.
+                  MBA-level strategic management combined with hands-on product
+                  experience. I create comprehensive product roadmaps with
+                  integrated SEO optimization and marketing strategies for
+                  maximum business impact.
                 </p>
               </CardContent>
             </Card>
@@ -139,9 +138,10 @@ export default function AboutPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400">
-                  From startup to enterprise scale - delivering products that serve 165M+ users
-                  globally while managing complex technical migrations and maintaining
-                  zero downtime for critical business operations.
+                  From startup to enterprise scale - delivering products that
+                  serve 165M+ users globally while managing complex technical
+                  migrations and maintaining zero downtime for critical business
+                  operations.
                 </p>
               </CardContent>
             </Card>
@@ -165,16 +165,19 @@ export default function AboutPage() {
                       Senior Product Manager
                     </CardTitle>
                     <CardDescription className="text-base">
-                      Runtastic GmbH | adidas Digital Sports • 2022 - 2025 • Austria
+                      Runtastic GmbH | adidas Digital Sports • 2022 - 2025 •
+                      Austria
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="mb-4 text-slate-600 dark:text-slate-400">
-                  Led comprehensive website redesign and technology stack migration for adidas Digital Sports.
-                  Managed cross-functional teams across multiple locations to deliver rebranded content,
-                  new tech stack, and integrated SEO marketing strategy serving 165M+ global users.
+                  Led comprehensive website redesign and technology stack
+                  migration for adidas Digital Sports. Managed cross-functional
+                  teams across multiple locations to deliver rebranded content,
+                  new tech stack, and integrated SEO marketing strategy serving
+                  165M+ global users.
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center">
@@ -222,16 +225,18 @@ export default function AboutPage() {
                   <div className="flex-1">
                     <CardTitle className="text-xl">Head of Product</CardTitle>
                     <CardDescription className="text-base">
-                      StagStrat | Algorithmic Trading Startup • 2022 - Present • Remote
+                      StagStrat | Algorithmic Trading Startup • 2022 - Present •
+                      Remote
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="mb-4 text-slate-600 dark:text-slate-400">
-                  Orchestrating development and product lifecycle of algorithmic trading platform.
-                  Created comprehensive product roadmap, launched complete website, and implemented
-                  SEO optimization plan for revolutionary trading solutions in the fintech space.
+                  Orchestrating development and product lifecycle of algorithmic
+                  trading platform. Created comprehensive product roadmap,
+                  launched complete website, and implemented SEO optimization
+                  plan for revolutionary trading solutions in the fintech space.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline">Product Strategy</Badge>
@@ -249,20 +254,20 @@ export default function AboutPage() {
                     <Briefcase className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="flex-1">
-                    <CardTitle className="text-xl">
-                      Product Manager
-                    </CardTitle>
+                    <CardTitle className="text-xl">Product Manager</CardTitle>
                     <CardDescription className="text-base">
-                      adidas International Marketing B.V. • 2019 - 2022 • Netherlands
+                      adidas International Marketing B.V. • 2019 - 2022 •
+                      Netherlands
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400">
-                  Led development teams of up to 13 personnel including external freelancers.
-                  Managed multiple products including third-party tool Sprinklr and in-house
-                  developed social commerce engine (adiSCom) for global e-commerce operations.
+                  Led development teams of up to 13 personnel including external
+                  freelancers. Managed multiple products including third-party
+                  tool Sprinklr and in-house developed social commerce engine
+                  (adiSCom) for global e-commerce operations.
                 </p>
               </CardContent>
             </Card>
@@ -276,68 +281,70 @@ export default function AboutPage() {
           </h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-xl font-semibold mb-6">Product Management</h3>
+              <h3 className="text-xl font-semibold mb-6">Product & Strategy</h3>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span>Product Strategy & Roadmapping</span>
+                    <span>Strategic Management & Planning</span>
                     <span className="text-sm text-slate-500">Expert</span>
                   </div>
                   <Progress value={95} className="h-2" />
                 </div>
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span>User Research & Customer Development</span>
-                    <span className="text-sm text-slate-500">Advanced</span>
-                  </div>
-                  <Progress value={90} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>Data Analysis & A/B Testing</span>
+                    <span>Team Leadership (13+ personnel)</span>
                     <span className="text-sm text-slate-500">Expert</span>
                   </div>
                   <Progress value={95} className="h-2" />
                 </div>
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span>Go-to-Market Strategy</span>
+                    <span>Product Roadmap & Lifecycle</span>
+                    <span className="text-sm text-slate-500">Expert</span>
+                  </div>
+                  <Progress value={92} className="h-2" />
+                </div>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span>International Market Expansion</span>
                     <span className="text-sm text-slate-500">Advanced</span>
                   </div>
-                  <Progress value={85} className="h-2" />
+                  <Progress value={88} className="h-2" />
                 </div>
               </div>
             </div>
             <div>
-              <h3 className="text-xl font-semibold mb-6">Technical Skills</h3>
+              <h3 className="text-xl font-semibold mb-6">
+                Technical & Digital
+              </h3>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span>SQL & Database Design</span>
-                    <span className="text-sm text-slate-500">Advanced</span>
+                    <span>SEO Strategy & Implementation</span>
+                    <span className="text-sm text-slate-500">Expert</span>
                   </div>
                   <Progress value={90} className="h-2" />
                 </div>
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span>Python & Machine Learning</span>
-                    <span className="text-sm text-slate-500">Intermediate</span>
-                  </div>
-                  <Progress value={75} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>API Design & System Architecture</span>
+                    <span>Tech Stack Modernization</span>
                     <span className="text-sm text-slate-500">Advanced</span>
                   </div>
                   <Progress value={85} className="h-2" />
                 </div>
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span>Cloud Platforms (AWS, GCP)</span>
-                    <span className="text-sm text-slate-500">Intermediate</span>
+                    <span>Agile/Scrum Methodology</span>
+                    <span className="text-sm text-slate-500">Expert</span>
                   </div>
-                  <Progress value={70} className="h-2" />
+                  <Progress value={95} className="h-2" />
+                </div>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span>Digital Marketing Integration</span>
+                    <span className="text-sm text-slate-500">Advanced</span>
+                  </div>
+                  <Progress value={88} className="h-2" />
                 </div>
               </div>
             </div>
@@ -352,19 +359,21 @@ export default function AboutPage() {
             </h2>
             <div className="prose prose-lg dark:prose-invert mx-auto text-center">
               <p>
-                When I'm not optimizing conversion funnels or analyzing cohort
-                data, you'll find me exploring emerging technologies, mentoring
-                aspiring product managers, or hiking the beautiful trails around
-                the Bay Area. I believe the best product insights often come
-                from stepping away from the screen and experiencing the world
-                from our users' perspective.
+                When I'm not leading cross-functional teams or architecting
+                product roadmaps, you'll find me exploring the medieval streets
+                of Volterra, Italy, where I'm currently based. From my Tuscan
+                hillside home, I develop personal projects like fitness apps and
+                productivity tools, bridging the gap between strategic product
+                thinking and hands-on development.
               </p>
               <p>
-                I'm passionate about the intersection of AI and human-centered
-                design, and I regularly contribute to product management
-                communities through speaking engagements and blog posts. I also
-                volunteer with local coding bootcamps, helping career-changers
-                navigate the tech landscape.
+                My journey from Slovakia to international product leadership has
+                taught me that the best insights come from diverse perspectives
+                and real user experiences. I'm passionate about building mental
+                health platforms like VetWell, combining my product expertise
+                with social impact initiatives. Whether it's algorithmic trading
+                at StagStrat or wellness technology, I believe in creating
+                products that genuinely improve people's lives.
               </p>
             </div>
           </div>
