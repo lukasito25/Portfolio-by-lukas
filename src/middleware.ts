@@ -55,8 +55,8 @@ export async function middleware(request: NextRequest) {
   )
 
   if (isProtectedRoute) {
-    // For admin pages, redirect to login
-    if (pathname.startsWith('/admin')) {
+    // For admin pages, redirect to login (but exclude the login page itself)
+    if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
       const token = await getToken({ req: request })
 
       if (!token || token.role !== 'ADMIN') {
