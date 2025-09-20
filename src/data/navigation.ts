@@ -12,6 +12,11 @@ export const mainNavigation: NavItem[] = [
     description: 'Learn more about me',
   },
   {
+    label: 'Skills',
+    href: '/skills',
+    description: 'My expertise & capabilities',
+  },
+  {
     label: 'Work',
     href: '/work',
     description: 'View my projects',
