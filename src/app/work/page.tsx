@@ -38,8 +38,9 @@ export default function WorkPage() {
             Real Projects, Real Impact
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto mb-8">
-            Explore authentic case studies from my 8+ years in product management at adidas Digital Sports,
-            fintech startups, and international teams. Real projects serving 165M+ users globally.
+            Explore authentic case studies from my 8+ years in product
+            management at adidas Digital Sports, fintech startups, and
+            international teams. Real projects serving 165M+ users globally.
           </p>
           <div className="flex flex-wrap justify-center gap-2">
             <Badge variant="secondary">Digital Sports</Badge>
@@ -62,9 +63,11 @@ export default function WorkPage() {
                   adidas Runtastic Website Redesign: Serving 165M+ Global Users
                 </h2>
                 <p className="text-lg text-slate-600 dark:text-slate-300 mb-6">
-                  Led the comprehensive website redesign and technology stack migration for adidas Digital Sports.
-                  Managed cross-functional teams across multiple locations to deliver rebranded content, new tech stack,
-                  and integrated SEO marketing strategy for one of the world's largest fitness platforms.
+                  Led the comprehensive website redesign and technology stack
+                  migration for adidas Digital Sports. Managed cross-functional
+                  teams across multiple locations to deliver rebranded content,
+                  new tech stack, and integrated SEO marketing strategy for one
+                  of the world's largest fitness platforms.
                 </p>
                 <div className="flex flex-wrap gap-4 mb-8">
                   <div className="flex items-center gap-2">
@@ -94,8 +97,10 @@ export default function WorkPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
-                      Complete website redesign and migration to new technology stack for adidas Digital Sports,
-                      while maintaining service for 165M+ global users and ensuring zero downtime during the transition.
+                      Complete website redesign and migration to new technology
+                      stack for adidas Digital Sports, while maintaining service
+                      for 165M+ global users and ensuring zero downtime during
+                      the transition.
                     </p>
                   </CardContent>
                 </Card>
@@ -107,8 +112,10 @@ export default function WorkPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
-                      Led cross-functional teams across multiple locations, coordinated rebranded content delivery,
-                      managed technical migration, and implemented integrated SEO marketing strategies.
+                      Led cross-functional teams across multiple locations,
+                      coordinated rebranded content delivery, managed technical
+                      migration, and implemented integrated SEO marketing
+                      strategies.
                     </p>
                   </CardContent>
                 </Card>
@@ -120,8 +127,10 @@ export default function WorkPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
-                      Successfully launched new platform serving 165M+ users globally, improved site performance,
-                      enhanced SEO visibility, and delivered seamless user experience migration.
+                      Successfully launched new platform serving 165M+ users
+                      globally, improved site performance, enhanced SEO
+                      visibility, and delivered seamless user experience
+                      migration.
                     </p>
                   </CardContent>
                 </Card>
@@ -130,13 +139,214 @@ export default function WorkPage() {
           </div>
         </section>
 
-        {/* Case Studies Grid */}
+        {/* Personal Projects Section */}
+        <section className="mb-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Personal Projects</h2>
+            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+              Side projects showcasing full-stack development, wellness
+              technology, and social impact initiatives I've built and launched.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-8 mb-16">
+            {/* Lukas Training App */}
+            <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
+              <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden">
+                <div className="absolute inset-0 bg-black/20"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-white text-center">
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Target className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold">Training Program</h3>
+                    <p className="text-sm opacity-90">3x/Week Aesthetic</p>
+                  </div>
+                </div>
+              </div>
+              <CardHeader>
+                <CardTitle className="text-xl">Lukas Training App</CardTitle>
+                <CardDescription>
+                  Personal Fitness • Full-Stack Development • 2024
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600 dark:text-slate-400 mb-4">
+                  Custom-built training application featuring a 3x/week
+                  aesthetic training program. Designed and developed from
+                  concept to deployment with focus on user experience and
+                  workout tracking.
+                </p>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                    <div className="font-semibold text-lg text-blue-600 dark:text-blue-400">
+                      React
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400">
+                      Frontend
+                    </div>
+                  </div>
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                    <div className="font-semibold text-lg text-purple-600 dark:text-purple-400">
+                      Vercel
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400">
+                      Deployment
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Badge variant="outline">React</Badge>
+                  <Badge variant="outline">Fitness</Badge>
+                  <Badge variant="outline">UI/UX</Badge>
+                </div>
+                <Button variant="outline" size="sm" asChild className="w-full">
+                  <Link
+                    href="https://lukas-training-app.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View Live App
+                    <ArrowUpRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Momentum Vita Time */}
+            <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
+              <div className="relative h-48 bg-gradient-to-br from-green-500 to-teal-600 overflow-hidden">
+                <div className="absolute inset-0 bg-black/20"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-white text-center">
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <BarChart3 className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold">Time Flow</h3>
+                    <p className="text-sm opacity-90">Productivity Suite</p>
+                  </div>
+                </div>
+              </div>
+              <CardHeader>
+                <CardTitle className="text-xl">Momentum Vita Time</CardTitle>
+                <CardDescription>
+                  Productivity • Web Application • 2024
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600 dark:text-slate-400 mb-4">
+                  Time flow and productivity web application designed to help
+                  users optimize their daily routines. Features reward tracking
+                  and momentum-building tools for sustained productivity.
+                </p>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                    <div className="font-semibold text-lg text-green-600 dark:text-green-400">
+                      JS
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400">
+                      Interactive
+                    </div>
+                  </div>
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                    <div className="font-semibold text-lg text-teal-600 dark:text-teal-400">
+                      Base44
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400">
+                      Hosting
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Badge variant="outline">Productivity</Badge>
+                  <Badge variant="outline">Time Management</Badge>
+                  <Badge variant="outline">JavaScript</Badge>
+                </div>
+                <Button variant="outline" size="sm" asChild className="w-full">
+                  <Link
+                    href="https://momentum-vita-time.base44.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View Live App
+                    <ArrowUpRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* VetWell */}
+            <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
+              <div className="relative h-48 bg-gradient-to-br from-indigo-500 to-blue-600 overflow-hidden">
+                <div className="absolute inset-0 bg-black/20"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-white text-center">
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Users className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold">VetWell</h3>
+                    <p className="text-sm opacity-90">Mental Health Support</p>
+                  </div>
+                </div>
+              </div>
+              <CardHeader>
+                <CardTitle className="text-xl">VetWell Organization</CardTitle>
+                <CardDescription>
+                  HealthTech • Social Impact • 2024-2025
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600 dark:text-slate-400 mb-4">
+                  Mental health and coaching platform specifically designed for
+                  veterinary professionals. Provides therapy, coaching, and
+                  support services to address burnout and career development.
+                </p>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                    <div className="font-semibold text-lg text-indigo-600 dark:text-indigo-400">
+                      Therapy
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400">
+                      Licensed
+                    </div>
+                  </div>
+                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                    <div className="font-semibold text-lg text-blue-600 dark:text-blue-400">
+                      Nov 2025
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-400">
+                      Launch
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Badge variant="outline">Mental Health</Badge>
+                  <Badge variant="outline">Veterinary</Badge>
+                  <Badge variant="outline">Social Impact</Badge>
+                </div>
+                <Button variant="outline" size="sm" asChild className="w-full">
+                  <Link
+                    href="https://vetwell.org/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View Organization
+                    <ArrowUpRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        {/* Professional Projects Grid */}
         <section className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Additional Projects</h2>
+            <h2 className="text-3xl font-bold mb-4">Professional Projects</h2>
             <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Real projects from my experience at adidas International Marketing B.V.,
-              StagStrat, and enterprise product management roles.
+              Enterprise projects from my experience at adidas International
+              Marketing B.V., StagStrat, and international product management
+              roles.
             </p>
           </div>
 
@@ -159,9 +369,10 @@ export default function WorkPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400 mb-6">
-                  Orchestrated complete product lifecycle for algorithmic trading startup.
-                  Led website launch, product roadmap creation, and SEO optimization
-                  strategy for revolutionary trading solutions.
+                  Orchestrated complete product lifecycle for algorithmic
+                  trading startup. Led website launch, product roadmap creation,
+                  and SEO optimization strategy for revolutionary trading
+                  solutions.
                 </p>
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
@@ -207,9 +418,9 @@ export default function WorkPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-slate-600 dark:text-slate-400 mb-6">
-                  Product lifecycle management for adidas internal administration portal.
-                  Enhanced operational efficiency and user experience for internal
-                  stakeholders across global teams.
+                  Product lifecycle management for adidas internal
+                  administration portal. Enhanced operational efficiency and
+                  user experience for internal stakeholders across global teams.
                 </p>
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
