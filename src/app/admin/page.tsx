@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-
-// Force dynamic rendering
-export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import LogoutButton from '@/components/LogoutButton'
 import { dataService } from '@/lib/data-service'
 import { RefreshCw } from 'lucide-react'
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
 
 interface DashboardCounts {
   projects: number
