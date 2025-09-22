@@ -1,13 +1,61 @@
-import { getServerSession } from 'next-auth'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { authOptions } from '@/lib/auth'
 import LogoutButton from '@/components/LogoutButton'
+import { dataService } from '@/lib/data-service'
+import { RefreshCw } from 'lucide-react'
 
-export default async function AdminDashboard() {
-  const session = await getServerSession(authOptions)
+interface DashboardCounts {
+  projects: number
+  blogPosts: number
+  totalViews: number
+  contactSubmissions: number
+}
+
+export default function AdminDashboard() {
+  const { data: session, status } = useSession()
+  const [counts, setCounts] = useState<DashboardCounts | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Load dashboard counts
+  useEffect(() => {
+    loadDashboardData()
+  }, [])
+
+  // Handle authentication
+  if (status === 'loading') return <div>Loading...</div>
   if (!session || session.user.role !== 'ADMIN') {
     redirect('/admin/login')
+    return null
+  }
+
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true)
+
+      const [projects, blogPosts] = await Promise.all([
+        dataService.getAdminProjects(),
+        dataService.getBlogPosts(),
+      ])
+
+      const totalViews =
+        (projects?.reduce((sum, p) => sum + (p.views || 0), 0) || 0) +
+        (blogPosts?.reduce((sum, p) => sum + (p.views || 0), 0) || 0)
+
+      setCounts({
+        projects: projects?.length || 0,
+        blogPosts: blogPosts?.length || 0,
+        totalViews,
+        contactSubmissions: 0, // Would be loaded from contact API when available
+      })
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -28,6 +76,12 @@ export default async function AdminDashboard() {
                     <dd className="flex items-center text-sm text-gray-500 font-medium capitalize sm:mr-6">
                       Welcome, {session.user.email}
                     </dd>
+                    {counts && (
+                      <dd className="flex items-center text-sm text-gray-500 font-medium sm:mr-6">
+                        {counts.projects} Projects • {counts.blogPosts} Articles
+                        • {counts.totalViews} Total Views
+                      </dd>
+                    )}
                   </dl>
                 </div>
               </div>
@@ -113,7 +167,11 @@ export default async function AdminDashboard() {
                         Projects
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        Manage Portfolio
+                        {isLoading ? (
+                          <RefreshCw className="w-4 h-4 animate-spin inline" />
+                        ) : (
+                          `${counts?.projects || 0} Projects`
+                        )}
                       </dd>
                     </dl>
                   </div>
@@ -122,10 +180,10 @@ export default async function AdminDashboard() {
               <div className="bg-gray-50 px-5 py-3">
                 <div className="text-sm">
                   <Link
-                    href="/api/projects"
+                    href="/admin/projects"
                     className="font-medium text-indigo-700 hover:text-indigo-900"
                   >
-                    View API →
+                    Manage Projects →
                   </Link>
                 </div>
               </div>
@@ -158,7 +216,11 @@ export default async function AdminDashboard() {
                         Blog
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        Manage Articles
+                        {isLoading ? (
+                          <RefreshCw className="w-4 h-4 animate-spin inline" />
+                        ) : (
+                          `${counts?.blogPosts || 0} Articles`
+                        )}
                       </dd>
                     </dl>
                   </div>
@@ -167,10 +229,10 @@ export default async function AdminDashboard() {
               <div className="bg-gray-50 px-5 py-3">
                 <div className="text-sm">
                   <Link
-                    href="/api/blog"
+                    href="/admin/blog"
                     className="font-medium text-green-700 hover:text-green-900"
                   >
-                    View API →
+                    Manage Blog →
                   </Link>
                 </div>
               </div>
@@ -288,7 +350,11 @@ export default async function AdminDashboard() {
                         Analytics
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        Site Metrics
+                        {isLoading ? (
+                          <RefreshCw className="w-4 h-4 animate-spin inline" />
+                        ) : (
+                          `${counts?.totalViews || 0} Total Views`
+                        )}
                       </dd>
                     </dl>
                   </div>
