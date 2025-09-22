@@ -13,7 +13,7 @@ NEXTAUTH_URL=https://your-domain.vercel.app
 ADMIN_EMAIL=your-email@example.com
 ADMIN_PASSWORD=your-secure-password
 
-# Database (Already configured)
+# Database (Required for SQLite)
 DATABASE_URL=file:./dev.db
 ```
 
@@ -27,16 +27,34 @@ openssl rand -base64 32
 
 Or visit: https://generate-secret.vercel.app/32
 
-## Step 3: Access Admin Editor
+## Step 3: Deploy and Access
 
-1. Visit: `https://your-domain.vercel.app/admin/editor`
-2. Login with your ADMIN_EMAIL and ADMIN_PASSWORD
-3. Start editing your portfolio content!
+1. **Deploy to Vercel**: The build process will automatically:
+   - Generate Prisma client
+   - Initialize the database schema
+   - Seed the database with your admin user
+
+2. **Access Admin Panel**: Visit `https://your-domain.vercel.app/admin/login`
+
+3. **Login**: Use your ADMIN_EMAIL and ADMIN_PASSWORD from step 1
+
+4. **Start Editing**: Navigate to `/admin/editor` to manage your content
 
 ## Current Development Credentials
 
 - Email: `admin@example.com`
 - Password: `admin123`
+
+## How the Production Setup Works
+
+The build process (`npm run build`) automatically:
+
+1. Generates the Prisma client
+2. Pushes the database schema to SQLite
+3. Seeds the database with initial data including your admin user
+4. Builds the Next.js application
+
+Your admin user is created using the environment variables you set in Vercel, ensuring secure access to the admin panel.
 
 ## Security Notes
 
