@@ -1,8 +1,8 @@
 import { NextAuthOptions } from 'next-auth'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
+import { dataService } from './data-service'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -18,32 +18,26 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        })
+        try {
+          // Use data service for authentication (handles both Prisma and D1 API)
+          const user = await dataService.verifyAdminCredentials(
+            credentials.email,
+            credentials.password
+          )
 
-        if (!user) {
+          if (!user) {
+            return null
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          }
+        } catch (error) {
+          console.error('Authentication error:', error)
           return null
-        }
-
-        // For admin users, we'll store hashed passwords
-        // For the initial setup, we'll create an admin user with a hashed password
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password || ''
-        )
-
-        if (!isPasswordValid) {
-          return null
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
         }
       },
     }),
