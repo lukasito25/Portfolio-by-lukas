@@ -56,11 +56,23 @@ export default function AnalyticsDashboard() {
 
   // Load analytics data
   useEffect(() => {
-    loadAnalytics()
-  }, [])
+    if (session && session.user.role === 'ADMIN') {
+      loadAnalytics()
+    }
+  }, [session])
 
   // Handle authentication
-  if (status === 'loading') return <div>Loading...</div>
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <RefreshCw className="w-6 h-6 animate-spin" />
+          Loading...
+        </div>
+      </div>
+    )
+  }
+
   if (!session || session.user.role !== 'ADMIN') {
     redirect('/admin/login')
     return null
