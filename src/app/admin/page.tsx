@@ -1,14 +1,14 @@
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-// import { authOptions } from '@/lib/auth'
+import { authOptions } from '@/lib/auth'
+import LogoutButton from '@/components/LogoutButton'
 
-export default function AdminDashboard() {
-  // Simplified admin dashboard for portfolio demo
-  // const session = await getServerSession(authOptions)
-  // if (!session || session.user.role !== 'ADMIN') {
-  //   redirect('/admin/login')
-  // }
+export default async function AdminDashboard() {
+  const session = await getServerSession(authOptions)
+  if (!session || session.user.role !== 'ADMIN') {
+    redirect('/admin/login')
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -26,11 +26,14 @@ export default function AdminDashboard() {
                   <dl className="mt-6 flex flex-col sm:ml-3 sm:mt-1 sm:flex-row sm:flex-wrap">
                     <dt className="sr-only">Account status</dt>
                     <dd className="flex items-center text-sm text-gray-500 font-medium capitalize sm:mr-6">
-                      Portfolio Admin Dashboard
+                      Welcome, {session.user.email}
                     </dd>
                   </dl>
                 </div>
               </div>
+            </div>
+            <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
+              <LogoutButton />
             </div>
           </div>
         </div>
