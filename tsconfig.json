@@ -26,6 +26,7 @@
   "exclude": [
     "node_modules",
     "temp_api/**/*",
+    "cloudflare-api/**/*",
     "src/components/analytics-*.tsx",
     "src/components/performance-monitor.tsx",
     "src/lib/analytics.ts",
