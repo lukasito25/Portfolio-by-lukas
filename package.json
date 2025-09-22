@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate && prisma db push && npm run db:seed && next build",
+    "build": "bash scripts/build.sh",
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
