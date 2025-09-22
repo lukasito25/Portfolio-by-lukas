@@ -42,5 +42,11 @@ next-env.d.ts
 
 /src/generated/prisma
 
+# database files
+*.db
+*.sqlite
+*.sqlite3
+/prisma/*.db
+
 # cloudflare workers (separate deployment)
 /cloudflare-api
