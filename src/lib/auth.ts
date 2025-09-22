@@ -1,11 +1,9 @@
 import { NextAuthOptions } from 'next-auth'
-import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { prisma } from './prisma'
 import { dataService } from './data-service'
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // No adapter needed for JWT sessions
   providers: [
     CredentialsProvider({
       name: 'credentials',
