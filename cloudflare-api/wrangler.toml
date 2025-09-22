@@ -7,12 +7,12 @@ compatibility_date = "2024-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "portfolio-db"
-database_id = "your-database-id-here"  # Replace with actual ID from wrangler d1 create
+database_id = "16ffea54-0ddc-4807-940b-b6fb383b850c"
 
 # Environment variables
 [vars]
 CORS_ORIGIN = "https://portfolio-by-lukas.vercel.app"
-API_SECRET = "your-api-secret-here"
+API_SECRET = "portfolio-api-secret-2024"
 
 # For local development
 [env.development]

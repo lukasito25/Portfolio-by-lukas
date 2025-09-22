@@ -5,7 +5,7 @@
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  'https://portfolio-api.your-username.workers.dev'
+  'https://portfolio-api.hosala-lukas.workers.dev'
 const API_SECRET = process.env.API_SECRET
 
 class ApiClient {
