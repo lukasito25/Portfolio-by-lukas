@@ -1,0 +1,20 @@
+# Cloudflare Worker configuration for portfolio API
+name = "portfolio-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# D1 database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "portfolio-db"
+database_id = "your-database-id-here"  # Replace with actual ID from wrangler d1 create
+
+# Environment variables
+[vars]
+CORS_ORIGIN = "https://portfolio-by-lukas.vercel.app"
+API_SECRET = "your-api-secret-here"
+
+# For local development
+[env.development]
+[env.development.vars]
+CORS_ORIGIN = "http://localhost:3000"
