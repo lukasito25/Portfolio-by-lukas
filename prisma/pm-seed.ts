@@ -586,8 +586,8 @@ The mobile app had achieved initial traction but faced growth plateau:
         status: project.status as any,
         featured: project.featured,
         sortOrder: project.sortOrder,
-        views: project.views,
-        likes: project.likes,
+        views: 0,
+        likes: 0,
         publishedAt: project.publishedAt,
         technologies: {
           set: [], // Clear existing
@@ -613,8 +613,8 @@ The mobile app had achieved initial traction but faced growth plateau:
         status: project.status as any,
         featured: project.featured,
         sortOrder: project.sortOrder,
-        views: project.views,
-        likes: project.likes,
+        views: 0,
+        likes: 0,
         publishedAt: project.publishedAt,
         authorId: admin.id,
         technologies: {
@@ -717,7 +717,17 @@ Successfully expanded to 12 markets with strong local adoption and market leader
     const createdPost = await prisma.blogPost.upsert({
       where: { slug: post.slug },
       update: {
-        ...post,
+        title: post.title,
+        slug: post.slug,
+        content: post.content,
+        excerpt: post.excerpt,
+        thumbnail: post.thumbnail,
+        category: post.category,
+        featured: post.featured,
+        readTime: post.readTime,
+        status: post.status as any,
+        authorId: admin.id,
+        publishedAt: post.publishedAt,
         tags: {
           set: [],
           connect: [
