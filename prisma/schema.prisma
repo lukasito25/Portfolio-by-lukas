@@ -53,6 +53,7 @@ model User {
   // Portfolio content relationships
   projects      Project[]
   blogPosts     BlogPost[]
+  recruiterPages RecruiterPage[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -176,6 +177,11 @@ model ContactSubmission {
   phone       String?
   company     String?
 
+  // Project details
+  projectType String?
+  budgetRange String?
+  source      String?
+
   // Status tracking
   status      ContactStatus @default(NEW)
   responded   Boolean   @default(false)
@@ -287,4 +293,133 @@ enum ContactStatus {
   READ
   RESPONDED
   ARCHIVED
+}
+
+// Recruiter Landing Page System Models
+model RecruiterPage {
+  id           String   @id @default(cuid())
+  title        String
+  slug         String   @unique
+  companyName  String
+  companySlug  String
+  isActive     Boolean  @default(true)
+
+  // Target Role & Company
+  roleName     String?
+  roleLevel    String?  // "Director", "VP", "Chief"
+  companySize  String?  // "Startup", "Growth", "Enterprise"
+  industry     String?  // "B2B SaaS", "E-commerce", "FinTech"
+
+  // Template & Personalization
+  templateType String   // "company-mirror", "day-one-impact", "executive-briefing"
+  customContent Json?   // Flexible content structure
+
+  // Company Research Integration
+  companyInfo  Json?    // Researched company data
+  challenges   Json?    // Identified challenges array
+  solutions    Json?    // Proposed solutions array
+
+  // Analytics & Performance
+  views        Int      @default(0)
+  uniqueViews  Int      @default(0)
+  timeOnPage   Int?     // Average seconds
+  responses    Int      @default(0)
+
+  // Metadata
+  authorId     String
+  author       User     @relation(fields: [authorId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  analytics    RecruiterPageAnalytics[]
+  interactions RecruiterPageInteraction[]
+
+  @@index([companySlug])
+  @@index([templateType])
+  @@index([authorId])
+}
+
+// Page Analytics Tracking
+model RecruiterPageAnalytics {
+  id           String       @id @default(cuid())
+  pageId       String
+  page         RecruiterPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  // Visitor Info
+  sessionId    String
+  ipAddress    String?
+  userAgent    String?
+  referrer     String?
+
+  // Engagement Metrics
+  timeSpent    Int?         // Seconds on page
+  scrollDepth  Int?         // Percentage scrolled
+  interactions Int          @default(0)
+
+  // Geographic
+  country      String?
+  city         String?
+
+  visitedAt    DateTime     @default(now())
+
+  @@index([pageId])
+  @@index([sessionId])
+  @@index([visitedAt])
+}
+
+// Interactive Elements Tracking
+model RecruiterPageInteraction {
+  id           String       @id @default(cuid())
+  pageId       String
+  page         RecruiterPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  // Interaction Details
+  sessionId    String
+  elementType  String       // "roi-calculator", "action-plan", "case-study"
+  elementId    String
+  actionType   String       // "click", "input", "download", "share"
+
+  // Data Captured
+  inputData    Json?        // User inputs for calculators
+  result       Json?        // Calculated results
+  duration     Int?         // Time spent on element
+
+  createdAt    DateTime     @default(now())
+
+  @@index([pageId])
+  @@index([sessionId])
+  @@index([elementType])
+}
+
+// Company Research Cache
+model CompanyResearch {
+  id             String   @id @default(cuid())
+  companyName    String   @unique
+  domain         String?
+
+  // Basic Info
+  size           String?  // "10-50", "100-500", "1000+"
+  industry       String?
+  stage          String?  // "Startup", "Growth", "Public"
+  location       String?
+
+  // Business Intelligence
+  recentNews     Json?    // Latest news and announcements
+  products       Json?    // Product portfolio
+  competitors    Json?    // Competitive landscape
+  challenges     Json?    // Identified market challenges
+
+  // Technology Stack (if available)
+  techStack      Json?
+
+  // Update tracking
+  lastResearched DateTime @default(now())
+  needsUpdate    Boolean  @default(false)
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([companyName])
+  @@index([industry])
 }

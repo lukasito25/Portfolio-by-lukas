@@ -14,6 +14,7 @@ export const dynamic = 'force-dynamic'
 interface DashboardCounts {
   projects: number
   blogPosts: number
+  technologies: number
   totalViews: number
   contactSubmissions: number
 }
@@ -49,20 +50,26 @@ export default function AdminDashboard() {
     try {
       setIsLoading(true)
 
-      const [projects, blogPosts] = await Promise.all([
-        dataService.getAdminProjects(),
-        dataService.getBlogPosts(),
-      ])
+      const [projects, blogPosts, technologies, contactSubmissions] =
+        await Promise.all([
+          dataService.getAdminProjects(),
+          dataService.getBlogPosts(),
+          dataService.getTechnologies(),
+          dataService.getContactSubmissions(),
+        ])
 
       const totalViews =
-        (projects?.reduce((sum, p) => sum + (p.views || 0), 0) || 0) +
-        (blogPosts?.reduce((sum, p) => sum + (p.views || 0), 0) || 0)
+        (projects?.reduce((sum: number, p: any) => sum + (p.views || 0), 0) ||
+          0) +
+        (blogPosts?.reduce((sum: number, p: any) => sum + (p.views || 0), 0) ||
+          0)
 
       setCounts({
         projects: projects?.length || 0,
         blogPosts: blogPosts?.length || 0,
+        technologies: technologies?.length || 0,
         totalViews,
-        contactSubmissions: 0, // Would be loaded from contact API when available
+        contactSubmissions: contactSubmissions?.length || 0,
       })
     } catch (error) {
       console.error('Failed to load dashboard data:', error)
@@ -278,7 +285,11 @@ export default function AdminDashboard() {
                         Technologies
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        Manage Skills
+                        {isLoading ? (
+                          <RefreshCw className="w-4 h-4 animate-spin inline" />
+                        ) : (
+                          `${counts?.technologies || 0} Skills`
+                        )}
                       </dd>
                     </dl>
                   </div>
@@ -286,12 +297,12 @@ export default function AdminDashboard() {
               </div>
               <div className="bg-gray-50 px-5 py-3">
                 <div className="text-sm">
-                  <a
-                    href="/api/technologies"
+                  <Link
+                    href="/admin/skills"
                     className="font-medium text-yellow-700 hover:text-yellow-900"
                   >
-                    View API →
-                  </a>
+                    Manage Skills →
+                  </Link>
                 </div>
               </div>
             </div>
@@ -323,7 +334,11 @@ export default function AdminDashboard() {
                         Contact
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        Form Submissions
+                        {isLoading ? (
+                          <RefreshCw className="w-4 h-4 animate-spin inline" />
+                        ) : (
+                          `${counts?.contactSubmissions || 0} Submissions`
+                        )}
                       </dd>
                     </dl>
                   </div>
@@ -331,7 +346,57 @@ export default function AdminDashboard() {
               </div>
               <div className="bg-gray-50 px-5 py-3">
                 <div className="text-sm">
-                  <span className="font-medium text-purple-700">API Ready</span>
+                  <Link
+                    href="/admin/contact"
+                    className="font-medium text-purple-700 hover:text-purple-900"
+                  >
+                    Manage Submissions →
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Recruiter Pages Card */}
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center">
+                      <svg
+                        className="w-5 h-5 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Recruiter Pages
+                      </dt>
+                      <dd className="text-lg font-medium text-gray-900">
+                        Strategic Proposals
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-5 py-3">
+                <div className="text-sm">
+                  <Link
+                    href="/admin/recruiter"
+                    className="font-medium text-blue-700 hover:text-blue-900"
+                  >
+                    Manage Pages →
+                  </Link>
                 </div>
               </div>
             </div>

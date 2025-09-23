@@ -819,6 +819,89 @@ Start small, migrate incrementally, and embrace the new paradigms for building m
 
   console.log('✅ Blog posts created:', createdBlogPosts.length)
 
+  // Create sample recruiter page
+  const sampleRecruiterPage = await prisma.recruiterPage.create({
+    data: {
+      title: 'Strategic Product Leadership for TechCorp',
+      slug: 'techcorp-product-strategy',
+      companyName: 'TechCorp',
+      companySlug: 'techcorp',
+      isActive: true,
+      roleName: 'Head of Product',
+      roleLevel: 'Director',
+      companySize: '500-1000',
+      industry: 'B2B SaaS',
+      templateType: 'company-mirror',
+      authorId: admin.id,
+      customContent: JSON.stringify({
+        heroMessage:
+          'Transform TechCorp product strategy with proven methodologies',
+        valueProposition: 'Drive 40% faster time-to-market and 25% user growth',
+      }),
+      companyInfo: JSON.stringify({
+        stage: 'Scale-Up',
+        marketPosition: 'Growing',
+        growthRate: '+45% YoY',
+        primaryGoals: [
+          'Market Expansion',
+          'Product Innovation',
+          'Team Scalability',
+        ],
+      }),
+      challenges: JSON.stringify([
+        {
+          title: 'Product-Market Fit Optimization',
+          description:
+            'Struggling to identify the highest-impact features that drive user retention and expansion revenue.',
+          impact: 'High',
+          urgency: 'Critical',
+        },
+        {
+          title: 'Cross-Functional Team Alignment',
+          description:
+            'Engineering, Design, and Marketing teams working in silos, leading to conflicting priorities and delayed releases.',
+          impact: 'High',
+          urgency: 'High',
+        },
+        {
+          title: 'Data-Driven Decision Making',
+          description:
+            'Limited product analytics infrastructure making it difficult to measure feature success and user behavior.',
+          impact: 'Medium',
+          urgency: 'High',
+        },
+      ]),
+      solutions: JSON.stringify([
+        {
+          title: 'Strategic Product Roadmap',
+          description:
+            'Develop a data-driven product strategy aligned with business objectives and user needs.',
+          timeframe: '30 days',
+          impact: '15-25% increase in user engagement',
+        },
+        {
+          title: 'Cross-Functional Process Framework',
+          description:
+            'Implement agile methodologies and communication protocols to break down silos.',
+          timeframe: '60 days',
+          impact: '40% reduction in time-to-market',
+        },
+        {
+          title: 'Analytics & Measurement System',
+          description:
+            'Deploy comprehensive product analytics to track KPIs and optimize user experience.',
+          timeframe: '90 days',
+          impact: '30% improvement in feature adoption',
+        },
+      ]),
+      views: 0,
+      uniqueViews: 0,
+      responses: 0,
+    },
+  })
+
+  console.log('✅ Sample recruiter page created:', sampleRecruiterPage.slug)
+
   console.log('🎉 Database seed completed successfully!')
   console.log(`
 📊 Summary:
