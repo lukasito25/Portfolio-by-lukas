@@ -2,9 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-
-// Force dynamic rendering
-export const dynamic = 'force-dynamic'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -38,6 +35,9 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import { dataService } from '@/lib/data-service'
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
 
 interface Project {
   id: string
