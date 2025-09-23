@@ -738,7 +738,17 @@ Successfully expanded to 12 markets with strong local adoption and market leader
         },
       },
       create: {
-        ...post,
+        title: post.title,
+        slug: post.slug,
+        content: post.content,
+        excerpt: post.excerpt,
+        thumbnail: post.thumbnail,
+        category: post.category,
+        featured: post.featured,
+        readTime: post.readTime,
+        status: post.status as any,
+        authorId: admin.id,
+        publishedAt: post.publishedAt,
         tags: {
           connect: [
             { id: pmTag?.id },

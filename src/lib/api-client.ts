@@ -82,6 +82,11 @@ class ApiClient {
     return this.request<{ tags: any[] }>(`/blog/${slug}/tags`)
   }
 
+  // Technologies API
+  async getTechnologies() {
+    return this.request<{ technologies: any[] }>('/technologies')
+  }
+
   // Auth API
   async verifyCredentials(email: string, password: string) {
     return this.request<{ user: any }>('/auth/verify', {

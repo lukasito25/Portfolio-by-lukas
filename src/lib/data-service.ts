@@ -4,7 +4,7 @@
  */
 
 import { prisma } from './prisma'
-import { apiClient, checkApiHealth } from './api-client'
+// import { apiClient, checkApiHealth } from './api-client'
 
 const isDevelopment = process.env.NODE_ENV === 'development'
 const USE_API = process.env.NEXT_PUBLIC_USE_API === 'true'
@@ -13,14 +13,15 @@ class DataService {
   private useApi: boolean
 
   constructor() {
-    this.useApi = !isDevelopment || USE_API
+    // Disable API usage for now until all methods are implemented
+    this.useApi = false
   }
 
   async getProjects() {
     if (this.useApi) {
       try {
-        const { projects } = await apiClient.getProjects()
-        return projects
+        // const { projects } = await apiClient.getProjects()
+        // return projects
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }

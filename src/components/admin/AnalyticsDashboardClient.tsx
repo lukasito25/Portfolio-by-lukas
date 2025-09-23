@@ -92,8 +92,10 @@ export default function AnalyticsDashboardClient() {
       const totalProjects = projects?.length || 0
       const totalBlogPosts = blogPosts?.length || 0
       const totalViews =
-        (projects?.reduce((sum, p) => sum + (p.views || 0), 0) || 0) +
-        (blogPosts?.reduce((sum, p) => sum + (p.views || 0), 0) || 0)
+        (projects?.reduce((sum: number, p: any) => sum + (p.views || 0), 0) ||
+          0) +
+        (blogPosts?.reduce((sum: number, p: any) => sum + (p.views || 0), 0) ||
+          0)
 
       const mockAnalytics: AnalyticsData = {
         totalViews,
@@ -127,14 +129,14 @@ export default function AnalyticsDashboardClient() {
           },
         ],
         popularProjects:
-          projects?.slice(0, 5).map(p => ({
+          projects?.slice(0, 5).map((p: any) => ({
             id: p.id,
             title: p.title,
             views: p.views || 0,
             likes: p.likes || 0,
           })) || [],
         popularBlogPosts:
-          blogPosts?.slice(0, 5).map(p => ({
+          blogPosts?.slice(0, 5).map((p: any) => ({
             id: p.id,
             title: p.title,
             views: p.views || 0,

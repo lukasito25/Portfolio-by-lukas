@@ -820,8 +820,10 @@ Start small, migrate incrementally, and embrace the new paradigms for building m
   console.log('✅ Blog posts created:', createdBlogPosts.length)
 
   // Create sample recruiter page
-  const sampleRecruiterPage = await prisma.recruiterPage.create({
-    data: {
+  const sampleRecruiterPage = await prisma.recruiterPage.upsert({
+    where: { slug: 'techcorp-product-strategy' },
+    update: {},
+    create: {
       title: 'Strategic Product Leadership for TechCorp',
       slug: 'techcorp-product-strategy',
       companyName: 'TechCorp',

@@ -245,7 +245,7 @@ export function CompanyMirrorTemplate({ page }: CompanyMirrorTemplateProps) {
           </h3>
 
           <div className="space-y-4">
-            {challenges.map((challenge, index) => (
+            {challenges.map((challenge: any, index: number) => (
               <Card
                 key={index}
                 className="cursor-pointer hover:shadow-md transition-shadow"
@@ -314,7 +314,7 @@ export function CompanyMirrorTemplate({ page }: CompanyMirrorTemplateProps) {
           </h3>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {solutions.map((solution, index) => (
+            {solutions.map((solution: any, index: number) => (
               <Card
                 key={index}
                 className="border-t-4 border-t-blue-500 hover:shadow-lg transition-shadow"
