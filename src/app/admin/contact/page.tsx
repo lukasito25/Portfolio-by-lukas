@@ -44,13 +44,13 @@ interface ContactSubmission {
   id: string
   name: string
   email: string
-  subject?: string
+  subject: string | null
   message: string
-  phone?: string
-  company?: string
-  projectType?: string
-  budgetRange?: string
-  source?: string
+  phone: string | null
+  company: string | null
+  projectType: string | null
+  budgetRange: string | null
+  source: string | null
   status: 'NEW' | 'READ' | 'RESPONDED' | 'ARCHIVED'
   responded: boolean
   respondedAt?: string

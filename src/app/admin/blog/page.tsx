@@ -43,18 +43,25 @@ interface BlogPost {
   id: string
   title: string
   slug: string
-  excerpt: string
-  content?: string
-  thumbnail: string
-  category: string
+  excerpt: string | null
+  content?: string | null
+  thumbnail: string | null
+  category: string | null
   featured: boolean
-  readTime: number
+  readTime: number | null
   views: number
   likes: number
-  status: 'DRAFT' | 'PUBLISHED'
-  createdAt: string
-  publishedAt?: string
-  tags?: Array<{ name: string }>
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
+  createdAt: string | Date
+  publishedAt?: string | Date | null
+  tags?: Array<{
+    name: string
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    slug: string
+    color: string | null
+  }>
 }
 
 const emptyPost: Partial<BlogPost> = {
@@ -188,8 +195,9 @@ export default function BlogManagement() {
     }))
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (date: string | Date) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date
+    return dateObj.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
