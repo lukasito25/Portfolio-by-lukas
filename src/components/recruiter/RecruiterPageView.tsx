@@ -8,26 +8,26 @@ interface RecruiterPageData {
   slug: string
   companyName: string
   companySlug: string
-  roleName?: string
-  roleLevel?: string
-  companySize?: string
-  industry?: string
+  roleName: string | null
+  roleLevel: string | null
+  companySize: string | null
+  industry: string | null
   templateType: string
-  customContent?: any
-  companyInfo?: any
-  challenges?: any
-  solutions?: any
+  customContent: any
+  companyInfo: any
+  challenges: any
+  solutions: any
   views: number
   uniqueViews: number
-  timeOnPage?: number
+  timeOnPage: number | null
   responses: number
   author: {
     id: string
-    name: string
+    name: string | null
     email: string
   }
-  createdAt: string
-  updatedAt: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 interface RecruiterPageViewProps {

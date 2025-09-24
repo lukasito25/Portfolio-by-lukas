@@ -64,7 +64,7 @@ class DataService {
       try {
         // const { project } = await apiClient.getProject(slug)
         // const { technologies } = await apiClient.getProjectTechnologies(slug)
-        return { ...project, technologies }
+        // return { ...project, technologies }
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -138,7 +138,7 @@ class DataService {
       try {
         // const { post } = await apiClient.getBlogPost(slug)
         // const { tags } = await apiClient.getBlogPostTags(slug)
-        return { ...post, tags }
+        // return { ...post, tags }
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -575,10 +575,10 @@ class DataService {
         actionType: interactionData.actionType,
         inputData: interactionData.inputData
           ? JSON.stringify(interactionData.inputData)
-          : null,
+          : undefined,
         result: interactionData.result
           ? JSON.stringify(interactionData.result)
-          : null,
+          : undefined,
         duration: interactionData.duration,
       },
     })

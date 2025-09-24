@@ -27,14 +27,14 @@ interface CompanyMirrorTemplateProps {
   page: {
     id: string
     companyName: string
-    roleName?: string
-    roleLevel?: string
-    companySize?: string
-    industry?: string
-    customContent?: any
-    companyInfo?: any
-    challenges?: any
-    solutions?: any
+    roleName: string | null
+    roleLevel: string | null
+    companySize: string | null
+    industry: string | null
+    customContent: any
+    companyInfo: any
+    challenges: any
+    solutions: any
   }
 }
 
