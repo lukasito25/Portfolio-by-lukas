@@ -47,22 +47,22 @@ interface RecruiterPage {
   companyName: string
   companySlug: string
   isActive: boolean
-  roleName?: string
-  roleLevel?: string
-  companySize?: string
-  industry?: string
+  roleName: string | null
+  roleLevel: string | null
+  companySize: string | null
+  industry: string | null
   templateType: string
   views: number
   uniqueViews: number
-  timeOnPage?: number
+  timeOnPage: number | null
   responses: number
   author: {
     id: string
-    name: string
+    name: string | null
     email: string
   }
-  createdAt: string
-  updatedAt: string
+  createdAt: Date
+  updatedAt: Date
   _count?: {
     analytics: number
     interactions: number
@@ -150,8 +150,9 @@ export default function RecruiterPageManagement() {
     // You could add a toast notification here
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (date: string | Date) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date
+    return dateObj.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
