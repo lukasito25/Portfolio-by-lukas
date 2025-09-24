@@ -44,13 +44,13 @@ interface Technology {
   id: string
   name: string
   slug: string
-  description?: string
-  icon?: string
-  color?: string
-  category?: string
+  description: string | null
+  icon: string | null
+  color: string | null
+  category: string | null
   level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT'
-  createdAt: string
-  updatedAt: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 const emptyTechnology: Partial<Technology> = {
