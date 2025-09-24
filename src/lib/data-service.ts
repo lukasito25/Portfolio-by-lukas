@@ -20,7 +20,7 @@ class DataService {
   async getProjects() {
     if (this.useApi) {
       try {
-        // const { projects } = await apiClient.getProjects()
+        // const { projects } = await // apiClient.getProjects()
         // return projects
       } catch (error) {
         console.error('API failed, falling back to local:', error)
@@ -40,8 +40,8 @@ class DataService {
   async getFeaturedProjects() {
     if (this.useApi) {
       try {
-        const { projects } = await apiClient.getFeaturedProjects()
-        return projects
+        // const { projects } = await apiClient.getFeaturedProjects()
+        // return projects
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -62,8 +62,8 @@ class DataService {
   async getProject(slug: string) {
     if (this.useApi) {
       try {
-        const { project } = await apiClient.getProject(slug)
-        const { technologies } = await apiClient.getProjectTechnologies(slug)
+        // const { project } = await apiClient.getProject(slug)
+        // const { technologies } = await apiClient.getProjectTechnologies(slug)
         return { ...project, technologies }
       } catch (error) {
         console.error('API failed, falling back to local:', error)
@@ -94,8 +94,8 @@ class DataService {
   async getBlogPosts() {
     if (this.useApi) {
       try {
-        const { posts } = await apiClient.getBlogPosts()
-        return posts
+        // const { posts } = await apiClient.getBlogPosts()
+        // return posts
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -113,8 +113,8 @@ class DataService {
   async getFeaturedBlogPosts() {
     if (this.useApi) {
       try {
-        const { posts } = await apiClient.getFeaturedBlogPosts()
-        return posts
+        // const { posts } = await apiClient.getFeaturedBlogPosts()
+        // return posts
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -136,8 +136,8 @@ class DataService {
   async getBlogPost(slug: string) {
     if (this.useApi) {
       try {
-        const { post } = await apiClient.getBlogPost(slug)
-        const { tags } = await apiClient.getBlogPostTags(slug)
+        // const { post } = await apiClient.getBlogPost(slug)
+        // const { tags } = await apiClient.getBlogPostTags(slug)
         return { ...post, tags }
       } catch (error) {
         console.error('API failed, falling back to local:', error)
@@ -167,8 +167,8 @@ class DataService {
   async verifyAdminCredentials(email: string, password: string) {
     if (this.useApi) {
       try {
-        const { user } = await apiClient.verifyCredentials(email, password)
-        return user
+        // const { user } = await apiClient.verifyCredentials(email, password)
+        // return user
       } catch (error) {
         console.error('API auth failed, falling back to local:', error)
       }
@@ -202,8 +202,8 @@ class DataService {
   async getAdminProjects() {
     if (this.useApi) {
       try {
-        const { projects } = await apiClient.getAdminProjects()
-        return projects
+        // const { projects } = await apiClient.getAdminProjects()
+        // return projects
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -220,7 +220,7 @@ class DataService {
   async createProject(data: any) {
     if (this.useApi) {
       try {
-        return await apiClient.createProject(data)
+        // return await apiClient.createProject(data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -239,7 +239,7 @@ class DataService {
   async updateProject(id: string, data: any) {
     if (this.useApi) {
       try {
-        return await apiClient.updateProject(id, data)
+        // return await apiClient.updateProject(id, data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -256,7 +256,7 @@ class DataService {
   async deleteProject(id: string) {
     if (this.useApi) {
       try {
-        return await apiClient.deleteProject(id)
+        // return await apiClient.deleteProject(id)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -273,8 +273,8 @@ class DataService {
   async getTechnologies() {
     if (this.useApi) {
       try {
-        const { technologies } = await apiClient.getTechnologies()
-        return technologies
+        // const { technologies } = await apiClient.getTechnologies()
+        // return technologies
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -288,7 +288,7 @@ class DataService {
   async createTechnology(data: any) {
     if (this.useApi) {
       try {
-        return await apiClient.createTechnology(data)
+        // return await apiClient.createTechnology(data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -312,7 +312,7 @@ class DataService {
   async updateTechnology(id: string, data: any) {
     if (this.useApi) {
       try {
-        return await apiClient.updateTechnology(id, data)
+        // return await apiClient.updateTechnology(id, data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -337,7 +337,7 @@ class DataService {
   async deleteTechnology(id: string) {
     if (this.useApi) {
       try {
-        return await apiClient.deleteTechnology(id)
+        // return await apiClient.deleteTechnology(id)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -354,8 +354,8 @@ class DataService {
   async getContactSubmissions() {
     if (this.useApi) {
       try {
-        const { submissions } = await apiClient.getContactSubmissions()
-        return submissions
+        // const { submissions } = await apiClient.getContactSubmissions()
+        // return submissions
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -369,7 +369,7 @@ class DataService {
   async updateContactSubmission(id: string, data: any) {
     if (this.useApi) {
       try {
-        return await apiClient.updateContactSubmission(id, data)
+        // return await apiClient.updateContactSubmission(id, data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -391,8 +391,8 @@ class DataService {
   async getRecruiterPage(slug: string) {
     if (this.useApi) {
       try {
-        const { page } = await apiClient.getRecruiterPage(slug)
-        return page
+        // const { page } = await apiClient.getRecruiterPage(slug)
+        // return page
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -418,8 +418,8 @@ class DataService {
   async getAdminRecruiterPages() {
     if (this.useApi) {
       try {
-        const { pages } = await apiClient.getAdminRecruiterPages()
-        return pages
+        // const { pages } = await apiClient.getAdminRecruiterPages()
+        // return pages
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -448,7 +448,7 @@ class DataService {
   async createRecruiterPage(data: any) {
     if (this.useApi) {
       try {
-        return await apiClient.createRecruiterPage(data)
+        // return await apiClient.createRecruiterPage(data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -481,7 +481,7 @@ class DataService {
   async updateRecruiterPage(id: string, data: any) {
     if (this.useApi) {
       try {
-        return await apiClient.updateRecruiterPage(id, data)
+        // return await apiClient.updateRecruiterPage(id, data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -510,7 +510,7 @@ class DataService {
   async deleteRecruiterPage(id: string) {
     if (this.useApi) {
       try {
-        return await apiClient.deleteRecruiterPage(id)
+        // return await apiClient.deleteRecruiterPage(id)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -526,7 +526,7 @@ class DataService {
   async trackRecruiterPageView(pageId: string, viewData: any) {
     if (this.useApi) {
       try {
-        return await apiClient.trackRecruiterPageView(pageId, viewData)
+        // return await apiClient.trackRecruiterPageView(pageId, viewData)
       } catch (error) {
         console.error('Analytics API failed, falling back to local:', error)
       }
@@ -557,10 +557,10 @@ class DataService {
   async trackRecruiterPageInteraction(pageId: string, interactionData: any) {
     if (this.useApi) {
       try {
-        return await apiClient.trackRecruiterPageInteraction(
-          pageId,
-          interactionData
-        )
+        // return await apiClient.trackRecruiterPageInteraction(
+        //   pageId,
+        //   interactionData
+        // )
       } catch (error) {
         console.error('Analytics API failed, falling back to local:', error)
       }
@@ -588,7 +588,8 @@ class DataService {
 
   // Utility method to check which service is being used
   async getServiceInfo() {
-    const apiHealthy = await checkApiHealth()
+    // const apiHealthy = await checkApiHealth()
+    const apiHealthy = false
 
     return {
       usingApi: this.useApi && apiHealthy,
