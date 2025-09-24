@@ -53,11 +53,11 @@ interface ContactSubmission {
   source: string | null
   status: 'NEW' | 'READ' | 'RESPONDED' | 'ARCHIVED'
   responded: boolean
-  respondedAt?: string
-  ipAddress?: string
-  userAgent?: string
-  createdAt: string
-  updatedAt: string
+  respondedAt: Date | null
+  ipAddress: string | null
+  userAgent: string | null
+  createdAt: Date
+  updatedAt: Date
 }
 
 const statusConfig = {
@@ -152,8 +152,9 @@ export default function ContactSubmissionsManagement() {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (date: string | Date) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date
+    return dateObj.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
