@@ -43,20 +43,31 @@ interface Project {
   id: string
   title: string
   slug: string
-  description: string
-  excerpt: string
-  thumbnail: string
-  demoUrl?: string
-  githubUrl?: string
-  category: string
+  description: string | null
+  excerpt: string | null
+  thumbnail: string | null
+  demoUrl: string | null
+  githubUrl: string | null
+  category: string | null
   featured: boolean
-  sortOrder: number
+  sortOrder: number | null
   views: number
   likes: number
-  status: 'DRAFT' | 'PUBLISHED'
-  createdAt: string
-  publishedAt?: string
-  technologies?: Array<{ name: string }>
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
+  createdAt: Date
+  publishedAt: Date | null
+  technologies?: Array<{
+    id: string
+    name: string
+    createdAt: Date
+    updatedAt: Date
+    slug: string
+    description: string | null
+    icon: string | null
+    color: string | null
+    category: string | null
+    level: string
+  }>
 }
 
 const emptyProject: Partial<Project> = {
