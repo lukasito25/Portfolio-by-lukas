@@ -17,6 +17,7 @@ import { Badge } from './badge'
 import { Button } from './button'
 import { Card, CardContent } from './card'
 import { dataService } from '@/lib/data-service'
+import { trackProjectView } from '@/lib/analytics'
 
 interface ProjectData {
   id: string
@@ -65,14 +66,29 @@ export function ProjectCarousel() {
   }, [])
 
   const nextProject = () => {
-    setCurrentIndex(prev => (prev + 1) % projects.length)
+    setCurrentIndex(prev => {
+      const newIndex = (prev + 1) % projects.length
+      if (projects[newIndex]) {
+        trackProjectView(projects[newIndex].title)
+      }
+      return newIndex
+    })
   }
 
   const prevProject = () => {
-    setCurrentIndex(prev => (prev - 1 + projects.length) % projects.length)
+    setCurrentIndex(prev => {
+      const newIndex = (prev - 1 + projects.length) % projects.length
+      if (projects[newIndex]) {
+        trackProjectView(projects[newIndex].title)
+      }
+      return newIndex
+    })
   }
 
   const goToProject = (index: number) => {
+    if (projects[index]) {
+      trackProjectView(projects[index].title)
+    }
     setCurrentIndex(index)
   }
 
@@ -283,15 +299,19 @@ export function ProjectCarousel() {
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-4">
               {currentProject.demoUrl && (
-                <Button className="cosmic-button text-white border-0" asChild>
-                  <a
-                    href={currentProject.demoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    View Demo
-                  </a>
+                <Button
+                  className="cosmic-button text-white border-0"
+                  onClick={() => {
+                    trackProjectView(currentProject.title)
+                    window.open(
+                      currentProject.demoUrl!,
+                      '_blank',
+                      'noopener,noreferrer'
+                    )
+                  }}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  View Demo
                 </Button>
               )}
 
@@ -299,16 +319,17 @@ export function ProjectCarousel() {
                 <Button
                   variant="outline"
                   className="border-purple-200 text-purple-700 hover:bg-purple-50"
-                  asChild
+                  onClick={() => {
+                    trackProjectView(currentProject.title)
+                    window.open(
+                      currentProject.githubUrl!,
+                      '_blank',
+                      'noopener,noreferrer'
+                    )
+                  }}
                 >
-                  <a
-                    href={currentProject.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Github className="w-4 h-4 mr-2" />
-                    Source Code
-                  </a>
+                  <Github className="w-4 h-4 mr-2" />
+                  Source Code
                 </Button>
               )}
 

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { trackFormSubmission } from '@/lib/analytics'
 import {
   Send,
   MapPin,
@@ -103,6 +104,10 @@ export default function ContactPage() {
         setSubmitMessage(
           "Thank you for your message! I'll get back to you within 24 hours."
         )
+
+        // Track successful form submission
+        trackFormSubmission('contact_form', true)
+
         setFormData({
           name: '',
           email: '',
@@ -121,6 +126,9 @@ export default function ContactPage() {
       setSubmitMessage(
         'Failed to send message. Please try again or email me directly.'
       )
+
+      // Track failed form submission
+      trackFormSubmission('contact_form', false)
     } finally {
       setIsSubmitting(false)
     }
