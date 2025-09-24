@@ -233,6 +233,7 @@ model Analytics {
 
   // Engagement metrics
   duration    Int?      // time spent on page in seconds
+  scrollDepth Int?      // percentage of page scrolled (0-100)
   bounce      Boolean   @default(false)
 
   createdAt   DateTime  @default(now())
