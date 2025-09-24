@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import {
   ChevronLeft,
   ChevronRight,
@@ -15,223 +16,60 @@ import {
 import { Badge } from './badge'
 import { Button } from './button'
 import { Card, CardContent } from './card'
+import { dataService } from '@/lib/data-service'
 
 interface ProjectData {
   id: string
   title: string
   description: string
-  longDescription: string
-  image: string
-  technologies: string[]
-  metrics: {
-    label: string
-    value: string
-    icon: React.ReactNode
-    color: string
+  excerpt: string | null
+  thumbnail: string | null
+  technologies: {
+    id: string
+    name: string
+    color: string | null
   }[]
-  links: {
-    demo?: string
-    github?: string
-    case_study?: string
-  }
-  category: string
+  demoUrl: string | null
+  githubUrl: string | null
+  category: string | null
   featured: boolean
-  status: 'completed' | 'in-progress' | 'concept'
+  status: string
+  views: number
+  likes: number
 }
-
-const sampleProjects: ProjectData[] = [
-  {
-    id: '1',
-    title: 'adidas Runtastic Website Redesign',
-    description:
-      'Complete website redesign and migration to new tech stack for adidas Digital Sports, serving 165M+ global users.',
-    longDescription:
-      'Led the comprehensive redesign and technical migration of the Runtastic website as Senior Product Manager at adidas Digital Sports. Managed cross-functional teams across multiple locations to deliver rebranded content, new technology stack, and integrated SEO marketing strategy.',
-    image:
-      'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&h=600&fit=crop',
-    technologies: [
-      'React',
-      'TypeScript',
-      'Next.js',
-      'Node.js',
-      'PostgreSQL',
-      'Docker',
-    ],
-    metrics: [
-      {
-        label: 'Global Users',
-        value: '165M+',
-        icon: <Users className="w-4 h-4" />,
-        color: 'text-purple-600',
-      },
-      {
-        label: 'Team Size',
-        value: '13',
-        icon: <TrendingUp className="w-4 h-4" />,
-        color: 'text-green-600',
-      },
-      {
-        label: 'Duration',
-        value: '18mo',
-        icon: <Star className="w-4 h-4" />,
-        color: 'text-blue-600',
-      },
-    ],
-    links: {
-      demo: 'https://www.runtastic.com',
-      case_study: '/work#runtastic-redesign',
-    },
-    category: 'Digital Sports',
-    featured: true,
-    status: 'completed',
-  },
-  {
-    id: '2',
-    title: 'StagStrat Algorithmic Trading Platform',
-    description:
-      'Head of Product for algorithmic trading startup, orchestrating development and complete website launch from concept to production.',
-    longDescription:
-      'As Head of Product at StagStrat, orchestrated the complete product lifecycle of an algorithmic trading platform. Created comprehensive product roadmap, launched website, and implemented SEO optimization strategies for a revolutionary trading solution.',
-    image:
-      'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=600&fit=crop',
-    technologies: [
-      'React',
-      'Python',
-      'FastAPI',
-      'PostgreSQL',
-      'WebSocket',
-      'Docker',
-    ],
-    metrics: [
-      {
-        label: 'Platform Launch',
-        value: '100%',
-        icon: <TrendingUp className="w-4 h-4" />,
-        color: 'text-green-600',
-      },
-      {
-        label: 'Product Strategy',
-        value: 'Full',
-        icon: <Star className="w-4 h-4" />,
-        color: 'text-blue-600',
-      },
-      {
-        label: 'Time to Market',
-        value: '12mo',
-        icon: <Users className="w-4 h-4" />,
-        color: 'text-purple-600',
-      },
-    ],
-    links: {
-      demo: 'https://www.stagstrat.com',
-      case_study: '/work#stagstrat-platform',
-    },
-    category: 'FinTech',
-    featured: true,
-    status: 'completed',
-  },
-  {
-    id: '3',
-    title: 'adidas Internal Admin Portal',
-    description:
-      'Product lifecycle management for adidas internal administration portal, streamlining operations across international teams.',
-    longDescription:
-      'Managed the complete product lifecycle for adidas internal admin portal, focusing on operational efficiency and user experience improvements. Led development teams to deliver tools that enhanced productivity for internal stakeholders globally.',
-    image:
-      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
-    technologies: [
-      'Angular',
-      'Java',
-      'Spring Boot',
-      'MySQL',
-      'Redis',
-      'Jenkins',
-    ],
-    metrics: [
-      {
-        label: 'Internal Users',
-        value: '1000+',
-        icon: <Users className="w-4 h-4" />,
-        color: 'text-purple-600',
-      },
-      {
-        label: 'Efficiency Gain',
-        value: '+45%',
-        icon: <TrendingUp className="w-4 h-4" />,
-        color: 'text-green-600',
-      },
-      {
-        label: 'Global Reach',
-        value: '25+',
-        icon: <Star className="w-4 h-4" />,
-        color: 'text-blue-600',
-      },
-    ],
-    links: {
-      case_study: '/work#adidas-admin-portal',
-    },
-    category: 'Enterprise Software',
-    featured: false,
-    status: 'completed',
-  },
-  {
-    id: '4',
-    title: 'Social Commerce Engine (adiSCom)',
-    description:
-      'Product management for in-house developed social commerce engine and third-party tool Sprinklr integration at adidas.',
-    longDescription:
-      'Led product management for multiple products including the in-house developed social commerce engine (adiSCom) and third-party tool Sprinklr. Managed external teams and coordinated complex integrations to enhance social media presence and e-commerce capabilities.',
-    image:
-      'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop',
-    technologies: [
-      'Vue.js',
-      'Node.js',
-      'GraphQL',
-      'MongoDB',
-      'Sprinklr API',
-      'AWS',
-    ],
-    metrics: [
-      {
-        label: 'Social Platforms',
-        value: '10+',
-        icon: <TrendingUp className="w-4 h-4" />,
-        color: 'text-green-600',
-      },
-      {
-        label: 'Team Management',
-        value: '13',
-        icon: <Users className="w-4 h-4" />,
-        color: 'text-purple-600',
-      },
-      {
-        label: 'Integration Success',
-        value: '100%',
-        icon: <Star className="w-4 h-4" />,
-        color: 'text-blue-600',
-      },
-    ],
-    links: {
-      case_study: '/work#social-commerce-engine',
-    },
-    category: 'Social Commerce',
-    featured: false,
-    status: 'completed',
-  },
-]
 
 export function ProjectCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [projects, setProjects] = useState<ProjectData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch projects on component mount
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setIsLoading(true)
+        const fetchedProjects = await dataService.getFeaturedProjects()
+        setProjects(fetchedProjects)
+        setError(null)
+      } catch (err) {
+        setError('Failed to load projects')
+        console.error('Error fetching projects:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProjects()
+  }, [])
 
   const nextProject = () => {
-    setCurrentIndex(prev => (prev + 1) % sampleProjects.length)
+    setCurrentIndex(prev => (prev + 1) % projects.length)
   }
 
   const prevProject = () => {
-    setCurrentIndex(
-      prev => (prev - 1 + sampleProjects.length) % sampleProjects.length
-    )
+    setCurrentIndex(prev => (prev - 1 + projects.length) % projects.length)
   }
 
   const goToProject = (index: number) => {
@@ -240,16 +78,65 @@ export function ProjectCarousel() {
 
   // Auto-play functionality
   useEffect(() => {
-    if (!isAutoPlaying) return
+    if (!isAutoPlaying || projects.length === 0) return
 
     const interval = setInterval(() => {
       nextProject()
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [isAutoPlaying, currentIndex])
+  }, [isAutoPlaying, currentIndex, projects.length])
 
-  const currentProject = sampleProjects[currentIndex]
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Featured <span className="gradient-text">Projects</span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Loading projects...
+          </p>
+        </div>
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden cosmic-glow min-h-[600px] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Featured <span className="gradient-text">Projects</span>
+          </h2>
+          <p className="text-xl text-red-600 max-w-3xl mx-auto">{error}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // No projects found
+  if (projects.length === 0) {
+    return (
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Featured <span className="gradient-text">Projects</span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            No featured projects found.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  const currentProject = projects[currentIndex]
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -276,7 +163,10 @@ export function ProjectCarousel() {
           <div className="relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-blue-500/20 z-10" />
             <Image
-              src={currentProject.image}
+              src={
+                currentProject.thumbnail ||
+                'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=600&fit=crop'
+              }
               alt={currentProject.title}
               fill
               className="object-cover transition-transform duration-700 hover:scale-110"
@@ -288,16 +178,16 @@ export function ProjectCarousel() {
             <div className="absolute top-6 left-6 z-20">
               <Badge
                 variant={
-                  currentProject.status === 'completed'
+                  currentProject.status === 'PUBLISHED'
                     ? 'default'
                     : 'secondary'
                 }
                 className="bg-white/90 text-gray-900 backdrop-blur-sm"
               >
-                {currentProject.status === 'completed'
-                  ? '✅ Launched'
-                  : currentProject.status === 'in-progress'
-                    ? '🚧 In Progress'
+                {currentProject.status === 'PUBLISHED'
+                  ? '✅ Published'
+                  : currentProject.status === 'DRAFT'
+                    ? '🚧 Draft'
                     : '💡 Concept'}
               </Badge>
             </div>
@@ -319,7 +209,7 @@ export function ProjectCarousel() {
               variant="outline"
               className="w-fit mb-4 text-purple-600 border-purple-200"
             >
-              {currentProject.category}
+              {currentProject.category || 'Portfolio Project'}
             </Badge>
 
             {/* Title */}
@@ -329,25 +219,38 @@ export function ProjectCarousel() {
 
             {/* Description */}
             <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-              {currentProject.longDescription}
+              {currentProject.excerpt || currentProject.description}
             </p>
 
             {/* Metrics */}
             <div className="grid grid-cols-3 gap-4 mb-8">
-              {currentProject.metrics.map((metric, index) => (
-                <div
-                  key={index}
-                  className="text-center p-4 bg-gray-50 rounded-xl"
-                >
-                  <div className={`flex justify-center mb-2 ${metric.color}`}>
-                    {metric.icon}
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 mb-1">
-                    {metric.value}
-                  </div>
-                  <div className="text-sm text-gray-600">{metric.label}</div>
+              <div className="text-center p-4 bg-gray-50 rounded-xl">
+                <div className="flex justify-center mb-2 text-purple-600">
+                  <Users className="w-4 h-4" />
                 </div>
-              ))}
+                <div className="text-2xl font-bold text-gray-900 mb-1">
+                  {currentProject.views.toLocaleString()}
+                </div>
+                <div className="text-sm text-gray-600">Views</div>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-xl">
+                <div className="flex justify-center mb-2 text-green-600">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mb-1">
+                  {currentProject.likes}
+                </div>
+                <div className="text-sm text-gray-600">Likes</div>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-xl">
+                <div className="flex justify-center mb-2 text-blue-600">
+                  <Star className="w-4 h-4" />
+                </div>
+                <div className="text-2xl font-bold text-gray-900 mb-1">
+                  {currentProject.technologies.length}
+                </div>
+                <div className="text-sm text-gray-600">Technologies</div>
+              </div>
             </div>
 
             {/* Technologies */}
@@ -361,8 +264,17 @@ export function ProjectCarousel() {
                     key={index}
                     variant="secondary"
                     className="bg-purple-100 text-purple-700"
+                    style={
+                      tech.color
+                        ? {
+                            backgroundColor: `${tech.color}20`,
+                            color: tech.color,
+                            borderColor: `${tech.color}40`,
+                          }
+                        : {}
+                    }
                   >
-                    {tech}
+                    {tech.name}
                   </Badge>
                 ))}
               </div>
@@ -370,31 +282,45 @@ export function ProjectCarousel() {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-4">
-              {currentProject.links.demo && (
-                <Button className="cosmic-button text-white border-0">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  View Demo
+              {currentProject.demoUrl && (
+                <Button className="cosmic-button text-white border-0" asChild>
+                  <a
+                    href={currentProject.demoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    View Demo
+                  </a>
                 </Button>
               )}
 
-              {currentProject.links.github && (
+              {currentProject.githubUrl && (
                 <Button
                   variant="outline"
                   className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                  asChild
                 >
-                  <Github className="w-4 h-4 mr-2" />
-                  Source Code
+                  <a
+                    href={currentProject.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Github className="w-4 h-4 mr-2" />
+                    Source Code
+                  </a>
                 </Button>
               )}
 
-              {currentProject.links.case_study && (
-                <Button
-                  variant="outline"
-                  className="border-purple-200 text-purple-700 hover:bg-purple-50"
-                >
-                  📖 Case Study
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                asChild
+              >
+                <Link href={`/projects/${currentProject.id}`}>
+                  📖 Read More
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -419,7 +345,7 @@ export function ProjectCarousel() {
 
       {/* Dots Navigation */}
       <div className="flex justify-center space-x-3 mt-8">
-        {sampleProjects.map((_, index) => (
+        {projects.map((_, index) => (
           <button
             key={index}
             onClick={() => goToProject(index)}
@@ -436,7 +362,7 @@ export function ProjectCarousel() {
       {/* Project Counter */}
       <div className="text-center mt-4">
         <span className="text-sm text-gray-500">
-          {currentIndex + 1} of {sampleProjects.length}
+          {currentIndex + 1} of {projects.length}
         </span>
       </div>
     </div>
