@@ -25,7 +25,7 @@ interface ProjectData {
   description: string
   excerpt: string | null
   thumbnail: string | null
-  technologies: {
+  technologies?: {
     id: string
     name: string
     color: string | null
@@ -263,7 +263,7 @@ export function ProjectCarousel() {
                   <Star className="w-4 h-4" />
                 </div>
                 <div className="text-2xl font-bold text-gray-900 mb-1">
-                  {currentProject.technologies.length}
+                  {currentProject.technologies?.length || 0}
                 </div>
                 <div className="text-sm text-gray-600">Technologies</div>
               </div>
@@ -275,7 +275,7 @@ export function ProjectCarousel() {
                 Technologies Used
               </h4>
               <div className="flex flex-wrap gap-2">
-                {currentProject.technologies.map((tech, index) => (
+                {currentProject.technologies?.map((tech, index) => (
                   <Badge
                     key={index}
                     variant="secondary"
@@ -292,7 +292,14 @@ export function ProjectCarousel() {
                   >
                     {tech.name}
                   </Badge>
-                ))}
+                )) || (
+                  <Badge
+                    variant="secondary"
+                    className="bg-gray-100 text-gray-700"
+                  >
+                    No technologies listed
+                  </Badge>
+                )}
               </div>
             </div>
 

@@ -21,7 +21,24 @@ class DataService {
     if (this.useApi) {
       try {
         const { projects } = await apiClient.getProjects()
-        return projects
+        // Fetch technologies for each project
+        const projectsWithTechnologies = await Promise.all(
+          projects.map(async (project: any) => {
+            try {
+              const { technologies } = await apiClient.getProjectTechnologies(
+                project.slug
+              )
+              return { ...project, technologies }
+            } catch (error) {
+              console.error(
+                `Failed to fetch technologies for ${project.slug}:`,
+                error
+              )
+              return { ...project, technologies: [] }
+            }
+          })
+        )
+        return projectsWithTechnologies
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -41,7 +58,24 @@ class DataService {
     if (this.useApi) {
       try {
         const { projects } = await apiClient.getFeaturedProjects()
-        return projects
+        // Fetch technologies for each project
+        const projectsWithTechnologies = await Promise.all(
+          projects.map(async (project: any) => {
+            try {
+              const { technologies } = await apiClient.getProjectTechnologies(
+                project.slug
+              )
+              return { ...project, technologies }
+            } catch (error) {
+              console.error(
+                `Failed to fetch technologies for ${project.slug}:`,
+                error
+              )
+              return { ...project, technologies: [] }
+            }
+          })
+        )
+        return projectsWithTechnologies
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
