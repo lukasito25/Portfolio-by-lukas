@@ -24,6 +24,16 @@ async function main() {
 
   console.log('✅ Admin user created:', admin.email)
 
+  // NOTE: This local Prisma seed file is kept for development purposes only.
+  // Production uses the comprehensive professional seed data in D1 database.
+  // To maintain consistency, the D1 database now contains authentic professional content:
+  // - 5 real projects from adidas Digital Sports, StagStrat, and personal work
+  // - 26 professional competencies and leadership technologies
+  // - 5 professional blog posts with PM insights
+  // - 10 professional context tags
+
+  console.log('✅ Admin user created:', admin.email)
+
   // Create sample technologies
   const technologies = [
     // Frontend
