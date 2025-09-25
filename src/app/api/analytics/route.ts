@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+const USE_API = process.env.NEXT_PUBLIC_USE_API === 'true'
+
 // POST - Track analytics events
 export async function POST(request: NextRequest) {
+  // If using external API, disable local analytics to avoid Prisma issues
+  if (USE_API) {
+    return NextResponse.json(
+      { message: 'Analytics disabled when using external API' },
+      { status: 503 }
+    )
+  }
+
   try {
     const body = await request.json()
 
@@ -81,6 +91,14 @@ export async function POST(request: NextRequest) {
 
 // GET - Retrieve analytics data for dashboard
 export async function GET(request: NextRequest) {
+  // If using external API, disable local analytics to avoid Prisma issues
+  if (USE_API) {
+    return NextResponse.json(
+      { message: 'Analytics disabled when using external API' },
+      { status: 503 }
+    )
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const timeframe = searchParams.get('timeframe') || '30d'

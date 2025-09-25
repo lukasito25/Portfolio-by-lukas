@@ -22,6 +22,7 @@ import { trackProjectView } from '@/lib/analytics'
 interface ProjectData {
   id: string
   title: string
+  slug: string
   description: string
   excerpt: string | null
   thumbnail: string | null
@@ -345,7 +346,7 @@ export function ProjectCarousel() {
                 className="border-purple-200 text-purple-700 hover:bg-purple-50"
                 asChild
               >
-                <Link href={`/projects/${currentProject.id}`}>
+                <Link href={`/projects/${currentProject.slug}`}>
                   📖 Read More
                 </Link>
               </Button>

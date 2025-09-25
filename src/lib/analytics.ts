@@ -96,15 +96,25 @@ class Analytics {
 
   private async sendEvent(event: AnalyticsEvent) {
     try {
-      await fetch('/api/analytics', {
+      const response = await fetch('/api/analytics', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(event),
       })
+
+      if (!response.ok) {
+        // If analytics API is not available (500, 404), silently skip
+        if (response.status >= 500) {
+          console.debug('Analytics service unavailable, skipping tracking')
+          return
+        }
+        throw new Error(`Analytics API responded with ${response.status}`)
+      }
     } catch (error) {
-      console.warn('Analytics tracking failed:', error)
+      // Gracefully handle all analytics failures - don't break the UI
+      console.debug('Analytics tracking failed, continuing silently:', error)
     }
   }
 
