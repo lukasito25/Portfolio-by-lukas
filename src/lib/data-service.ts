@@ -128,8 +128,8 @@ class DataService {
   async getBlogPosts() {
     if (this.useApi) {
       try {
-        // const { posts } = await apiClient.getBlogPosts()
-        // return posts
+        const { posts } = await apiClient.getBlogPosts()
+        return posts
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -147,8 +147,8 @@ class DataService {
   async getFeaturedBlogPosts() {
     if (this.useApi) {
       try {
-        // const { posts } = await apiClient.getFeaturedBlogPosts()
-        // return posts
+        const { posts } = await apiClient.getFeaturedBlogPosts()
+        return posts
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -170,9 +170,9 @@ class DataService {
   async getBlogPost(slug: string) {
     if (this.useApi) {
       try {
-        // const { post } = await apiClient.getBlogPost(slug)
-        // const { tags } = await apiClient.getBlogPostTags(slug)
-        // return { ...post, tags }
+        const { post } = await apiClient.getBlogPost(slug)
+        const { tags } = await apiClient.getBlogPostTags(slug)
+        return { ...post, tags }
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -307,8 +307,8 @@ class DataService {
   async getTechnologies() {
     if (this.useApi) {
       try {
-        // const { technologies } = await apiClient.getTechnologies()
-        // return technologies
+        const { technologies } = await apiClient.getTechnologies()
+        return technologies
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
