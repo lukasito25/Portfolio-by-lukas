@@ -4,7 +4,7 @@
  */
 
 import { prisma } from './prisma'
-// import { apiClient, checkApiHealth } from './api-client'
+import { apiClient, checkApiHealth } from './api-client'
 
 const isDevelopment = process.env.NODE_ENV === 'development'
 const USE_API = process.env.NEXT_PUBLIC_USE_API === 'true'
@@ -13,15 +13,15 @@ class DataService {
   private useApi: boolean
 
   constructor() {
-    // Disable API usage for now until all methods are implemented
-    this.useApi = false
+    // Enable API usage based on environment variable
+    this.useApi = USE_API || !isDevelopment
   }
 
   async getProjects() {
     if (this.useApi) {
       try {
-        // const { projects } = await // apiClient.getProjects()
-        // return projects
+        const { projects } = await apiClient.getProjects()
+        return projects
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -40,8 +40,8 @@ class DataService {
   async getFeaturedProjects() {
     if (this.useApi) {
       try {
-        // const { projects } = await apiClient.getFeaturedProjects()
-        // return projects
+        const { projects } = await apiClient.getFeaturedProjects()
+        return projects
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -62,9 +62,9 @@ class DataService {
   async getProject(slug: string) {
     if (this.useApi) {
       try {
-        // const { project } = await apiClient.getProject(slug)
-        // const { technologies } = await apiClient.getProjectTechnologies(slug)
-        // return { ...project, technologies }
+        const { project } = await apiClient.getProject(slug)
+        const { technologies } = await apiClient.getProjectTechnologies(slug)
+        return { ...project, technologies }
       } catch (error) {
         console.error('API failed, falling back to local:', error)
       }
@@ -167,8 +167,8 @@ class DataService {
   async verifyAdminCredentials(email: string, password: string) {
     if (this.useApi) {
       try {
-        // const { user } = await apiClient.verifyCredentials(email, password)
-        // return user
+        const { user } = await apiClient.verifyCredentials(email, password)
+        return user
       } catch (error) {
         console.error('API auth failed, falling back to local:', error)
       }
@@ -202,8 +202,8 @@ class DataService {
   async getAdminProjects() {
     if (this.useApi) {
       try {
-        // const { projects } = await apiClient.getAdminProjects()
-        // return projects
+        const { projects } = await apiClient.getAdminProjects()
+        return projects
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -220,7 +220,7 @@ class DataService {
   async createProject(data: any) {
     if (this.useApi) {
       try {
-        // return await apiClient.createProject(data)
+        return await apiClient.createProject(data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -239,7 +239,7 @@ class DataService {
   async updateProject(id: string, data: any) {
     if (this.useApi) {
       try {
-        // return await apiClient.updateProject(id, data)
+        return await apiClient.updateProject(id, data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -256,7 +256,7 @@ class DataService {
   async deleteProject(id: string) {
     if (this.useApi) {
       try {
-        // return await apiClient.deleteProject(id)
+        return await apiClient.deleteProject(id)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
       }
@@ -588,8 +588,7 @@ class DataService {
 
   // Utility method to check which service is being used
   async getServiceInfo() {
-    // const apiHealthy = await checkApiHealth()
-    const apiHealthy = false
+    const apiHealthy = await checkApiHealth()
 
     return {
       usingApi: this.useApi && apiHealthy,

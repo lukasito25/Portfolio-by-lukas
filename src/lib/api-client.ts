@@ -130,6 +130,95 @@ class ApiClient {
   async getAdminBlogPosts() {
     return this.request<{ posts: any[] }>('/admin/blog')
   }
+
+  // Technologies API (Admin routes)
+  async createTechnology(data: any) {
+    return this.request<{ success: boolean; technologyId: string }>(
+      '/admin/technologies',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    )
+  }
+
+  async updateTechnology(id: string, data: any) {
+    return this.request<{ success: boolean }>(`/admin/technologies/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteTechnology(id: string) {
+    return this.request<{ success: boolean }>(`/admin/technologies/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
+  // Contact Submissions API (Admin routes)
+  async getContactSubmissions() {
+    return this.request<{ submissions: any[] }>('/admin/contact')
+  }
+
+  async updateContactSubmission(id: string, data: any) {
+    return this.request<{ success: boolean }>(`/admin/contact/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  // Recruiter Pages API
+  async getRecruiterPage(slug: string) {
+    return this.request<{ page: any }>(`/recruiter/${slug}`)
+  }
+
+  async getAdminRecruiterPages() {
+    return this.request<{ pages: any[] }>('/admin/recruiter')
+  }
+
+  async createRecruiterPage(data: any) {
+    return this.request<{ success: boolean; pageId: string }>(
+      '/admin/recruiter',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    )
+  }
+
+  async updateRecruiterPage(id: string, data: any) {
+    return this.request<{ success: boolean }>(`/admin/recruiter/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteRecruiterPage(id: string) {
+    return this.request<{ success: boolean }>(`/admin/recruiter/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
+  // Analytics API
+  async trackRecruiterPageView(pageId: string, viewData: any) {
+    return this.request<{ success: boolean }>(
+      `/analytics/recruiter/${pageId}/view`,
+      {
+        method: 'POST',
+        body: JSON.stringify(viewData),
+      }
+    )
+  }
+
+  async trackRecruiterPageInteraction(pageId: string, interactionData: any) {
+    return this.request<{ success: boolean }>(
+      `/analytics/recruiter/${pageId}/interaction`,
+      {
+        method: 'POST',
+        body: JSON.stringify(interactionData),
+      }
+    )
+  }
 }
 
 // Export singleton instance
