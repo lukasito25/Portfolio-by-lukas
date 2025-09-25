@@ -25,6 +25,12 @@ interface ProjectPageProps {
   }>
 }
 
+interface Technology {
+  id: string
+  name: string
+  color: string | null
+}
+
 export async function generateMetadata({
   params,
 }: ProjectPageProps): Promise<Metadata> {
@@ -208,7 +214,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-3">
-                  {project.technologies.map(tech => (
+                  {project.technologies.map((tech: Technology) => (
                     <Badge
                       key={tech.id}
                       variant="secondary"
