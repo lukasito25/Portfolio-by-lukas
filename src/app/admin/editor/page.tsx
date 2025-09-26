@@ -23,7 +23,7 @@ import {
   AlertCircle,
   ArrowLeft,
   Database,
-  CheckCircle
+  CheckCircle,
 } from 'lucide-react'
 import { dataService } from '@/lib/data-service'
 import { SiteContent, defaultContent } from '@/lib/content-config'
@@ -41,6 +41,11 @@ export default function ContentEditor() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  // Load content from database on mount
+  useEffect(() => {
+    loadContentFromDatabase()
+  }, [])
+
   // Handle authentication
   if (status === 'loading') {
     return (
@@ -57,11 +62,6 @@ export default function ContentEditor() {
     redirect('/admin/login')
     return null
   }
-
-  // Load content from database on mount
-  useEffect(() => {
-    loadContentFromDatabase()
-  }, [])
 
   const loadContentFromDatabase = async () => {
     try {
@@ -96,7 +96,10 @@ export default function ContentEditor() {
 
       for (const section of sections) {
         if (content[section]) {
-          const result = await dataService.updateContentSection(section, content[section])
+          const result = await dataService.updateContentSection(
+            section,
+            content[section]
+          )
           if (result.success && result.itemsUpdated) {
             totalUpdated += result.itemsUpdated
           }
@@ -112,7 +115,6 @@ export default function ContentEditor() {
 
       // Optional: Show a toast notification here
       alert(message)
-
     } catch (error) {
       console.error('Failed to save content:', error)
       setError('Failed to save content to database')
@@ -127,7 +129,8 @@ export default function ContentEditor() {
     try {
       const freshContent = await dataService.getAllContent()
       const dataStr = JSON.stringify(freshContent, null, 2)
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr)
+      const dataUri =
+        'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr)
 
       const exportFileDefaultName = `site-content-${new Date().toISOString().split('T')[0]}.json`
       const linkElement = document.createElement('a')
@@ -145,12 +148,14 @@ export default function ContentEditor() {
     const file = event.target.files?.[0]
     if (file) {
       const reader = new FileReader()
-      reader.onload = (e) => {
+      reader.onload = e => {
         try {
           const importedContent = JSON.parse(e.target?.result as string)
           setContent(importedContent)
           setHasChanges(true)
-          alert('Content imported successfully! Remember to save to apply changes.')
+          alert(
+            'Content imported successfully! Remember to save to apply changes.'
+          )
         } catch (error) {
           alert('Invalid JSON file')
         }
@@ -161,7 +166,11 @@ export default function ContentEditor() {
 
   // Reset to default content
   const resetContent = () => {
-    if (confirm('Are you sure you want to reset all content to defaults? This cannot be undone.')) {
+    if (
+      confirm(
+        'Are you sure you want to reset all content to defaults? This cannot be undone.'
+      )
+    ) {
       setContent(defaultContent)
       setHasChanges(true)
     }
@@ -170,7 +179,9 @@ export default function ContentEditor() {
   // Reload from database
   const reloadFromDatabase = () => {
     if (hasChanges) {
-      const confirmed = confirm('You have unsaved changes. Are you sure you want to reload from database? Your changes will be lost.')
+      const confirmed = confirm(
+        'You have unsaved changes. Are you sure you want to reload from database? Your changes will be lost.'
+      )
       if (!confirmed) return
     }
     loadContentFromDatabase()
@@ -261,13 +272,19 @@ export default function ContentEditor() {
             </div>
             <div className="flex items-center gap-3">
               {error && (
-                <Badge variant="destructive" className="bg-red-100 text-red-800">
+                <Badge
+                  variant="destructive"
+                  className="bg-red-100 text-red-800"
+                >
                   <AlertCircle className="w-3 h-3 mr-1" />
                   Database Error
                 </Badge>
               )}
               {hasChanges && (
-                <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                <Badge
+                  variant="secondary"
+                  className="bg-yellow-100 text-yellow-800"
+                >
                   <AlertCircle className="w-3 h-3 mr-1" />
                   Unsaved Changes
                 </Badge>
@@ -354,7 +371,12 @@ export default function ContentEditor() {
                   <Input
                     id="hero-badge"
                     value={content.homepage.hero.badge}
-                    onChange={(e) => updateContent(['homepage', 'hero', 'badge'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['homepage', 'hero', 'badge'],
+                        e.target.value
+                      )
+                    }
                   />
                 </div>
 
@@ -364,10 +386,15 @@ export default function ContentEditor() {
                     <div key={index} className="flex gap-2 mt-2">
                       <Input
                         value={line}
-                        onChange={(e) => {
-                          const newHeadlines = [...content.homepage.hero.headline]
+                        onChange={e => {
+                          const newHeadlines = [
+                            ...content.homepage.hero.headline,
+                          ]
                           newHeadlines[index] = e.target.value
-                          updateContent(['homepage', 'hero', 'headline'], newHeadlines)
+                          updateContent(
+                            ['homepage', 'hero', 'headline'],
+                            newHeadlines
+                          )
                         }}
                         placeholder={`Headline ${index + 1}`}
                       />
@@ -375,8 +402,14 @@ export default function ContentEditor() {
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          const newHeadlines = content.homepage.hero.headline.filter((_, i) => i !== index)
-                          updateContent(['homepage', 'hero', 'headline'], newHeadlines)
+                          const newHeadlines =
+                            content.homepage.hero.headline.filter(
+                              (_, i) => i !== index
+                            )
+                          updateContent(
+                            ['homepage', 'hero', 'headline'],
+                            newHeadlines
+                          )
                         }}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -388,8 +421,14 @@ export default function ContentEditor() {
                     size="sm"
                     className="mt-2"
                     onClick={() => {
-                      const newHeadlines = [...content.homepage.hero.headline, "New Line"]
-                      updateContent(['homepage', 'hero', 'headline'], newHeadlines)
+                      const newHeadlines = [
+                        ...content.homepage.hero.headline,
+                        'New Line',
+                      ]
+                      updateContent(
+                        ['homepage', 'hero', 'headline'],
+                        newHeadlines
+                      )
                     }}
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -402,7 +441,12 @@ export default function ContentEditor() {
                   <Textarea
                     id="hero-subheadline"
                     value={content.homepage.hero.subheadline}
-                    onChange={(e) => updateContent(['homepage', 'hero', 'subheadline'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['homepage', 'hero', 'subheadline'],
+                        e.target.value
+                      )
+                    }
                     rows={3}
                   />
                 </div>
@@ -413,27 +457,38 @@ export default function ContentEditor() {
                     <div key={index} className="flex gap-2 mt-2">
                       <Input
                         value={metric.value}
-                        onChange={(e) => {
+                        onChange={e => {
                           const newMetrics = [...content.homepage.hero.metrics]
                           newMetrics[index].value = e.target.value
-                          updateContent(['homepage', 'hero', 'metrics'], newMetrics)
+                          updateContent(
+                            ['homepage', 'hero', 'metrics'],
+                            newMetrics
+                          )
                         }}
                         placeholder="Value"
                         className="w-24"
                       />
                       <Input
                         value={metric.label}
-                        onChange={(e) => {
+                        onChange={e => {
                           const newMetrics = [...content.homepage.hero.metrics]
                           newMetrics[index].label = e.target.value
-                          updateContent(['homepage', 'hero', 'metrics'], newMetrics)
+                          updateContent(
+                            ['homepage', 'hero', 'metrics'],
+                            newMetrics
+                          )
                         }}
                         placeholder="Label"
                       />
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => removeArrayItem(['homepage', 'hero', 'metrics'], index)}
+                        onClick={() =>
+                          removeArrayItem(
+                            ['homepage', 'hero', 'metrics'],
+                            index
+                          )
+                        }
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -443,7 +498,12 @@ export default function ContentEditor() {
                     variant="outline"
                     size="sm"
                     className="mt-2"
-                    onClick={() => addArrayItem(['homepage', 'hero', 'metrics'], { value: "0", label: "New Metric" })}
+                    onClick={() =>
+                      addArrayItem(['homepage', 'hero', 'metrics'], {
+                        value: '0',
+                        label: 'New Metric',
+                      })
+                    }
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Metric
@@ -462,27 +522,39 @@ export default function ContentEditor() {
                     <div className="flex gap-2 mb-2">
                       <Input
                         value={competency.title}
-                        onChange={(e) => {
-                          const newCompetencies = [...content.homepage.competencies]
+                        onChange={e => {
+                          const newCompetencies = [
+                            ...content.homepage.competencies,
+                          ]
                           newCompetencies[index].title = e.target.value
-                          updateContent(['homepage', 'competencies'], newCompetencies)
+                          updateContent(
+                            ['homepage', 'competencies'],
+                            newCompetencies
+                          )
                         }}
                         placeholder="Title"
                       />
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => removeArrayItem(['homepage', 'competencies'], index)}
+                        onClick={() =>
+                          removeArrayItem(['homepage', 'competencies'], index)
+                        }
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                     <Textarea
                       value={competency.description}
-                      onChange={(e) => {
-                        const newCompetencies = [...content.homepage.competencies]
+                      onChange={e => {
+                        const newCompetencies = [
+                          ...content.homepage.competencies,
+                        ]
                         newCompetencies[index].description = e.target.value
-                        updateContent(['homepage', 'competencies'], newCompetencies)
+                        updateContent(
+                          ['homepage', 'competencies'],
+                          newCompetencies
+                        )
                       }}
                       placeholder="Description"
                       rows={2}
@@ -491,7 +563,12 @@ export default function ContentEditor() {
                 ))}
                 <Button
                   variant="outline"
-                  onClick={() => addArrayItem(['homepage', 'competencies'], { title: "New Competency", description: "Description" })}
+                  onClick={() =>
+                    addArrayItem(['homepage', 'competencies'], {
+                      title: 'New Competency',
+                      description: 'Description',
+                    })
+                  }
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Competency
@@ -509,7 +586,12 @@ export default function ContentEditor() {
                   <Input
                     id="cta-title"
                     value={content.homepage.cta.title}
-                    onChange={(e) => updateContent(['homepage', 'cta', 'title'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['homepage', 'cta', 'title'],
+                        e.target.value
+                      )
+                    }
                   />
                 </div>
                 <div>
@@ -517,7 +599,12 @@ export default function ContentEditor() {
                   <Textarea
                     id="cta-description"
                     value={content.homepage.cta.description}
-                    onChange={(e) => updateContent(['homepage', 'cta', 'description'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['homepage', 'cta', 'description'],
+                        e.target.value
+                      )
+                    }
                     rows={3}
                   />
                 </div>
@@ -537,7 +624,9 @@ export default function ContentEditor() {
                   <Input
                     id="about-title"
                     value={content.about.hero.title}
-                    onChange={(e) => updateContent(['about', 'hero', 'title'], e.target.value)}
+                    onChange={e =>
+                      updateContent(['about', 'hero', 'title'], e.target.value)
+                    }
                   />
                 </div>
                 <div>
@@ -545,7 +634,12 @@ export default function ContentEditor() {
                   <Textarea
                     id="about-description"
                     value={content.about.hero.description}
-                    onChange={(e) => updateContent(['about', 'hero', 'description'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['about', 'hero', 'description'],
+                        e.target.value
+                      )
+                    }
                     rows={4}
                   />
                 </div>
@@ -555,19 +649,25 @@ export default function ContentEditor() {
                     <div key={index} className="flex gap-2 mt-2">
                       <Input
                         value={stat.label}
-                        onChange={(e) => {
+                        onChange={e => {
                           const newStats = [...content.about.hero.quickStats]
                           newStats[index].label = e.target.value
-                          updateContent(['about', 'hero', 'quickStats'], newStats)
+                          updateContent(
+                            ['about', 'hero', 'quickStats'],
+                            newStats
+                          )
                         }}
                         placeholder="Label"
                       />
                       <Input
                         value={stat.value}
-                        onChange={(e) => {
+                        onChange={e => {
                           const newStats = [...content.about.hero.quickStats]
                           newStats[index].value = e.target.value
-                          updateContent(['about', 'hero', 'quickStats'], newStats)
+                          updateContent(
+                            ['about', 'hero', 'quickStats'],
+                            newStats
+                          )
                         }}
                         placeholder="Value"
                         className="w-24"
@@ -575,7 +675,12 @@ export default function ContentEditor() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => removeArrayItem(['about', 'hero', 'quickStats'], index)}
+                        onClick={() =>
+                          removeArrayItem(
+                            ['about', 'hero', 'quickStats'],
+                            index
+                          )
+                        }
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -585,7 +690,12 @@ export default function ContentEditor() {
                     variant="outline"
                     size="sm"
                     className="mt-2"
-                    onClick={() => addArrayItem(['about', 'hero', 'quickStats'], { label: "New Stat", value: "0" })}
+                    onClick={() =>
+                      addArrayItem(['about', 'hero', 'quickStats'], {
+                        label: 'New Stat',
+                        value: '0',
+                      })
+                    }
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Stat
@@ -604,7 +714,12 @@ export default function ContentEditor() {
                   <Input
                     id="philosophy-title"
                     value={content.about.philosophy.title}
-                    onChange={(e) => updateContent(['about', 'philosophy', 'title'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['about', 'philosophy', 'title'],
+                        e.target.value
+                      )
+                    }
                   />
                 </div>
                 <div>
@@ -612,7 +727,12 @@ export default function ContentEditor() {
                   <Textarea
                     id="philosophy-description"
                     value={content.about.philosophy.description}
-                    onChange={(e) => updateContent(['about', 'philosophy', 'description'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['about', 'philosophy', 'description'],
+                        e.target.value
+                      )
+                    }
                     rows={3}
                   />
                 </div>
@@ -623,27 +743,38 @@ export default function ContentEditor() {
                       <div className="flex gap-2 mb-2">
                         <Input
                           value={card.title}
-                          onChange={(e) => {
+                          onChange={e => {
                             const newCards = [...content.about.philosophy.cards]
                             newCards[index].title = e.target.value
-                            updateContent(['about', 'philosophy', 'cards'], newCards)
+                            updateContent(
+                              ['about', 'philosophy', 'cards'],
+                              newCards
+                            )
                           }}
                           placeholder="Card Title"
                         />
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => removeArrayItem(['about', 'philosophy', 'cards'], index)}
+                          onClick={() =>
+                            removeArrayItem(
+                              ['about', 'philosophy', 'cards'],
+                              index
+                            )
+                          }
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                       <Textarea
                         value={card.description}
-                        onChange={(e) => {
+                        onChange={e => {
                           const newCards = [...content.about.philosophy.cards]
                           newCards[index].description = e.target.value
-                          updateContent(['about', 'philosophy', 'cards'], newCards)
+                          updateContent(
+                            ['about', 'philosophy', 'cards'],
+                            newCards
+                          )
                         }}
                         placeholder="Description"
                         rows={3}
@@ -652,7 +783,12 @@ export default function ContentEditor() {
                   ))}
                   <Button
                     variant="outline"
-                    onClick={() => addArrayItem(['about', 'philosophy', 'cards'], { title: "New Philosophy", description: "Description" })}
+                    onClick={() =>
+                      addArrayItem(['about', 'philosophy', 'cards'], {
+                        title: 'New Philosophy',
+                        description: 'Description',
+                      })
+                    }
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Philosophy Card
@@ -674,7 +810,9 @@ export default function ContentEditor() {
                   <Input
                     id="blog-title"
                     value={content.blog.hero.title}
-                    onChange={(e) => updateContent(['blog', 'hero', 'title'], e.target.value)}
+                    onChange={e =>
+                      updateContent(['blog', 'hero', 'title'], e.target.value)
+                    }
                   />
                 </div>
                 <div>
@@ -682,7 +820,12 @@ export default function ContentEditor() {
                   <Textarea
                     id="blog-description"
                     value={content.blog.hero.description}
-                    onChange={(e) => updateContent(['blog', 'hero', 'description'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['blog', 'hero', 'description'],
+                        e.target.value
+                      )
+                    }
                     rows={3}
                   />
                 </div>
@@ -699,7 +842,12 @@ export default function ContentEditor() {
                   <Input
                     id="featured-title"
                     value={content.blog.featured.title}
-                    onChange={(e) => updateContent(['blog', 'featured', 'title'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['blog', 'featured', 'title'],
+                        e.target.value
+                      )
+                    }
                   />
                 </div>
                 <div>
@@ -707,7 +855,12 @@ export default function ContentEditor() {
                   <Textarea
                     id="featured-description"
                     value={content.blog.featured.description}
-                    onChange={(e) => updateContent(['blog', 'featured', 'description'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['blog', 'featured', 'description'],
+                        e.target.value
+                      )
+                    }
                     rows={3}
                   />
                 </div>
@@ -717,17 +870,27 @@ export default function ContentEditor() {
                     <div key={index} className="flex gap-2 mt-2">
                       <Input
                         value={insight}
-                        onChange={(e) => {
-                          const newInsights = [...content.blog.featured.keyInsights]
+                        onChange={e => {
+                          const newInsights = [
+                            ...content.blog.featured.keyInsights,
+                          ]
                           newInsights[index] = e.target.value
-                          updateContent(['blog', 'featured', 'keyInsights'], newInsights)
+                          updateContent(
+                            ['blog', 'featured', 'keyInsights'],
+                            newInsights
+                          )
                         }}
                         placeholder="Key Insight"
                       />
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => removeArrayItem(['blog', 'featured', 'keyInsights'], index)}
+                        onClick={() =>
+                          removeArrayItem(
+                            ['blog', 'featured', 'keyInsights'],
+                            index
+                          )
+                        }
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -737,7 +900,12 @@ export default function ContentEditor() {
                     variant="outline"
                     size="sm"
                     className="mt-2"
-                    onClick={() => addArrayItem(['blog', 'featured', 'keyInsights'], "New insight")}
+                    onClick={() =>
+                      addArrayItem(
+                        ['blog', 'featured', 'keyInsights'],
+                        'New insight'
+                      )
+                    }
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Insight
@@ -759,7 +927,9 @@ export default function ContentEditor() {
                   <Input
                     id="work-title"
                     value={content.work.hero.title}
-                    onChange={(e) => updateContent(['work', 'hero', 'title'], e.target.value)}
+                    onChange={e =>
+                      updateContent(['work', 'hero', 'title'], e.target.value)
+                    }
                   />
                 </div>
                 <div>
@@ -767,7 +937,12 @@ export default function ContentEditor() {
                   <Textarea
                     id="work-description"
                     value={content.work.hero.description}
-                    onChange={(e) => updateContent(['work', 'hero', 'description'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['work', 'hero', 'description'],
+                        e.target.value
+                      )
+                    }
                     rows={2}
                   />
                 </div>
@@ -784,7 +959,12 @@ export default function ContentEditor() {
                   <Input
                     id="featured-project-title"
                     value={content.work.featured.title}
-                    onChange={(e) => updateContent(['work', 'featured', 'title'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['work', 'featured', 'title'],
+                        e.target.value
+                      )
+                    }
                   />
                 </div>
                 <div>
@@ -792,7 +972,12 @@ export default function ContentEditor() {
                   <Textarea
                     id="featured-challenge"
                     value={content.work.featured.challenge}
-                    onChange={(e) => updateContent(['work', 'featured', 'challenge'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['work', 'featured', 'challenge'],
+                        e.target.value
+                      )
+                    }
                     rows={2}
                   />
                 </div>
@@ -801,7 +986,12 @@ export default function ContentEditor() {
                   <Textarea
                     id="featured-solution"
                     value={content.work.featured.solution}
-                    onChange={(e) => updateContent(['work', 'featured', 'solution'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['work', 'featured', 'solution'],
+                        e.target.value
+                      )
+                    }
                     rows={2}
                   />
                 </div>
@@ -810,7 +1000,12 @@ export default function ContentEditor() {
                   <Textarea
                     id="featured-impact"
                     value={content.work.featured.impact}
-                    onChange={(e) => updateContent(['work', 'featured', 'impact'], e.target.value)}
+                    onChange={e =>
+                      updateContent(
+                        ['work', 'featured', 'impact'],
+                        e.target.value
+                      )
+                    }
                     rows={2}
                   />
                 </div>
