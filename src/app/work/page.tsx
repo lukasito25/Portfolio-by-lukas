@@ -1,4 +1,6 @@
-import { Metadata } from 'next'
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,29 +20,83 @@ import {
   Zap,
   Brain,
   Globe,
-  Smartphone,
   Building2,
 } from 'lucide-react'
+import { dataService } from '@/lib/data-service'
+import { defaultContent } from '@/lib/content-config'
 
-export const metadata: Metadata = {
-  title: 'Work & Case Studies - Lukas Hosala | Senior Product Manager',
-  description:
-    'Real case studies from 8+ years at adidas Digital Sports and fintech startups. Product management experience serving 165M+ users globally.',
-}
+const personalProjectColors = [
+  'from-blue-500 to-purple-600',
+  'from-green-500 to-teal-600',
+  'from-indigo-500 to-blue-600',
+]
+
+const personalProjectIcons = [Target, BarChart3, Users]
+
+const professionalProjectColors = [
+  'bg-green-100 dark:bg-green-900',
+  'bg-purple-100 dark:bg-purple-900',
+  'bg-blue-100 dark:bg-blue-900',
+  'bg-red-100 dark:bg-red-900',
+]
+
+const professionalProjectIconColors = [
+  'text-green-600 dark:text-green-400',
+  'text-purple-600 dark:text-purple-400',
+  'text-blue-600 dark:text-blue-400',
+  'text-red-600 dark:text-red-400',
+]
+
+const professionalProjectIcons = [TrendingUp, Building2, Brain, Globe]
 
 export default function WorkPage() {
+  const [content, setContent] = useState(defaultContent.work)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        setIsLoading(true)
+        const workContent = await dataService.getContentSection('work')
+        if (workContent) {
+          setContent(workContent)
+        }
+      } catch (fetchError) {
+        console.error('Failed to fetch work content, using fallback:', fetchError)
+        // Keep default content as fallback
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchContent()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-slate-600 dark:text-slate-400">Loading work content...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
         {/* Hero Section */}
         <section className="text-center mb-16">
           <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-            Real Projects, Real Impact
+            {content.hero.title}
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto mb-8">
-            Explore authentic case studies from my 8+ years in product
-            management at adidas Digital Sports, fintech startups, and
-            international teams. Real projects serving 165M+ users globally.
+            {content.hero.description}
           </p>
           <div className="flex flex-wrap justify-center gap-2">
             <Badge variant="secondary">Digital Sports</Badge>
@@ -60,14 +116,10 @@ export default function WorkPage() {
                   Featured Case Study
                 </Badge>
                 <h2 className="text-3xl lg:text-4xl font-bold mb-6">
-                  adidas Runtastic Website Redesign: Serving 165M+ Global Users
+                  {content.featured.title}
                 </h2>
                 <p className="text-lg text-slate-600 dark:text-slate-300 mb-6">
-                  Led the comprehensive website redesign and technology stack
-                  migration for adidas Digital Sports. Managed cross-functional
-                  teams across multiple locations to deliver rebranded content,
-                  new tech stack, and integrated SEO marketing strategy for one
-                  of the world's largest fitness platforms.
+                  {content.featured.challenge}
                 </p>
                 <div className="flex flex-wrap gap-4 mb-8">
                   <div className="flex items-center gap-2">
@@ -97,10 +149,7 @@ export default function WorkPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
-                      Complete website redesign and migration to new technology
-                      stack for adidas Digital Sports, while maintaining service
-                      for 165M+ global users and ensuring zero downtime during
-                      the transition.
+                      {content.featured.challenge}
                     </p>
                   </CardContent>
                 </Card>
@@ -112,10 +161,7 @@ export default function WorkPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
-                      Led cross-functional teams across multiple locations,
-                      coordinated rebranded content delivery, managed technical
-                      migration, and implemented integrated SEO marketing
-                      strategies.
+                      {content.featured.solution}
                     </p>
                   </CardContent>
                 </Card>
@@ -127,10 +173,7 @@ export default function WorkPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
-                      Successfully launched new platform serving 165M+ users
-                      globally, improved site performance, enhanced SEO
-                      visibility, and delivered seamless user experience
-                      migration.
+                      {content.featured.impact}
                     </p>
                   </CardContent>
                 </Card>
@@ -150,192 +193,54 @@ export default function WorkPage() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8 mb-16">
-            {/* Lukas Training App */}
-            <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
-              <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden">
-                <div className="absolute inset-0 bg-black/20"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-white text-center">
-                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Target className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-lg font-bold">Training Program</h3>
-                    <p className="text-sm opacity-90">3x/Week Aesthetic</p>
-                  </div>
-                </div>
-              </div>
-              <CardHeader>
-                <CardTitle className="text-xl">Lukas Training App</CardTitle>
-                <CardDescription>
-                  Personal Fitness • Full-Stack Development • 2024
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">
-                  Custom-built training application featuring a 3x/week
-                  aesthetic training program. Designed and developed from
-                  concept to deployment with focus on user experience and
-                  workout tracking.
-                </p>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-blue-600 dark:text-blue-400">
-                      React
-                    </div>
-                    <div className="text-xs text-slate-600 dark:text-slate-400">
-                      Frontend
-                    </div>
-                  </div>
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-purple-600 dark:text-purple-400">
-                      Vercel
-                    </div>
-                    <div className="text-xs text-slate-600 dark:text-slate-400">
-                      Deployment
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="outline">React</Badge>
-                  <Badge variant="outline">Fitness</Badge>
-                  <Badge variant="outline">UI/UX</Badge>
-                </div>
-                <Button variant="outline" size="sm" asChild className="w-full">
-                  <Link
-                    href="https://lukas-training-app.vercel.app/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View Live App
-                    <ArrowUpRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+            {content.projects.map((project, index) => {
+              const Icon = personalProjectIcons[index % personalProjectIcons.length]
 
-            {/* Momentum Vita Time */}
-            <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
-              <div className="relative h-48 bg-gradient-to-br from-green-500 to-teal-600 overflow-hidden">
-                <div className="absolute inset-0 bg-black/20"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-white text-center">
-                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <BarChart3 className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-lg font-bold">Time Flow</h3>
-                    <p className="text-sm opacity-90">Productivity Suite</p>
-                  </div>
-                </div>
-              </div>
-              <CardHeader>
-                <CardTitle className="text-xl">Momentum Vita Time</CardTitle>
-                <CardDescription>
-                  Productivity • Web Application • 2024
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">
-                  Time flow and productivity web application designed to help
-                  users optimize their daily routines. Features reward tracking
-                  and momentum-building tools for sustained productivity.
-                </p>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-green-600 dark:text-green-400">
-                      JS
-                    </div>
-                    <div className="text-xs text-slate-600 dark:text-slate-400">
-                      Interactive
+              return (
+                <Card key={index} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
+                  <div className={`relative h-48 bg-gradient-to-br ${personalProjectColors[index % personalProjectColors.length]} overflow-hidden`}>
+                    <div className="absolute inset-0 bg-black/20"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-white text-center">
+                        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Icon className="h-8 w-8 text-white" />
+                        </div>
+                        <h3 className="text-lg font-bold">{project.title}</h3>
+                        <p className="text-sm opacity-90">{project.description}</p>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-teal-600 dark:text-teal-400">
-                      Base44
+                  <CardHeader>
+                    <CardTitle className="text-xl">{project.title}</CardTitle>
+                    <CardDescription>
+                      {project.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-slate-600 dark:text-slate-400 mb-4">
+                      {project.description}
+                    </p>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      {project.metrics.slice(0, 2).map((metric, metricIndex) => (
+                        <div key={metricIndex} className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                          <div className="font-semibold text-lg text-blue-600 dark:text-blue-400">
+                            {metric.value}
+                          </div>
+                          <div className="text-xs text-slate-600 dark:text-slate-400">
+                            {metric.label}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="text-xs text-slate-600 dark:text-slate-400">
-                      Hosting
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {project.technologies.map((tech, techIndex) => (
+                        <Badge key={techIndex} variant="outline">{tech}</Badge>
+                      ))}
                     </div>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="outline">Productivity</Badge>
-                  <Badge variant="outline">Time Management</Badge>
-                  <Badge variant="outline">JavaScript</Badge>
-                </div>
-                <Button variant="outline" size="sm" asChild className="w-full">
-                  <Link
-                    href="https://momentum-vita-time.base44.app/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View Live App
-                    <ArrowUpRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* VetWell */}
-            <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
-              <div className="relative h-48 bg-gradient-to-br from-indigo-500 to-blue-600 overflow-hidden">
-                <div className="absolute inset-0 bg-black/20"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-white text-center">
-                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Users className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-lg font-bold">VetWell</h3>
-                    <p className="text-sm opacity-90">Mental Health Support</p>
-                  </div>
-                </div>
-              </div>
-              <CardHeader>
-                <CardTitle className="text-xl">VetWell Organization</CardTitle>
-                <CardDescription>
-                  HealthTech • Social Impact • 2024-2025
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">
-                  Mental health and coaching platform specifically designed for
-                  veterinary professionals. Provides therapy, coaching, and
-                  support services to address burnout and career development.
-                </p>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-indigo-600 dark:text-indigo-400">
-                      Therapy
-                    </div>
-                    <div className="text-xs text-slate-600 dark:text-slate-400">
-                      Licensed
-                    </div>
-                  </div>
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-blue-600 dark:text-blue-400">
-                      Nov 2025
-                    </div>
-                    <div className="text-xs text-slate-600 dark:text-slate-400">
-                      Launch
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="outline">Mental Health</Badge>
-                  <Badge variant="outline">Veterinary</Badge>
-                  <Badge variant="outline">Social Impact</Badge>
-                </div>
-                <Button variant="outline" size="sm" asChild className="w-full">
-                  <Link
-                    href="https://vetwell.org/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View Organization
-                    <ArrowUpRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </section>
 
@@ -351,198 +256,50 @@ export default function WorkPage() {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">
-            {/* Case Study 2: StagStrat */}
-            <Card className="group hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
-                    <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
-                  </div>
-                  <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
-                </div>
-                <CardTitle className="text-xl">
-                  StagStrat Algorithmic Trading Platform
-                </CardTitle>
-                <CardDescription className="text-base">
-                  Head of Product • FinTech Startup • 2022-Present
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600 dark:text-slate-400 mb-6">
-                  Orchestrated complete product lifecycle for algorithmic
-                  trading startup. Led website launch, product roadmap creation,
-                  and SEO optimization strategy for revolutionary trading
-                  solutions.
-                </p>
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-green-600 dark:text-green-400">
-                      100%
-                    </div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Platform Launch
-                    </div>
-                  </div>
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-blue-600 dark:text-blue-400">
-                      12mo
-                    </div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Time to Market
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">Product Strategy</Badge>
-                  <Badge variant="outline">SEO Marketing</Badge>
-                  <Badge variant="outline">FinTech</Badge>
-                </div>
-              </CardContent>
-            </Card>
+            {content.projects.slice(0, 4).map((project, index) => {
+              const Icon = professionalProjectIcons[index % professionalProjectIcons.length]
 
-            {/* Case Study 3: adidas Admin Portal */}
-            <Card className="group hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4">
-                    <Building2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
-                </div>
-                <CardTitle className="text-xl">
-                  adidas Internal Admin Portal
-                </CardTitle>
-                <CardDescription className="text-base">
-                  Enterprise Software • adidas • 2022-2025
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600 dark:text-slate-400 mb-6">
-                  Product lifecycle management for adidas internal
-                  administration portal. Enhanced operational efficiency and
-                  user experience for internal stakeholders across global teams.
-                </p>
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-purple-600 dark:text-purple-400">
-                      1000+
+              return (
+                <Card key={index} className="group hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className={`w-12 h-12 ${professionalProjectColors[index % professionalProjectColors.length]} rounded-lg flex items-center justify-center mb-4`}>
+                        <Icon className={`h-6 w-6 ${professionalProjectIconColors[index % professionalProjectIconColors.length]}`} />
+                      </div>
+                      <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
                     </div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Internal Users
+                    <CardTitle className="text-xl">
+                      {project.title}
+                    </CardTitle>
+                    <CardDescription className="text-base">
+                      {project.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-slate-600 dark:text-slate-400 mb-6">
+                      {project.description}
+                    </p>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      {project.metrics.slice(0, 2).map((metric, metricIndex) => (
+                        <div key={metricIndex} className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                          <div className={`font-semibold text-lg ${professionalProjectIconColors[index % professionalProjectIconColors.length]}`}>
+                            {metric.value}
+                          </div>
+                          <div className="text-sm text-slate-600 dark:text-slate-400">
+                            {metric.label}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-orange-600 dark:text-orange-400">
-                      25+
+                    <div className="flex flex-wrap gap-2">
+                      {project.technologies.slice(0, 3).map((tech, techIndex) => (
+                        <Badge key={techIndex} variant="outline">{tech}</Badge>
+                      ))}
                     </div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Countries
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">Enterprise Software</Badge>
-                  <Badge variant="outline">Global Teams</Badge>
-                  <Badge variant="outline">Customer Success</Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Case Study 4: AI Integration */}
-            <Card className="group hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
-                    <Brain className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
-                </div>
-                <CardTitle className="text-xl">
-                  AI-Powered Content Personalization
-                </CardTitle>
-                <CardDescription className="text-base">
-                  Machine Learning Integration • EdTech • 2021-2023
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600 dark:text-slate-400 mb-6">
-                  Integrated ML-driven personalization engine that improved
-                  learning outcomes by 45% and increased user session duration
-                  by 120% through adaptive content delivery.
-                </p>
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-blue-600 dark:text-blue-400">
-                      45%
-                    </div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Better Outcomes
-                    </div>
-                  </div>
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-green-600 dark:text-green-400">
-                      120%
-                    </div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Session Increase
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">Machine Learning</Badge>
-                  <Badge variant="outline">Personalization</Badge>
-                  <Badge variant="outline">EdTech</Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Case Study 5: Global Platform */}
-            <Card className="group hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mb-4">
-                    <Globe className="h-6 w-6 text-red-600 dark:text-red-400" />
-                  </div>
-                  <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
-                </div>
-                <CardTitle className="text-xl">
-                  Global Marketplace Expansion
-                </CardTitle>
-                <CardDescription className="text-base">
-                  International Growth • E-commerce • 2018-2020
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-600 dark:text-slate-400 mb-6">
-                  Led international expansion of e-commerce platform to 15 new
-                  markets. Developed localization strategy that increased global
-                  revenue by 200% while maintaining product consistency.
-                </p>
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-red-600 dark:text-red-400">
-                      15
-                    </div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">
-                      New Markets
-                    </div>
-                  </div>
-                  <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                    <div className="font-semibold text-lg text-green-600 dark:text-green-400">
-                      200%
-                    </div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Revenue Growth
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">International</Badge>
-                  <Badge variant="outline">Localization</Badge>
-                  <Badge variant="outline">Market Entry</Badge>
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </section>
 

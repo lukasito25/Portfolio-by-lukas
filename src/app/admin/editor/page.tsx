@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
@@ -18,56 +21,123 @@ import {
   Plus,
   Trash2,
   AlertCircle,
-  ArrowLeft
+  ArrowLeft,
+  Database,
+  CheckCircle
 } from 'lucide-react'
+import { dataService } from '@/lib/data-service'
 import { SiteContent, defaultContent } from '@/lib/content-config'
-import Link from 'next/link'
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
 
 export default function ContentEditor() {
+  const { data: session, status } = useSession()
   const [content, setContent] = useState<SiteContent>(defaultContent)
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingContent, setIsLoadingContent] = useState(true)
   const [hasChanges, setHasChanges] = useState(false)
   const [activeTab, setActiveTab] = useState('homepage')
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  // Load content from localStorage on mount
+  // Handle authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <RefreshCw className="w-6 h-6 animate-spin" />
+          Loading...
+        </div>
+      </div>
+    )
+  }
+
+  if (!session || session.user.role !== 'ADMIN') {
+    redirect('/admin/login')
+    return null
+  }
+
+  // Load content from database on mount
   useEffect(() => {
-    const savedContent = localStorage.getItem('site-content')
-    if (savedContent) {
-      try {
-        setContent(JSON.parse(savedContent))
-      } catch (error) {
-        console.error('Failed to load saved content:', error)
-      }
-    }
+    loadContentFromDatabase()
   }, [])
 
-  // Save content to localStorage
+  const loadContentFromDatabase = async () => {
+    try {
+      setIsLoadingContent(true)
+      setError(null)
+      const allContent = await dataService.getAllContent()
+
+      if (allContent && Object.keys(allContent).length > 0) {
+        setContent(allContent as SiteContent)
+      } else {
+        // If no content in database, use default content
+        setContent(defaultContent)
+      }
+    } catch (error) {
+      console.error('Failed to load content from database:', error)
+      setError('Failed to load content from database. Using default content.')
+      setContent(defaultContent)
+    } finally {
+      setIsLoadingContent(false)
+    }
+  }
+
+  // Save content to database
   const saveContent = async () => {
     setIsLoading(true)
+    setError(null)
+
     try {
-      localStorage.setItem('site-content', JSON.stringify(content))
+      // Save each section separately
+      const sections = ['homepage', 'about', 'blog', 'work'] as const
+      let totalUpdated = 0
+
+      for (const section of sections) {
+        if (content[section]) {
+          const result = await dataService.updateContentSection(section, content[section])
+          if (result.success && result.itemsUpdated) {
+            totalUpdated += result.itemsUpdated
+          }
+        }
+      }
+
       setHasChanges(false)
-      // You could also save to a backend here
-      await new Promise(resolve => setTimeout(resolve, 500)) // Simulate save delay
-      alert('Content saved successfully!')
+      setLastSaved(new Date())
+
+      // Show success message
+      const message = `Successfully updated ${totalUpdated} content items!`
+      console.log(message)
+
+      // Optional: Show a toast notification here
+      alert(message)
+
     } catch (error) {
       console.error('Failed to save content:', error)
-      alert('Failed to save content')
+      setError('Failed to save content to database')
+      alert('Failed to save content. Please try again.')
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Export content as JSON
-  const exportContent = () => {
-    const dataStr = JSON.stringify(content, null, 2)
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr)
+  // Export content as JSON (from database, not local state)
+  const exportContent = async () => {
+    try {
+      const freshContent = await dataService.getAllContent()
+      const dataStr = JSON.stringify(freshContent, null, 2)
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr)
 
-    const exportFileDefaultName = 'site-content.json'
-    const linkElement = document.createElement('a')
-    linkElement.setAttribute('href', dataUri)
-    linkElement.setAttribute('download', exportFileDefaultName)
-    linkElement.click()
+      const exportFileDefaultName = `site-content-${new Date().toISOString().split('T')[0]}.json`
+      const linkElement = document.createElement('a')
+      linkElement.setAttribute('href', dataUri)
+      linkElement.setAttribute('download', exportFileDefaultName)
+      linkElement.click()
+    } catch (error) {
+      console.error('Failed to export content:', error)
+      alert('Failed to export content')
+    }
   }
 
   // Import content from JSON file
@@ -80,7 +150,7 @@ export default function ContentEditor() {
           const importedContent = JSON.parse(e.target?.result as string)
           setContent(importedContent)
           setHasChanges(true)
-          alert('Content imported successfully!')
+          alert('Content imported successfully! Remember to save to apply changes.')
         } catch (error) {
           alert('Invalid JSON file')
         }
@@ -95,6 +165,16 @@ export default function ContentEditor() {
       setContent(defaultContent)
       setHasChanges(true)
     }
+  }
+
+  // Reload from database
+  const reloadFromDatabase = () => {
+    if (hasChanges) {
+      const confirmed = confirm('You have unsaved changes. Are you sure you want to reload from database? Your changes will be lost.')
+      if (!confirmed) return
+    }
+    loadContentFromDatabase()
+    setHasChanges(false)
   }
 
   // Update content helper
@@ -139,6 +219,17 @@ export default function ContentEditor() {
     setHasChanges(true)
   }
 
+  if (isLoadingContent) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <RefreshCw className="w-6 h-6 animate-spin" />
+          Loading content from database...
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
@@ -154,14 +245,27 @@ export default function ContentEditor() {
               </Button>
               <div>
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-                  Content Editor
+                  Database Content Editor
                 </h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-2">
-                  Edit your portfolio content in real-time
+                <p className="text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-2">
+                  <Database className="w-4 h-4" />
+                  Edit your portfolio content with live database updates
+                  {lastSaved && (
+                    <span className="text-green-600 flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3" />
+                      Last saved: {lastSaved.toLocaleTimeString()}
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {error && (
+                <Badge variant="destructive" className="bg-red-100 text-red-800">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  Database Error
+                </Badge>
+              )}
               {hasChanges && (
                 <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
                   <AlertCircle className="w-3 h-3 mr-1" />
@@ -178,13 +282,17 @@ export default function ContentEditor() {
                 ) : (
                   <Save className="w-4 h-4 mr-2" />
                 )}
-                Save Changes
+                Save to Database
               </Button>
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-2 flex-wrap">
+            <Button onClick={reloadFromDatabase} variant="outline" size="sm">
+              <Database className="w-4 h-4 mr-2" />
+              Reload from Database
+            </Button>
             <Button onClick={exportContent} variant="outline" size="sm">
               <Download className="w-4 h-4 mr-2" />
               Export JSON
@@ -214,6 +322,12 @@ export default function ContentEditor() {
               </a>
             </Button>
           </div>
+
+          {error && (
+            <div className="mt-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded">
+              {error}
+            </div>
+          )}
         </div>
 
         {/* Content Editor Tabs */}
@@ -631,103 +745,6 @@ export default function ContentEditor() {
                 </div>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Blog Articles</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {content.blog.articles.map((article, index) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <div className="flex gap-2 mb-2">
-                      <Input
-                        value={article.title}
-                        onChange={(e) => {
-                          const newArticles = [...content.blog.articles]
-                          newArticles[index].title = e.target.value
-                          updateContent(['blog', 'articles'], newArticles)
-                        }}
-                        placeholder="Article Title"
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeArrayItem(['blog', 'articles'], index)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <Textarea
-                      value={article.description}
-                      onChange={(e) => {
-                        const newArticles = [...content.blog.articles]
-                        newArticles[index].description = e.target.value
-                        updateContent(['blog', 'articles'], newArticles)
-                      }}
-                      placeholder="Description"
-                      rows={2}
-                      className="mb-2"
-                    />
-                    <Textarea
-                      value={article.content}
-                      onChange={(e) => {
-                        const newArticles = [...content.blog.articles]
-                        newArticles[index].content = e.target.value
-                        updateContent(['blog', 'articles'], newArticles)
-                      }}
-                      placeholder="Content"
-                      rows={3}
-                      className="mb-2"
-                    />
-                    <div className="flex gap-2">
-                      <Input
-                        value={article.date}
-                        onChange={(e) => {
-                          const newArticles = [...content.blog.articles]
-                          newArticles[index].date = e.target.value
-                          updateContent(['blog', 'articles'], newArticles)
-                        }}
-                        placeholder="Date"
-                      />
-                      <Input
-                        value={article.readTime}
-                        onChange={(e) => {
-                          const newArticles = [...content.blog.articles]
-                          newArticles[index].readTime = e.target.value
-                          updateContent(['blog', 'articles'], newArticles)
-                        }}
-                        placeholder="Read Time"
-                      />
-                    </div>
-                    <div className="mt-2">
-                      <Input
-                        value={article.tags.join(', ')}
-                        onChange={(e) => {
-                          const newArticles = [...content.blog.articles]
-                          newArticles[index].tags = e.target.value.split(', ').filter(tag => tag.trim())
-                          updateContent(['blog', 'articles'], newArticles)
-                        }}
-                        placeholder="Tags (comma separated)"
-                      />
-                    </div>
-                  </div>
-                ))}
-                <Button
-                  variant="outline"
-                  onClick={() => addArrayItem(['blog', 'articles'], {
-                    title: "New Article",
-                    description: "Article description",
-                    content: "Article content",
-                    date: "January 1, 2025",
-                    readTime: "5 min read",
-                    tags: ["Tag1", "Tag2"]
-                  })}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Article
-                </Button>
-              </CardContent>
-            </Card>
           </TabsContent>
 
           {/* Work Tab */}
@@ -797,71 +814,6 @@ export default function ContentEditor() {
                     rows={2}
                   />
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Projects</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {content.work.projects.map((project, index) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <div className="flex gap-2 mb-2">
-                      <Input
-                        value={project.title}
-                        onChange={(e) => {
-                          const newProjects = [...content.work.projects]
-                          newProjects[index].title = e.target.value
-                          updateContent(['work', 'projects'], newProjects)
-                        }}
-                        placeholder="Project Title"
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeArrayItem(['work', 'projects'], index)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <Textarea
-                      value={project.description}
-                      onChange={(e) => {
-                        const newProjects = [...content.work.projects]
-                        newProjects[index].description = e.target.value
-                        updateContent(['work', 'projects'], newProjects)
-                      }}
-                      placeholder="Description"
-                      rows={2}
-                      className="mb-2"
-                    />
-                    <div>
-                      <Label>Technologies</Label>
-                      <Input
-                        value={project.technologies.join(', ')}
-                        onChange={(e) => {
-                          const newProjects = [...content.work.projects]
-                          newProjects[index].technologies = e.target.value.split(', ').filter(tech => tech.trim())
-                          updateContent(['work', 'projects'], newProjects)
-                        }}
-                        placeholder="Technologies (comma separated)"
-                      />
-                    </div>
-                  </div>
-                ))}
-                <Button
-                  variant="outline"
-                  onClick={() => addArrayItem(['work', 'projects'], {
-                    title: "New Project",
-                    description: "Project description",
-                    technologies: ["React", "TypeScript"],
-                    metrics: [{ label: "Metric", value: "100%" }]
-                  })}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Project
-                </Button>
               </CardContent>
             </Card>
           </TabsContent>

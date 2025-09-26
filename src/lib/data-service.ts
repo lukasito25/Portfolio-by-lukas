@@ -631,6 +631,64 @@ class DataService {
       fallbackAvailable: true,
     }
   }
+
+  // Content Management Methods
+  async getContentSection(section: string): Promise<any> {
+    if (this.useApi) {
+      try {
+        const response = await apiClient.getContentSection(section)
+        return response.content
+      } catch (error) {
+        console.error('API failed, falling back to local:', error)
+      }
+    }
+
+    // Fallback to static content for development
+    const { defaultContent } = await import('./content-config')
+    return defaultContent[section as keyof typeof defaultContent] || {}
+  }
+
+  async getAllContent(): Promise<any> {
+    if (this.useApi) {
+      try {
+        const response = await apiClient.getAllContent()
+        return response.content
+      } catch (error) {
+        console.error('API failed for getAllContent:', error)
+        throw error
+      }
+    }
+
+    // Fallback to static content for development
+    const { defaultContent } = await import('./content-config')
+    return defaultContent
+  }
+
+  async updateContentSection(section: string, content: any): Promise<{ success: boolean; itemsUpdated?: number }> {
+    if (this.useApi) {
+      try {
+        return await apiClient.updateContentSection(section, content)
+      } catch (error) {
+        console.error('API failed for updateContentSection:', error)
+        throw error
+      }
+    }
+
+    throw new Error('Content updates require API connection')
+  }
+
+  async updateContentItem(section: string, key: string, value: any, type: string = 'text'): Promise<{ success: boolean; id?: string }> {
+    if (this.useApi) {
+      try {
+        return await apiClient.updateContentItem(section, key, value, type)
+      } catch (error) {
+        console.error('API failed for updateContentItem:', error)
+        throw error
+      }
+    }
+
+    throw new Error('Content updates require API connection')
+  }
 }
 
 export const dataService = new DataService()

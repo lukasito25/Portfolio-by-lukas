@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,8 +22,42 @@ import {
   Star,
   Zap,
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { dataService } from '@/lib/data-service'
+import { defaultContent } from '@/lib/content-config'
 
 export default function Home() {
+  const [content, setContent] = useState(defaultContent.homepage)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const homepageContent = await dataService.getContentSection('homepage')
+        if (homepageContent && Object.keys(homepageContent).length > 0) {
+          setContent(homepageContent)
+        }
+      } catch (error) {
+        console.error('Failed to load homepage content:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadContent()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading content...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen">
       {/* Hero Section with Cosmic Background */}
@@ -39,32 +75,28 @@ export default function Home() {
           <div className="mb-8 cosmic-float">
             <span className="inline-flex items-center px-6 py-3 bg-white/70 backdrop-blur-sm border border-purple-200 text-purple-800 text-sm font-medium rounded-full shadow-lg">
               <Sparkles className="w-4 h-4 mr-2" />
-              Senior Product Manager • 8+ Years Experience • International Background
+              {content.hero.badge}
             </span>
           </div>
 
           {/* Main Headline */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-8 leading-[1.1] tracking-tight">
-            <span className="block mb-2">
-              <span className="gradient-text cosmic-glow">Building Digital</span>
-            </span>
-            <span className="block mb-2">
-              <span className="gradient-text cosmic-glow">Experiences</span>
-            </span>
-            <span className="block">
-              <span className="text-gray-900 dark:text-gray-100">
-                That Connect & Scale
+            {content.hero.headline.map((line, index) => (
+              <span key={index} className="block mb-2">
+                <span className={index < content.hero.headline.length - 1 ? "gradient-text cosmic-glow" : "text-gray-900 dark:text-gray-100"}>
+                  {line}
+                </span>
               </span>
-            </span>
+            ))}
           </h1>
 
           {/* Subheadline */}
           <p className="text-xl md:text-2xl text-gray-700 mb-12 max-w-4xl mx-auto leading-relaxed">
-            Senior Product Manager with 8+ years of international experience at adidas Digital Sports and fintech startups.
-            Leading cross-functional teams of up to{' '}
-            <span className="font-bold text-purple-600 cosmic-pulse">13 personnel</span>{' '}
-            to deliver products that serve{' '}
-            <span className="font-bold text-green-600 cosmic-pulse">165M+ users</span> globally.
+            {content.hero.subheadline.replace(/13 personnel/g, '').replace(/165M\+ users/g, '')}
+            <span className="font-bold text-purple-600 cosmic-pulse">13 personnel</span>
+            {' to deliver products that serve '}
+            <span className="font-bold text-green-600 cosmic-pulse">165M+ users</span>
+            {' globally.'}
           </p>
 
           {/* CTA Buttons */}
@@ -94,46 +126,25 @@ export default function Home() {
 
           {/* Impact Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            {[
-              {
-                value: '8+',
-                label: 'Years Experience',
-                icon: <Rocket className="w-6 h-6" />,
-                color: 'text-blue-600',
-              },
-              {
-                value: '165M+',
-                label: 'Users Reached',
-                icon: <Users className="w-6 h-6" />,
-                color: 'text-purple-600',
-              },
-              {
-                value: '13',
-                label: 'Max Team Size',
-                icon: <Target className="w-6 h-6" />,
-                color: 'text-green-600',
-              },
-              {
-                value: '3',
-                label: 'Countries',
-                icon: <Star className="w-6 h-6" />,
-                color: 'text-orange-600',
-              },
-            ].map((metric, index) => (
-              <div
-                key={index}
-                className="glass-card p-6 rounded-2xl cosmic-float"
-                style={{ animationDelay: `${index * 0.2}s` }}
-              >
-                <div className={`flex justify-center mb-3 ${metric.color}`}>
-                  {metric.icon}
+            {content.hero.metrics.map((metric, index) => {
+              const icons = [<Rocket className="w-6 h-6" />, <Users className="w-6 h-6" />, <Target className="w-6 h-6" />, <Star className="w-6 h-6" />]
+              const colors = ['text-blue-600', 'text-purple-600', 'text-green-600', 'text-orange-600']
+              return (
+                <div
+                  key={index}
+                  className="glass-card p-6 rounded-2xl cosmic-float"
+                  style={{ animationDelay: `${index * 0.2}s` }}
+                >
+                  <div className={`flex justify-center mb-3 ${colors[index]}`}>
+                    {icons[index]}
+                  </div>
+                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                    {metric.value}
+                  </div>
+                  <div className="text-sm text-gray-600">{metric.label}</div>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-2">
-                  {metric.value}
-                </div>
-                <div className="text-sm text-gray-600">{metric.label}</div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -157,69 +168,30 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <Users className="w-8 h-8" />,
-                title: 'Team Leadership & Management',
-                description:
-                  'Leading cross-functional teams of up to 13 personnel including external freelancers across multiple locations and time zones.',
-                color: 'from-purple-500 to-blue-500',
-              },
-              {
-                icon: <BarChart3 className="w-8 h-8" />,
-                title: 'Digital Product Development',
-                description:
-                  'Full product lifecycle management from conception to launch, including website redesigns, admin portals, and mobile applications.',
-                color: 'from-blue-500 to-teal-500',
-              },
-              {
-                icon: <Target className="w-8 h-8" />,
-                title: 'Agile Methodology',
-                description:
-                  'Expert in agile development processes, sprint planning, and iterative product delivery across international teams.',
-                color: 'from-teal-500 to-green-500',
-              },
-              {
-                icon: <Brain className="w-8 h-8" />,
-                title: 'Strategic Management',
-                description:
-                  'MBA-level strategic thinking with Level 7 Diploma in Strategic Management and Leadership, driving business outcomes.',
-                color: 'from-green-500 to-yellow-500',
-              },
-              {
-                icon: <TrendingUp className="w-8 h-8" />,
-                title: 'SEO & Marketing Integration',
-                description:
-                  'Creating product roadmaps with integrated SEO optimization and marketing strategies for maximum reach and engagement.',
-                color: 'from-yellow-500 to-orange-500',
-              },
-              {
-                icon: <Lightbulb className="w-8 h-8" />,
-                title: 'Tech Stack Modernization',
-                description:
-                  'Managing complex website redesigns on new technology stacks, rebranding initiatives, and technical migration projects.',
-                color: 'from-orange-500 to-red-500',
-              },
-            ].map((competency, index) => (
-              <Card
-                key={index}
-                className="group hover:shadow-2xl transition-all duration-300 cosmic-float border-0 bg-white/70 backdrop-blur-sm"
-              >
-                <CardHeader className="pb-4">
-                  <div
-                    className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${competency.color} flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-300`}
-                  >
-                    {competency.icon}
-                  </div>
-                  <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
-                    {competency.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardDescription className="text-gray-600 leading-relaxed px-6 pb-6">
-                  {competency.description}
-                </CardDescription>
-              </Card>
-            ))}
+            {content.competencies.map((competency, index) => {
+              const icons = [<Users className="w-8 h-8" />, <BarChart3 className="w-8 h-8" />, <Target className="w-8 h-8" />, <Brain className="w-8 h-8" />, <TrendingUp className="w-8 h-8" />, <Lightbulb className="w-8 h-8" />]
+              const colors = ['from-purple-500 to-blue-500', 'from-blue-500 to-teal-500', 'from-teal-500 to-green-500', 'from-green-500 to-yellow-500', 'from-yellow-500 to-orange-500', 'from-orange-500 to-red-500']
+              return (
+                <Card
+                  key={index}
+                  className="group hover:shadow-2xl transition-all duration-300 cosmic-float border-0 bg-white/70 backdrop-blur-sm"
+                >
+                  <CardHeader className="pb-4">
+                    <div
+                      className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${colors[index]} flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      {icons[index]}
+                    </div>
+                    <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
+                      {competency.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardDescription className="text-gray-600 leading-relaxed px-6 pb-6">
+                    {competency.description}
+                  </CardDescription>
+                </Card>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -229,12 +201,10 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Build Something Amazing?
+            {content.cta.title}
           </h2>
           <p className="text-xl text-white/90 mb-10 leading-relaxed">
-            Let&apos;s discuss how we can transform your product vision into
-            reality. From strategy to execution, I bring the expertise to drive
-            meaningful results.
+            {content.cta.description}
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Button

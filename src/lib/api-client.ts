@@ -219,6 +219,46 @@ class ApiClient {
       }
     )
   }
+
+  // Content Management API
+  async getContentSection(section: string) {
+    return this.request<{ success: boolean; content: any }>(`/content/${section}`)
+  }
+
+  async getAllContent() {
+    return this.request<{ success: boolean; content: any }>('/content', {
+      headers: {
+        Authorization: `Bearer ${this.secret}`,
+      },
+    })
+  }
+
+  async updateContentSection(section: string, content: any) {
+    return this.request<{ success: boolean; itemsUpdated: number }>(
+      `/content/${section}`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+        headers: {
+          Authorization: `Bearer ${this.secret}`,
+        },
+      }
+    )
+  }
+
+  async updateContentItem(section: string, key: string, value: any, type: string = 'text') {
+    const keyParam = key.replace(/\./g, '_') // Convert dots to underscores for URL
+    return this.request<{ success: boolean; id: string }>(
+      `/content/${section}/${keyParam}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ value, type }),
+        headers: {
+          Authorization: `Bearer ${this.secret}`,
+        },
+      }
+    )
+  }
 }
 
 // Export singleton instance
