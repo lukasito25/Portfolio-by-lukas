@@ -44,7 +44,9 @@ class DataService {
       } catch (error) {
         console.error('API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -88,7 +90,9 @@ class DataService {
       } catch (error) {
         console.error('API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -119,7 +123,9 @@ class DataService {
       } catch (error) {
         console.error('API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -157,27 +163,33 @@ class DataService {
     if (this.useApi) {
       try {
         const { posts } = await apiClient.getBlogPosts()
-        return posts
+        return posts || []
       } catch (error) {
         console.error('API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          // Return empty array instead of throwing error
+          return []
         }
       }
     }
 
     // Before using Prisma, check if we're in browser
     if (isBrowser) {
-      throw new Error('Cannot use local database in browser')
+      return []
     }
 
-    return await prisma.blogPost.findMany({
-      where: { status: 'PUBLISHED' },
-      include: {
-        tags: true,
-      },
-      orderBy: { publishedAt: 'desc' },
-    })
+    try {
+      return await prisma.blogPost.findMany({
+        where: { status: 'PUBLISHED' },
+        include: {
+          tags: true,
+        },
+        orderBy: { publishedAt: 'desc' },
+      })
+    } catch (error) {
+      console.error('Failed to fetch blog posts:', error)
+      return []
+    }
   }
 
   async getFeaturedBlogPosts() {
@@ -188,7 +200,9 @@ class DataService {
       } catch (error) {
         console.error('API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -220,7 +234,9 @@ class DataService {
       } catch (error) {
         console.error('API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -261,7 +277,9 @@ class DataService {
       } catch (error) {
         console.error('API auth failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -300,26 +318,32 @@ class DataService {
     if (this.useApi) {
       try {
         const { projects } = await apiClient.getAdminProjects()
-        return projects
+        return projects || []
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          // Return empty array instead of throwing error
+          return []
         }
       }
     }
 
     // Before using Prisma, check if we're in browser
     if (isBrowser) {
-      throw new Error('Cannot use local database in browser')
+      return []
     }
 
-    return await prisma.project.findMany({
-      include: {
-        technologies: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+    try {
+      return await prisma.project.findMany({
+        include: {
+          technologies: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+    } catch (error) {
+      console.error('Failed to fetch admin projects:', error)
+      return []
+    }
   }
 
   async createProject(data: any) {
@@ -329,7 +353,9 @@ class DataService {
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -356,7 +382,9 @@ class DataService {
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -381,7 +409,9 @@ class DataService {
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -407,7 +437,9 @@ class DataService {
       } catch (error) {
         console.error('API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -429,7 +461,9 @@ class DataService {
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -461,7 +495,9 @@ class DataService {
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -494,7 +530,9 @@ class DataService {
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -515,24 +553,30 @@ class DataService {
   async getContactSubmissions() {
     if (this.useApi) {
       try {
-        // const { submissions } = await apiClient.getContactSubmissions()
-        // return submissions
+        const { submissions } = await apiClient.getContactSubmissions()
+        return submissions || []
       } catch (error) {
         console.error('API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          // Return empty array instead of throwing error
+          return []
         }
       }
     }
 
     // Before using Prisma, check if we're in browser
     if (isBrowser) {
-      throw new Error('Cannot use local database in browser')
+      return []
     }
 
-    return await prisma.contactSubmission.findMany({
-      orderBy: { createdAt: 'desc' },
-    })
+    try {
+      return await prisma.contactSubmission.findMany({
+        orderBy: { createdAt: 'desc' },
+      })
+    } catch (error) {
+      console.error('Failed to fetch contact submissions:', error)
+      return []
+    }
   }
 
   async updateContactSubmission(id: string, data: any) {
@@ -542,7 +586,9 @@ class DataService {
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -573,7 +619,9 @@ class DataService {
       } catch (error) {
         console.error('API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -608,7 +656,9 @@ class DataService {
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -645,7 +695,9 @@ class DataService {
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -686,7 +738,9 @@ class DataService {
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -723,7 +777,9 @@ class DataService {
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -747,7 +803,9 @@ class DataService {
       } catch (error) {
         console.error('Analytics API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -792,7 +850,9 @@ class DataService {
       } catch (error) {
         console.error('Analytics API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -843,7 +903,9 @@ class DataService {
       } catch (error) {
         console.error('API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error('API unavailable and cannot use local database in browser')
+          throw new Error(
+            'API unavailable and cannot use local database in browser'
+          )
         }
       }
     }
@@ -869,7 +931,10 @@ class DataService {
     return defaultContent
   }
 
-  async updateContentSection(section: string, content: any): Promise<{ success: boolean; itemsUpdated?: number }> {
+  async updateContentSection(
+    section: string,
+    content: any
+  ): Promise<{ success: boolean; itemsUpdated?: number }> {
     if (this.useApi) {
       try {
         return await apiClient.updateContentSection(section, content)
@@ -882,7 +947,12 @@ class DataService {
     throw new Error('Content updates require API connection')
   }
 
-  async updateContentItem(section: string, key: string, value: any, type: string = 'text'): Promise<{ success: boolean; id?: string }> {
+  async updateContentItem(
+    section: string,
+    key: string,
+    value: any,
+    type: string = 'text'
+  ): Promise<{ success: boolean; id?: string }> {
     if (this.useApi) {
       try {
         return await apiClient.updateContentItem(section, key, value, type)

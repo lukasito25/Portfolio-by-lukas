@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -24,29 +24,7 @@ export default function AdminDashboard() {
   const [counts, setCounts] = useState<DashboardCounts | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Load dashboard counts
-  useEffect(() => {
-    loadDashboardData()
-  }, [])
-
-  // Handle authentication
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <RefreshCw className="w-6 h-6 animate-spin" />
-          Loading...
-        </div>
-      </div>
-    )
-  }
-
-  if (!session || session.user.role !== 'ADMIN') {
-    redirect('/admin/login')
-    return null
-  }
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       setIsLoading(true)
 
@@ -76,6 +54,28 @@ export default function AdminDashboard() {
     } finally {
       setIsLoading(false)
     }
+  }, [])
+
+  // Load dashboard counts
+  useEffect(() => {
+    loadDashboardData()
+  }, [loadDashboardData])
+
+  // Handle authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <RefreshCw className="w-6 h-6 animate-spin" />
+          Loading...
+        </div>
+      </div>
+    )
+  }
+
+  if (!session || session.user.role !== 'ADMIN') {
+    redirect('/admin/login')
+    return null
   }
 
   return (

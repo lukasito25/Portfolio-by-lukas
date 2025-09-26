@@ -170,11 +170,19 @@ export default function ContentEditor() {
   // Update content helper
   const updateContent = (path: string[], value: any) => {
     setContent(prev => {
+      if (!prev) return prev
+
       const newContent = JSON.parse(JSON.stringify(prev))
       let current = newContent
+
+      // Safely navigate to the nested property
       for (let i = 0; i < path.length - 1; i++) {
+        if (!current[path[i]]) {
+          current[path[i]] = {}
+        }
         current = current[path[i]]
       }
+
       current[path[path.length - 1]] = value
       return newContent
     })
@@ -184,12 +192,23 @@ export default function ContentEditor() {
   // Add array item helper
   const addArrayItem = (path: string[], template: any) => {
     setContent(prev => {
+      if (!prev) return prev
+
       const newContent = JSON.parse(JSON.stringify(prev))
       let current = newContent
+
+      // Safely navigate to the array
       for (const key of path) {
+        if (!current[key]) {
+          current[key] = []
+        }
         current = current[key]
       }
-      current.push(template)
+
+      // Ensure current is an array before pushing
+      if (Array.isArray(current)) {
+        current.push(template)
+      }
       return newContent
     })
     setHasChanges(true)
@@ -198,12 +217,23 @@ export default function ContentEditor() {
   // Remove array item helper
   const removeArrayItem = (path: string[], index: number) => {
     setContent(prev => {
+      if (!prev) return prev
+
       const newContent = JSON.parse(JSON.stringify(prev))
       let current = newContent
+
+      // Safely navigate to the array
       for (const key of path) {
+        if (!current[key]) {
+          return newContent // Early return if path doesn't exist
+        }
         current = current[key]
       }
-      current.splice(index, 1)
+
+      // Ensure current is an array and index is valid
+      if (Array.isArray(current) && index >= 0 && index < current.length) {
+        current.splice(index, 1)
+      }
       return newContent
     })
     setHasChanges(true)
@@ -371,7 +401,7 @@ export default function ContentEditor() {
                   <Label htmlFor="hero-badge">Hero Badge</Label>
                   <Input
                     id="hero-badge"
-                    value={content.homepage.hero.badge}
+                    value={content?.homepage?.hero?.badge || ''}
                     onChange={e =>
                       updateContent(
                         ['homepage', 'hero', 'badge'],
@@ -383,49 +413,51 @@ export default function ContentEditor() {
 
                 <div>
                   <Label>Headlines</Label>
-                  {content.homepage.hero.headline.map((line, index) => (
-                    <div key={index} className="flex gap-2 mt-2">
-                      <Input
-                        value={line}
-                        onChange={e => {
-                          const newHeadlines = [
-                            ...content.homepage.hero.headline,
-                          ]
-                          newHeadlines[index] = e.target.value
-                          updateContent(
-                            ['homepage', 'hero', 'headline'],
-                            newHeadlines
-                          )
-                        }}
-                        placeholder={`Headline ${index + 1}`}
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const newHeadlines =
-                            content.homepage.hero.headline.filter(
+                  {(content?.homepage?.hero?.headline || []).map(
+                    (line, index) => (
+                      <div key={index} className="flex gap-2 mt-2">
+                        <Input
+                          value={line}
+                          onChange={e => {
+                            const currentHeadlines =
+                              content?.homepage?.hero?.headline || []
+                            const newHeadlines = [...currentHeadlines]
+                            newHeadlines[index] = e.target.value
+                            updateContent(
+                              ['homepage', 'hero', 'headline'],
+                              newHeadlines
+                            )
+                          }}
+                          placeholder={`Headline ${index + 1}`}
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const currentHeadlines =
+                              content?.homepage?.hero?.headline || []
+                            const newHeadlines = currentHeadlines.filter(
                               (_, i) => i !== index
                             )
-                          updateContent(
-                            ['homepage', 'hero', 'headline'],
-                            newHeadlines
-                          )
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
+                            updateContent(
+                              ['homepage', 'hero', 'headline'],
+                              newHeadlines
+                            )
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
                     className="mt-2"
                     onClick={() => {
-                      const newHeadlines = [
-                        ...content.homepage.hero.headline,
-                        'New Line',
-                      ]
+                      const currentHeadlines =
+                        content?.homepage?.hero?.headline || []
+                      const newHeadlines = [...currentHeadlines, 'New Line']
                       updateContent(
                         ['homepage', 'hero', 'headline'],
                         newHeadlines
@@ -441,7 +473,7 @@ export default function ContentEditor() {
                   <Label htmlFor="hero-subheadline">Subheadline</Label>
                   <Textarea
                     id="hero-subheadline"
-                    value={content.homepage.hero.subheadline}
+                    value={content?.homepage?.hero?.subheadline || ''}
                     onChange={e =>
                       updateContent(
                         ['homepage', 'hero', 'subheadline'],
@@ -454,47 +486,57 @@ export default function ContentEditor() {
 
                 <div>
                   <Label>Metrics</Label>
-                  {content.homepage.hero.metrics.map((metric, index) => (
-                    <div key={index} className="flex gap-2 mt-2">
-                      <Input
-                        value={metric.value}
-                        onChange={e => {
-                          const newMetrics = [...content.homepage.hero.metrics]
-                          newMetrics[index].value = e.target.value
-                          updateContent(
-                            ['homepage', 'hero', 'metrics'],
-                            newMetrics
-                          )
-                        }}
-                        placeholder="Value"
-                        className="w-24"
-                      />
-                      <Input
-                        value={metric.label}
-                        onChange={e => {
-                          const newMetrics = [...content.homepage.hero.metrics]
-                          newMetrics[index].label = e.target.value
-                          updateContent(
-                            ['homepage', 'hero', 'metrics'],
-                            newMetrics
-                          )
-                        }}
-                        placeholder="Label"
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          removeArrayItem(
-                            ['homepage', 'hero', 'metrics'],
-                            index
-                          )
-                        }
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
+                  {(content?.homepage?.hero?.metrics || []).map(
+                    (metric, index) => (
+                      <div key={index} className="flex gap-2 mt-2">
+                        <Input
+                          value={metric?.value || ''}
+                          onChange={e => {
+                            const currentMetrics =
+                              content?.homepage?.hero?.metrics || []
+                            const newMetrics = [...currentMetrics]
+                            if (newMetrics[index]) {
+                              newMetrics[index].value = e.target.value
+                            }
+                            updateContent(
+                              ['homepage', 'hero', 'metrics'],
+                              newMetrics
+                            )
+                          }}
+                          placeholder="Value"
+                          className="w-24"
+                        />
+                        <Input
+                          value={metric?.label || ''}
+                          onChange={e => {
+                            const currentMetrics =
+                              content?.homepage?.hero?.metrics || []
+                            const newMetrics = [...currentMetrics]
+                            if (newMetrics[index]) {
+                              newMetrics[index].label = e.target.value
+                            }
+                            updateContent(
+                              ['homepage', 'hero', 'metrics'],
+                              newMetrics
+                            )
+                          }}
+                          placeholder="Label"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            removeArrayItem(
+                              ['homepage', 'hero', 'metrics'],
+                              index
+                            )
+                          }
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -518,50 +560,56 @@ export default function ContentEditor() {
                 <CardTitle>Core Competencies</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {content.homepage.competencies.map((competency, index) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <div className="flex gap-2 mb-2">
-                      <Input
-                        value={competency.title}
+                {(content?.homepage?.competencies || []).map(
+                  (competency, index) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex gap-2 mb-2">
+                        <Input
+                          value={competency?.title || ''}
+                          onChange={e => {
+                            const currentCompetencies =
+                              content?.homepage?.competencies || []
+                            const newCompetencies = [...currentCompetencies]
+                            if (newCompetencies[index]) {
+                              newCompetencies[index].title = e.target.value
+                            }
+                            updateContent(
+                              ['homepage', 'competencies'],
+                              newCompetencies
+                            )
+                          }}
+                          placeholder="Title"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            removeArrayItem(['homepage', 'competencies'], index)
+                          }
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <Textarea
+                        value={competency?.description || ''}
                         onChange={e => {
-                          const newCompetencies = [
-                            ...content.homepage.competencies,
-                          ]
-                          newCompetencies[index].title = e.target.value
+                          const currentCompetencies =
+                            content?.homepage?.competencies || []
+                          const newCompetencies = [...currentCompetencies]
+                          if (newCompetencies[index]) {
+                            newCompetencies[index].description = e.target.value
+                          }
                           updateContent(
                             ['homepage', 'competencies'],
                             newCompetencies
                           )
                         }}
-                        placeholder="Title"
+                        placeholder="Description"
+                        rows={2}
                       />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          removeArrayItem(['homepage', 'competencies'], index)
-                        }
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
                     </div>
-                    <Textarea
-                      value={competency.description}
-                      onChange={e => {
-                        const newCompetencies = [
-                          ...content.homepage.competencies,
-                        ]
-                        newCompetencies[index].description = e.target.value
-                        updateContent(
-                          ['homepage', 'competencies'],
-                          newCompetencies
-                        )
-                      }}
-                      placeholder="Description"
-                      rows={2}
-                    />
-                  </div>
-                ))}
+                  )
+                )}
                 <Button
                   variant="outline"
                   onClick={() =>
@@ -586,7 +634,7 @@ export default function ContentEditor() {
                   <Label htmlFor="cta-title">Title</Label>
                   <Input
                     id="cta-title"
-                    value={content.homepage.cta.title}
+                    value={content?.homepage?.cta?.title || ''}
                     onChange={e =>
                       updateContent(
                         ['homepage', 'cta', 'title'],
@@ -599,7 +647,7 @@ export default function ContentEditor() {
                   <Label htmlFor="cta-description">Description</Label>
                   <Textarea
                     id="cta-description"
-                    value={content.homepage.cta.description}
+                    value={content?.homepage?.cta?.description || ''}
                     onChange={e =>
                       updateContent(
                         ['homepage', 'cta', 'description'],
@@ -624,7 +672,7 @@ export default function ContentEditor() {
                   <Label htmlFor="about-title">Title</Label>
                   <Input
                     id="about-title"
-                    value={content.about.hero.title}
+                    value={content?.about?.hero?.title || ''}
                     onChange={e =>
                       updateContent(['about', 'hero', 'title'], e.target.value)
                     }
@@ -634,7 +682,7 @@ export default function ContentEditor() {
                   <Label htmlFor="about-description">Description</Label>
                   <Textarea
                     id="about-description"
-                    value={content.about.hero.description}
+                    value={content?.about?.hero?.description || ''}
                     onChange={e =>
                       updateContent(
                         ['about', 'hero', 'description'],
@@ -646,47 +694,57 @@ export default function ContentEditor() {
                 </div>
                 <div>
                   <Label>Quick Stats</Label>
-                  {content.about.hero.quickStats.map((stat, index) => (
-                    <div key={index} className="flex gap-2 mt-2">
-                      <Input
-                        value={stat.label}
-                        onChange={e => {
-                          const newStats = [...content.about.hero.quickStats]
-                          newStats[index].label = e.target.value
-                          updateContent(
-                            ['about', 'hero', 'quickStats'],
-                            newStats
-                          )
-                        }}
-                        placeholder="Label"
-                      />
-                      <Input
-                        value={stat.value}
-                        onChange={e => {
-                          const newStats = [...content.about.hero.quickStats]
-                          newStats[index].value = e.target.value
-                          updateContent(
-                            ['about', 'hero', 'quickStats'],
-                            newStats
-                          )
-                        }}
-                        placeholder="Value"
-                        className="w-24"
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          removeArrayItem(
-                            ['about', 'hero', 'quickStats'],
-                            index
-                          )
-                        }
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
+                  {(content?.about?.hero?.quickStats || []).map(
+                    (stat, index) => (
+                      <div key={index} className="flex gap-2 mt-2">
+                        <Input
+                          value={stat?.label || ''}
+                          onChange={e => {
+                            const currentStats =
+                              content?.about?.hero?.quickStats || []
+                            const newStats = [...currentStats]
+                            if (newStats[index]) {
+                              newStats[index].label = e.target.value
+                            }
+                            updateContent(
+                              ['about', 'hero', 'quickStats'],
+                              newStats
+                            )
+                          }}
+                          placeholder="Label"
+                        />
+                        <Input
+                          value={stat?.value || ''}
+                          onChange={e => {
+                            const currentStats =
+                              content?.about?.hero?.quickStats || []
+                            const newStats = [...currentStats]
+                            if (newStats[index]) {
+                              newStats[index].value = e.target.value
+                            }
+                            updateContent(
+                              ['about', 'hero', 'quickStats'],
+                              newStats
+                            )
+                          }}
+                          placeholder="Value"
+                          className="w-24"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            removeArrayItem(
+                              ['about', 'hero', 'quickStats'],
+                              index
+                            )
+                          }
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
