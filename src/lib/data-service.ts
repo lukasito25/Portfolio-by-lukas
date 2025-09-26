@@ -614,8 +614,8 @@ class DataService {
   async getRecruiterPage(slug: string) {
     if (this.useApi) {
       try {
-        // const { page } = await apiClient.getRecruiterPage(slug)
-        // return page
+        const { page } = await apiClient.getRecruiterPage(slug)
+        return page
       } catch (error) {
         console.error('API failed, falling back to local:', error)
         if (isBrowser) {
@@ -651,14 +651,13 @@ class DataService {
   async getAdminRecruiterPages() {
     if (this.useApi) {
       try {
-        // const { pages } = await apiClient.getAdminRecruiterPages()
-        // return pages
+        const { pages } = await apiClient.getAdminRecruiterPages()
+        return pages || []
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
-          throw new Error(
-            'API unavailable and cannot use local database in browser'
-          )
+          // Return empty array instead of throwing error
+          return []
         }
       }
     }
@@ -691,7 +690,7 @@ class DataService {
   async createRecruiterPage(data: any) {
     if (this.useApi) {
       try {
-        // return await apiClient.createRecruiterPage(data)
+        return await apiClient.createRecruiterPage(data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
@@ -734,7 +733,7 @@ class DataService {
   async updateRecruiterPage(id: string, data: any) {
     if (this.useApi) {
       try {
-        // return await apiClient.updateRecruiterPage(id, data)
+        return await apiClient.updateRecruiterPage(id, data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
@@ -773,7 +772,7 @@ class DataService {
   async deleteRecruiterPage(id: string) {
     if (this.useApi) {
       try {
-        // return await apiClient.deleteRecruiterPage(id)
+        return await apiClient.deleteRecruiterPage(id)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
         if (isBrowser) {
@@ -799,7 +798,7 @@ class DataService {
   async trackRecruiterPageView(pageId: string, viewData: any) {
     if (this.useApi) {
       try {
-        // return await apiClient.trackRecruiterPageView(pageId, viewData)
+        return await apiClient.trackRecruiterPageView(pageId, viewData)
       } catch (error) {
         console.error('Analytics API failed, falling back to local:', error)
         if (isBrowser) {
@@ -843,10 +842,10 @@ class DataService {
   async trackRecruiterPageInteraction(pageId: string, interactionData: any) {
     if (this.useApi) {
       try {
-        // return await apiClient.trackRecruiterPageInteraction(
-        //   pageId,
-        //   interactionData
-        // )
+        return await apiClient.trackRecruiterPageInteraction(
+          pageId,
+          interactionData
+        )
       } catch (error) {
         console.error('Analytics API failed, falling back to local:', error)
         if (isBrowser) {
