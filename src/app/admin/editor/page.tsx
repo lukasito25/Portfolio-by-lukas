@@ -41,28 +41,7 @@ export default function ContentEditor() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  // Load content from database on mount
-  useEffect(() => {
-    loadContentFromDatabase()
-  }, [])
-
-  // Handle authentication
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <RefreshCw className="w-6 h-6 animate-spin" />
-          Loading...
-        </div>
-      </div>
-    )
-  }
-
-  if (!session || session.user.role !== 'ADMIN') {
-    redirect('/admin/login')
-    return null
-  }
-
+  // Define all functions before using them
   const loadContentFromDatabase = async () => {
     try {
       setIsLoadingContent(true)
@@ -228,6 +207,28 @@ export default function ContentEditor() {
       return newContent
     })
     setHasChanges(true)
+  }
+
+  // Load content from database on mount
+  useEffect(() => {
+    loadContentFromDatabase()
+  }, [])
+
+  // Handle authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <RefreshCw className="w-6 h-6 animate-spin" />
+          Loading...
+        </div>
+      </div>
+    )
+  }
+
+  if (!session || session.user.role !== 'ADMIN') {
+    redirect('/admin/login')
+    return null
   }
 
   if (isLoadingContent) {
