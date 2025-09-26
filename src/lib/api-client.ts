@@ -6,31 +6,37 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   'https://portfolio-api.hosala-lukas.workers.dev'
-const API_SECRET = process.env.API_SECRET
 
 class ApiClient {
   private baseUrl: string
-  private secret?: string
 
-  constructor(baseUrl: string = API_BASE_URL, secret?: string) {
+  constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl
-    this.secret = secret || API_SECRET
   }
 
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`
+    // Use admin proxy for admin routes when running in browser
+    const isAdminRoute = endpoint.startsWith('/admin') ||
+                        (endpoint === '/content' && options.method !== 'GET') ||
+                        (endpoint.startsWith('/content/') && options.method !== 'GET')
+
+    const isBrowser = typeof window !== 'undefined'
+
+    let url: string
+    if (isAdminRoute && isBrowser) {
+      // Use the Next.js admin proxy for authenticated routes
+      url = `/api/admin-proxy${endpoint}`
+    } else {
+      // Use direct Cloudflare API for public routes or server-side calls
+      url = `${this.baseUrl}${endpoint}`
+    }
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
-    }
-
-    // Add authorization header for admin routes
-    if (endpoint.startsWith('/admin') && this.secret) {
-      headers['Authorization'] = `Bearer ${this.secret}`
     }
 
     const response = await fetch(url, {
@@ -226,11 +232,7 @@ class ApiClient {
   }
 
   async getAllContent() {
-    return this.request<{ success: boolean; content: any }>('/content', {
-      headers: {
-        Authorization: `Bearer ${this.secret}`,
-      },
-    })
+    return this.request<{ success: boolean; content: any }>('/content')
   }
 
   async updateContentSection(section: string, content: any) {
@@ -239,9 +241,6 @@ class ApiClient {
       {
         method: 'POST',
         body: JSON.stringify({ content }),
-        headers: {
-          Authorization: `Bearer ${this.secret}`,
-        },
       }
     )
   }

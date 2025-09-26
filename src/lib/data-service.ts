@@ -8,13 +8,15 @@ import { apiClient, checkApiHealth } from './api-client'
 
 const isDevelopment = process.env.NODE_ENV === 'development'
 const USE_API = process.env.NEXT_PUBLIC_USE_API === 'true'
+const isBrowser = typeof window !== 'undefined'
 
 class DataService {
   private useApi: boolean
 
   constructor() {
     // Enable API usage based on environment variable
-    this.useApi = USE_API || !isDevelopment
+    // In production or browser, always use API
+    this.useApi = USE_API || !isDevelopment || isBrowser
   }
 
   async getProjects() {
@@ -41,10 +43,17 @@ class DataService {
         return projectsWithTechnologies
       } catch (error) {
         console.error('API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
     }
 
-    // Fallback to local Prisma
+    // Fallback to local Prisma only on server
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
+    }
+
     return await prisma.project.findMany({
       where: { status: 'PUBLISHED' },
       include: {
@@ -78,7 +87,15 @@ class DataService {
         return projectsWithTechnologies
       } catch (error) {
         console.error('API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     return await prisma.project.findMany({
@@ -101,7 +118,15 @@ class DataService {
         return { ...project, technologies }
       } catch (error) {
         console.error('API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     const project = await prisma.project.findFirst({
@@ -116,6 +141,9 @@ class DataService {
 
     if (project) {
       // Increment view count for local database
+      if (isBrowser) {
+        throw new Error('Cannot use local database in browser')
+      }
       await prisma.project.update({
         where: { id: project.id },
         data: { views: { increment: 1 } },
@@ -132,7 +160,15 @@ class DataService {
         return posts
       } catch (error) {
         console.error('API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     return await prisma.blogPost.findMany({
@@ -151,7 +187,15 @@ class DataService {
         return posts
       } catch (error) {
         console.error('API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     return await prisma.blogPost.findMany({
@@ -175,7 +219,15 @@ class DataService {
         return { ...post, tags }
       } catch (error) {
         console.error('API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     const post = await prisma.blogPost.findFirst({
@@ -189,6 +241,9 @@ class DataService {
     })
 
     if (post) {
+      if (isBrowser) {
+        throw new Error('Cannot use local database in browser')
+      }
       await prisma.blogPost.update({
         where: { id: post.id },
         data: { views: { increment: 1 } },
@@ -205,7 +260,15 @@ class DataService {
         return user
       } catch (error) {
         console.error('API auth failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     // Fallback to local Prisma for auth (existing implementation)
@@ -240,7 +303,15 @@ class DataService {
         return projects
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     return await prisma.project.findMany({
@@ -257,7 +328,15 @@ class DataService {
         return await apiClient.createProject(data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     const project = await prisma.project.create({
@@ -276,7 +355,15 @@ class DataService {
         return await apiClient.updateProject(id, data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     await prisma.project.update({
@@ -293,7 +380,15 @@ class DataService {
         return await apiClient.deleteProject(id)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     await prisma.project.delete({
@@ -311,7 +406,15 @@ class DataService {
         return technologies
       } catch (error) {
         console.error('API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     return await prisma.technology.findMany({
@@ -325,7 +428,15 @@ class DataService {
         // return await apiClient.createTechnology(data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     const technology = await prisma.technology.create({
@@ -349,7 +460,15 @@ class DataService {
         // return await apiClient.updateTechnology(id, data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     await prisma.technology.update({
@@ -374,7 +493,15 @@ class DataService {
         // return await apiClient.deleteTechnology(id)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     await prisma.technology.delete({
@@ -392,7 +519,15 @@ class DataService {
         // return submissions
       } catch (error) {
         console.error('API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     return await prisma.contactSubmission.findMany({
@@ -406,7 +541,15 @@ class DataService {
         // return await apiClient.updateContactSubmission(id, data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     await prisma.contactSubmission.update({
@@ -429,7 +572,15 @@ class DataService {
         // return page
       } catch (error) {
         console.error('API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     return await prisma.recruiterPage.findFirst({
@@ -456,7 +607,15 @@ class DataService {
         // return pages
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     return await prisma.recruiterPage.findMany({
@@ -485,7 +644,15 @@ class DataService {
         // return await apiClient.createRecruiterPage(data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     const page = await prisma.recruiterPage.create({
@@ -518,7 +685,15 @@ class DataService {
         // return await apiClient.updateRecruiterPage(id, data)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     await prisma.recruiterPage.update({
@@ -547,7 +722,15 @@ class DataService {
         // return await apiClient.deleteRecruiterPage(id)
       } catch (error) {
         console.error('Admin API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     await prisma.recruiterPage.delete({
@@ -563,7 +746,15 @@ class DataService {
         // return await apiClient.trackRecruiterPageView(pageId, viewData)
       } catch (error) {
         console.error('Analytics API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     // Increment view count
@@ -574,6 +765,9 @@ class DataService {
 
     // Record analytics if data is provided
     if (viewData.sessionId || viewData.ipAddress) {
+      if (isBrowser) {
+        throw new Error('Cannot use local database in browser')
+      }
       await prisma.recruiterPageAnalytics.create({
         data: {
           pageId,
@@ -597,7 +791,15 @@ class DataService {
         // )
       } catch (error) {
         console.error('Analytics API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
+    }
+
+    // Before using Prisma, check if we're in browser
+    if (isBrowser) {
+      throw new Error('Cannot use local database in browser')
     }
 
     await prisma.recruiterPageInteraction.create({
@@ -640,6 +842,9 @@ class DataService {
         return response.content
       } catch (error) {
         console.error('API failed, falling back to local:', error)
+        if (isBrowser) {
+          throw new Error('API unavailable and cannot use local database in browser')
+        }
       }
     }
 
