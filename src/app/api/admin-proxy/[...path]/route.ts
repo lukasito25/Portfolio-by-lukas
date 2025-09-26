@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '../../auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -14,30 +14,34 @@ const API_SECRET = process.env.API_SECRET
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  return handleRequest(request, 'GET', params.path)
+  const resolvedParams = await params
+  return handleRequest(request, 'GET', resolvedParams.path)
 }
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  return handleRequest(request, 'POST', params.path)
+  const resolvedParams = await params
+  return handleRequest(request, 'POST', resolvedParams.path)
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  return handleRequest(request, 'PUT', params.path)
+  const resolvedParams = await params
+  return handleRequest(request, 'PUT', resolvedParams.path)
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
-  return handleRequest(request, 'DELETE', params.path)
+  const resolvedParams = await params
+  return handleRequest(request, 'DELETE', resolvedParams.path)
 }
 
 async function handleRequest(

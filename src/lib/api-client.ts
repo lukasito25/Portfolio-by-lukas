@@ -19,9 +19,10 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     // Use admin proxy for admin routes when running in browser
-    const isAdminRoute = endpoint.startsWith('/admin') ||
-                        (endpoint === '/content' && options.method !== 'GET') ||
-                        (endpoint.startsWith('/content/') && options.method !== 'GET')
+    const isAdminRoute =
+      endpoint.startsWith('/admin') ||
+      (endpoint === '/content' && options.method !== 'GET') ||
+      (endpoint.startsWith('/content/') && options.method !== 'GET')
 
     const isBrowser = typeof window !== 'undefined'
 
@@ -228,7 +229,9 @@ class ApiClient {
 
   // Content Management API
   async getContentSection(section: string) {
-    return this.request<{ success: boolean; content: any }>(`/content/${section}`)
+    return this.request<{ success: boolean; content: any }>(
+      `/content/${section}`
+    )
   }
 
   async getAllContent() {
@@ -245,16 +248,18 @@ class ApiClient {
     )
   }
 
-  async updateContentItem(section: string, key: string, value: any, type: string = 'text') {
+  async updateContentItem(
+    section: string,
+    key: string,
+    value: any,
+    type: string = 'text'
+  ) {
     const keyParam = key.replace(/\./g, '_') // Convert dots to underscores for URL
     return this.request<{ success: boolean; id: string }>(
       `/content/${section}/${keyParam}`,
       {
         method: 'PUT',
         body: JSON.stringify({ value, type }),
-        headers: {
-          Authorization: `Bearer ${this.secret}`,
-        },
       }
     )
   }
