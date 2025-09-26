@@ -3,6 +3,8 @@
  * Handles all external API calls to the Cloudflare Worker
  */
 
+import { deduplicatedFetch } from './request-deduplication'
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   'https://portfolio-api.hosala-lukas.workers.dev'
@@ -40,17 +42,16 @@ class ApiClient {
       ...(options.headers as Record<string, string>),
     }
 
-    const response = await fetch(url, {
+    const requestOptions: RequestInit = {
       ...options,
       headers,
-    })
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}))
-      throw new Error(error.error || `HTTP ${response.status}`)
     }
 
-    return response.json()
+    // Use deduplication for all requests to prevent infinite loops
+    // Enable caching for GET requests, disable for mutations
+    const enableCaching = !options.method || options.method === 'GET'
+
+    return deduplicatedFetch<T>(url, requestOptions, enableCaching)
   }
 
   // Projects API
