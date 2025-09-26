@@ -7,7 +7,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../../auth/[...nextauth]/route'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://portfolio-api.hosala-lukas.workers.dev'
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  'https://portfolio-api.hosala-lukas.workers.dev'
 const API_SECRET = process.env.API_SECRET
 
 export async function GET(
@@ -52,7 +54,10 @@ async function handleRequest(
 
     if (!API_SECRET) {
       console.error('API_SECRET not found in environment variables')
-      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      )
     }
 
     // Build the API path
@@ -62,7 +67,7 @@ async function handleRequest(
     // Prepare headers
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API_SECRET}`,
+      Authorization: `Bearer ${API_SECRET}`,
     }
 
     // Get request body if present
@@ -92,7 +97,7 @@ async function handleRequest(
     }
 
     return NextResponse.json(data)
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Admin proxy error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
