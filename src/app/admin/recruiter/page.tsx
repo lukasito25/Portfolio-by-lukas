@@ -37,6 +37,7 @@ import {
   Copy,
 } from 'lucide-react'
 import { dataService } from '@/lib/data-service'
+import { RecruiterPageForm } from '@/components/recruiter/RecruiterPageForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -142,6 +143,16 @@ export default function RecruiterPageManagement() {
     } catch (error) {
       console.error('Failed to delete page:', error)
     }
+  }
+
+  const handleFormSuccess = async (result: any) => {
+    console.log('Form submitted successfully:', result)
+    setIsDialogOpen(false)
+    await loadPages()
+  }
+
+  const handleFormCancel = () => {
+    setIsDialogOpen(false)
   }
 
   const copyPageUrl = (slug: string) => {
@@ -404,28 +415,142 @@ export default function RecruiterPageManagement() {
             </DialogHeader>
 
             <div className="space-y-6">
-              {/* Dialog content will be implemented in a separate component */}
-              <div className="p-6 bg-blue-50 rounded-lg">
-                <p className="text-blue-800">
-                  {dialogType === 'create' &&
-                    'Create page form will be implemented next'}
-                  {dialogType === 'edit' &&
-                    'Edit page form will be implemented next'}
-                  {dialogType === 'view' && selectedPage && (
-                    <>
-                      <strong>{selectedPage.title}</strong>
-                      <br />
-                      Company: {selectedPage.companyName}
-                      <br />
-                      Template: {selectedPage.templateType}
-                      <br />
-                      Views: {selectedPage.views}
-                      <br />
-                      Status: {selectedPage.isActive ? 'Active' : 'Inactive'}
-                    </>
-                  )}
-                </p>
-              </div>
+              {/* Create Form */}
+              {dialogType === 'create' && (
+                <RecruiterPageForm
+                  mode="create"
+                  onSuccess={handleFormSuccess}
+                  onCancel={handleFormCancel}
+                />
+              )}
+
+              {/* Edit Form */}
+              {dialogType === 'edit' && selectedPage && (
+                <RecruiterPageForm
+                  mode="edit"
+                  initialData={{
+                    id: selectedPage.id,
+                    title: selectedPage.title,
+                    companyName: selectedPage.companyName,
+                    slug: selectedPage.slug,
+                    roleName: selectedPage.roleName || '',
+                    roleLevel: selectedPage.roleLevel as any,
+                    companySize: selectedPage.companySize as any,
+                    industry: selectedPage.industry as any,
+                    templateType: selectedPage.templateType as any,
+                    isActive: selectedPage.isActive,
+                    // Add other fields as needed
+                  }}
+                  onSuccess={handleFormSuccess}
+                  onCancel={handleFormCancel}
+                />
+              )}
+
+              {/* View Details */}
+              {dialogType === 'view' && selectedPage && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">
+                        Page Details
+                      </h3>
+                      <div className="mt-2 space-y-2 text-sm">
+                        <div>
+                          <strong>Title:</strong> {selectedPage.title}
+                        </div>
+                        <div>
+                          <strong>Company:</strong> {selectedPage.companyName}
+                        </div>
+                        <div>
+                          <strong>Slug:</strong> /r/{selectedPage.slug}
+                        </div>
+                        <div>
+                          <strong>Template:</strong> {selectedPage.templateType}
+                        </div>
+                        <div>
+                          <strong>Status:</strong>{' '}
+                          {selectedPage.isActive ? 'Active' : 'Inactive'}
+                        </div>
+                        {selectedPage.roleName && (
+                          <div>
+                            <strong>Role:</strong> {selectedPage.roleName}
+                          </div>
+                        )}
+                        {selectedPage.roleLevel && (
+                          <div>
+                            <strong>Level:</strong> {selectedPage.roleLevel}
+                          </div>
+                        )}
+                        {selectedPage.companySize && (
+                          <div>
+                            <strong>Company Size:</strong>{' '}
+                            {selectedPage.companySize}
+                          </div>
+                        )}
+                        {selectedPage.industry && (
+                          <div>
+                            <strong>Industry:</strong> {selectedPage.industry}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Analytics</h3>
+                      <div className="mt-2 space-y-2 text-sm">
+                        <div>
+                          <strong>Views:</strong> {selectedPage.views}
+                        </div>
+                        <div>
+                          <strong>Unique Views:</strong>{' '}
+                          {selectedPage.uniqueViews}
+                        </div>
+                        <div>
+                          <strong>Responses:</strong> {selectedPage.responses}
+                        </div>
+                        {selectedPage.timeOnPage && (
+                          <div>
+                            <strong>Avg. Time on Page:</strong>{' '}
+                            {selectedPage.timeOnPage}s
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Timestamps</h3>
+                    <div className="mt-2 space-y-1 text-sm">
+                      <div>
+                        <strong>Created:</strong>{' '}
+                        {formatDate(selectedPage.createdAt)}
+                      </div>
+                      <div>
+                        <strong>Updated:</strong>{' '}
+                        {formatDate(selectedPage.updatedAt)}
+                      </div>
+                      <div>
+                        <strong>Author:</strong>{' '}
+                        {selectedPage.author.name || selectedPage.author.email}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-4">
+                    <Button onClick={() => handleEditPage(selectedPage)}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Page
+                    </Button>
+                    <Button variant="outline" asChild>
+                      <a
+                        href={`/r/${selectedPage.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        View Live Page
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </DialogContent>
         </Dialog>
