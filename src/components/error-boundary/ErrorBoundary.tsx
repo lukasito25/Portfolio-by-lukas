@@ -20,13 +20,13 @@ import {
   AppError,
   ErrorHandler,
   ErrorFactory,
-  ErrorSeverity,
   getErrorSeverityColor,
   formatErrorForUser,
   createErrorBoundaryState,
   handleErrorBoundaryError,
   type ErrorBoundaryState,
 } from '@/lib/error-handling'
+import { ErrorSeverity } from '@/lib/error-constants'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -43,7 +43,10 @@ interface ErrorBoundaryComponentState extends ErrorBoundaryState {
   errorId: string
 }
 
-class ErrorBoundaryComponent extends Component<ErrorBoundaryProps, ErrorBoundaryComponentState> {
+class ErrorBoundaryComponent extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryComponentState
+> {
   private retryTimeoutId: NodeJS.Timeout | null = null
 
   constructor(props: ErrorBoundaryProps) {
@@ -57,7 +60,9 @@ class ErrorBoundaryComponent extends Component<ErrorBoundaryProps, ErrorBoundary
     }
   }
 
-  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryComponentState> {
+  static getDerivedStateFromError(
+    error: Error
+  ): Partial<ErrorBoundaryComponentState> {
     const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     return {
       ...handleErrorBoundaryError(error, { errorId }),
@@ -190,9 +195,7 @@ class ErrorBoundaryComponent extends Component<ErrorBoundaryProps, ErrorBoundary
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-red-700">
-            {formatErrorForUser(error)}
-          </p>
+          <p className="text-sm text-red-700">{formatErrorForUser(error)}</p>
 
           <div className="flex flex-wrap gap-2">
             {canRetry && (
@@ -262,9 +265,7 @@ class ErrorBoundaryComponent extends Component<ErrorBoundaryProps, ErrorBoundary
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-6">
-            <p className="text-gray-600">
-              {formatErrorForUser(error)}
-            </p>
+            <p className="text-gray-600">{formatErrorForUser(error)}</p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               {canRetry && (
@@ -311,9 +312,7 @@ class ErrorBoundaryComponent extends Component<ErrorBoundaryProps, ErrorBoundary
                 <Bug className="w-4 h-4 inline mr-1" />
                 Technical Details
               </summary>
-              <div className="mt-3">
-                {this.renderErrorDetails()}
-              </div>
+              <div className="mt-3">{this.renderErrorDetails()}</div>
             </details>
           </CardContent>
         </Card>
@@ -413,7 +412,8 @@ class ErrorBoundaryComponent extends Component<ErrorBoundaryProps, ErrorBoundary
             <span className="font-medium">Code:</span> {error.code}
           </div>
           <div>
-            <span className="font-medium">Time:</span> {error.timestamp.toLocaleString()}
+            <span className="font-medium">Time:</span>{' '}
+            {error.timestamp.toLocaleString()}
           </div>
           {error.context && (
             <div>
@@ -454,16 +454,18 @@ export function withErrorBoundary<P extends object>(
 
 // Hook for error handling in functional components
 export function useErrorHandler() {
-  const handleError = React.useCallback((error: Error | AppError, context?: Record<string, any>) => {
-    const appError = error instanceof Error
-      ? ErrorFactory.fromError(error, context)
-      : error
+  const handleError = React.useCallback(
+    (error: Error | AppError, context?: Record<string, any>) => {
+      const appError =
+        error instanceof Error ? ErrorFactory.fromError(error, context) : error
 
-    ErrorHandler.getInstance().handleError(appError)
+      ErrorHandler.getInstance().handleError(appError)
 
-    // Re-throw to trigger error boundary
-    throw appError
-  }, [])
+      // Re-throw to trigger error boundary
+      throw appError
+    },
+    []
+  )
 
   return { handleError }
 }

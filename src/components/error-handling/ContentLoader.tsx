@@ -307,7 +307,7 @@ export function ContentFallbackNotice({
     ErrorCode.OFFLINE_ERROR,
     ErrorCode.NETWORK_ERROR,
     ErrorCode.TIMEOUT_ERROR,
-  ].includes(error.code)
+  ].includes(error.code as any)
 
   return (
     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
@@ -322,9 +322,7 @@ export function ContentFallbackNotice({
             <span className="font-medium text-blue-800">
               Showing cached {contentName}
             </span>
-            <span className="text-blue-700 ml-1">
-              - {error.userMessage}
-            </span>
+            <span className="text-blue-700 ml-1">- {error.userMessage}</span>
           </div>
         </div>
 
@@ -416,7 +414,9 @@ export function ContentSection({
             </div>
             {fallbackContent && (
               <div className="mt-4 p-3 bg-orange-100 rounded border">
-                <p className="text-xs text-orange-700 mb-2">Fallback content:</p>
+                <p className="text-xs text-orange-700 mb-2">
+                  Fallback content:
+                </p>
                 {fallbackContent}
               </div>
             )}
@@ -431,9 +431,7 @@ export function ContentSection({
             {subtitle && <p className="text-gray-600">{subtitle}</p>}
           </CardHeader>
         )}
-        <CardContent>
-          {children}
-        </CardContent>
+        <CardContent>{children}</CardContent>
       </Card>
     </ErrorBoundary>
   )

@@ -6,8 +6,8 @@ import {
   ErrorHandler,
   ErrorFactory,
   NetworkStatusManager,
-  ErrorCode,
 } from '@/lib/error-handling'
+import { ErrorCode } from '@/lib/error-constants'
 
 export interface UseErrorHandlerOptions {
   showToast?: boolean
@@ -32,30 +32,29 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}) {
   const networkManager = NetworkStatusManager.getInstance()
 
   // Handle errors
-  const handleError = useCallback((
-    error: Error | AppError,
-    context?: Record<string, any>
-  ) => {
-    const appError = error instanceof Error
-      ? ErrorFactory.fromError(error, context)
-      : error
+  const handleError = useCallback(
+    (error: Error | AppError, context?: Record<string, any>) => {
+      const appError =
+        error instanceof Error ? ErrorFactory.fromError(error, context) : error
 
-    // Update local state
-    setErrorState(prev => ({
-      ...prev,
-      error: appError,
-      hasError: true,
-    }))
+      // Update local state
+      setErrorState(prev => ({
+        ...prev,
+        error: appError,
+        hasError: true,
+      }))
 
-    // Handle error globally
-    errorHandler.handleError(appError, {
-      showToast: options.showToast,
-      logError: options.logError,
-    })
+      // Handle error globally
+      errorHandler.handleError(appError, {
+        showToast: options.showToast,
+        logError: options.logError,
+      })
 
-    // Call custom error handler
-    options.onError?.(appError)
-  }, [errorHandler, options])
+      // Call custom error handler
+      options.onError?.(appError)
+    },
+    [errorHandler, options]
+  )
 
   // Clear error
   const clearError = useCallback(() => {
@@ -67,48 +66,48 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}) {
   }, [])
 
   // Retry mechanism
-  const retry = useCallback(async (
-    operation: () => Promise<any>,
-    retryOptions?: {
-      maxAttempts?: number
-      delay?: number
-      onRetry?: (attempt: number) => void
-    }
-  ) => {
-    const {
-      maxAttempts = 3,
-      delay = 1000,
-      onRetry,
-    } = retryOptions || {}
+  const retry = useCallback(
+    async (
+      operation: () => Promise<any>,
+      retryOptions?: {
+        maxAttempts?: number
+        delay?: number
+        onRetry?: (attempt: number) => void
+      }
+    ) => {
+      const { maxAttempts = 3, delay = 1000, onRetry } = retryOptions || {}
 
-    let lastError: AppError | null = null
+      let lastError: AppError | null = null
 
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        const result = await operation()
-        clearError() // Clear any previous errors on success
-        return result
-      } catch (error) {
-        lastError = error instanceof Error
-          ? ErrorFactory.fromError(error, { attempt, maxAttempts })
-          : error as AppError
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const result = await operation()
+          clearError() // Clear any previous errors on success
+          return result
+        } catch (error) {
+          lastError =
+            error instanceof Error
+              ? ErrorFactory.fromError(error, { attempt, maxAttempts })
+              : (error as AppError)
 
-        if (attempt < maxAttempts) {
-          onRetry?.(attempt)
-          await new Promise(resolve => setTimeout(resolve, delay * attempt))
+          if (attempt < maxAttempts) {
+            onRetry?.(attempt)
+            await new Promise(resolve => setTimeout(resolve, delay * attempt))
+          }
         }
       }
-    }
 
-    if (lastError) {
-      handleError(lastError)
-      throw lastError
-    }
-  }, [handleError, clearError])
+      if (lastError) {
+        handleError(lastError)
+        throw lastError
+      }
+    },
+    [handleError, clearError]
+  )
 
   // Monitor network status
   useEffect(() => {
-    const unsubscribe = networkManager.addListener((isOnline) => {
+    const unsubscribe = networkManager.addListener(isOnline => {
       setErrorState(prev => {
         const newState = {
           ...prev,
@@ -140,7 +139,7 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}) {
 
   // Listen to global errors
   useEffect(() => {
-    const unsubscribe = errorHandler.addErrorListener((error) => {
+    const unsubscribe = errorHandler.addErrorListener(error => {
       setErrorState(prev => ({
         ...prev,
         error,
@@ -184,9 +183,10 @@ export function useAsyncOperation<T>(
       setState({ data: result, loading: false, error: null })
       return result
     } catch (error) {
-      const appError = error instanceof Error
-        ? ErrorFactory.fromError(error)
-        : error as AppError
+      const appError =
+        error instanceof Error
+          ? ErrorFactory.fromError(error)
+          : (error as AppError)
 
       setState(prev => ({ ...prev, loading: false, error: appError }))
       handleError(appError)
@@ -215,18 +215,18 @@ export function useFormErrorHandler() {
   const { handleError } = useErrorHandler()
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
-  const handleFormError = useCallback((
-    error: Error | AppError,
-    fieldErrors?: Record<string, string>
-  ) => {
-    // Set field-specific errors
-    if (fieldErrors) {
-      setFormErrors(fieldErrors)
-    }
+  const handleFormError = useCallback(
+    (error: Error | AppError, fieldErrors?: Record<string, string>) => {
+      // Set field-specific errors
+      if (fieldErrors) {
+        setFormErrors(fieldErrors)
+      }
 
-    // Handle the main error
-    handleError(error, { formErrors: fieldErrors })
-  }, [handleError])
+      // Handle the main error
+      handleError(error, { formErrors: fieldErrors })
+    },
+    [handleError]
+  )
 
   const clearFormErrors = useCallback(() => {
     setFormErrors({})
@@ -286,10 +286,9 @@ export function useContentLoader<T>(
       }))
       return content
     } catch (error) {
-      const appError = ErrorFactory.createContentLoadingError(
-        'content',
-        { originalError: error }
-      )
+      const appError = ErrorFactory.createContentLoadingError('content', {
+        originalError: error,
+      })
 
       setState(prev => ({
         ...prev,

@@ -4,7 +4,13 @@
  */
 
 import React from 'react'
-import { AppError, ErrorCode, ErrorSeverity } from './error-handling'
+import { AppError } from './error-handling'
+import {
+  ErrorCode,
+  ErrorSeverity,
+  type ErrorCodeType,
+  type ErrorSeverityType,
+} from './error-constants'
 
 // ====================== Error Monitoring Configuration ======================
 
@@ -90,7 +96,9 @@ export class ErrorMonitoringService {
   private errorQueue: ErrorReport[] = []
   private isOnline: boolean = true
 
-  static getInstance(config?: Partial<ErrorMonitoringConfig>): ErrorMonitoringService {
+  static getInstance(
+    config?: Partial<ErrorMonitoringConfig>
+  ): ErrorMonitoringService {
     if (!ErrorMonitoringService.instance) {
       ErrorMonitoringService.instance = new ErrorMonitoringService(config)
     }
@@ -128,29 +136,33 @@ export class ErrorMonitoringService {
 
   private setupGlobalErrorHandlers(): void {
     // Handle unhandled promise rejections
-    window.addEventListener('unhandledrejection', (event) => {
+    window.addEventListener('unhandledrejection', event => {
       const error = this.createErrorFromRejection(event)
       this.captureError(error, { unhandled: true })
     })
 
     // Handle global JavaScript errors
-    window.addEventListener('error', (event) => {
+    window.addEventListener('error', event => {
       const error = this.createErrorFromEvent(event)
       this.captureError(error, { unhandled: true })
     })
 
     // Handle resource loading errors
-    window.addEventListener('error', (event) => {
-      if (event.target !== window) {
-        const error = this.createResourceError(event)
-        this.captureError(error, { resource: true })
-      }
-    }, true)
+    window.addEventListener(
+      'error',
+      event => {
+        if (event.target !== window) {
+          const error = this.createResourceError(event)
+          this.captureError(error, { resource: true })
+        }
+      },
+      true
+    )
   }
 
   private setupUserActionTracking(): void {
     // Track clicks
-    document.addEventListener('click', (event) => {
+    document.addEventListener('click', event => {
       this.addUserAction({
         type: 'click',
         element: this.getElementSelector(event.target as Element),
@@ -202,7 +214,10 @@ export class ErrorMonitoringService {
   // ====================== Public API ======================
 
   captureError(error: AppError, customContext?: Record<string, any>): string {
-    if (!this.config.enabled || this.errorCount >= this.config.maxErrorsPerSession) {
+    if (
+      !this.config.enabled ||
+      this.errorCount >= this.config.maxErrorsPerSession
+    ) {
       return ''
     }
 
@@ -250,7 +265,12 @@ export class ErrorMonitoringService {
     return errorId
   }
 
-  addBreadcrumb(level: Breadcrumb['level'], category: string, message: string, data?: Record<string, any>): void {
+  addBreadcrumb(
+    level: Breadcrumb['level'],
+    category: string,
+    message: string,
+    data?: Record<string, any>
+  ): void {
     const breadcrumb: Breadcrumb = {
       level,
       category,
@@ -281,7 +301,9 @@ export class ErrorMonitoringService {
   }
 
   setCustomContext(key: string, value: any): void {
-    this.addBreadcrumb('info', 'context', `Custom context: ${key}`, { [key]: value })
+    this.addBreadcrumb('info', 'context', `Custom context: ${key}`, {
+      [key]: value,
+    })
   }
 
   // ====================== Private Methods ======================
@@ -309,11 +331,15 @@ export class ErrorMonitoringService {
   }
 
   private getPerformanceMetrics(): PerformanceMetrics {
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+    const navigation = performance.getEntriesByType(
+      'navigation'
+    )[0] as PerformanceNavigationTiming
     const memory = (performance as any).memory
 
     return {
-      loadTime: navigation ? navigation.loadEventEnd - navigation.loadEventStart : 0,
+      loadTime: navigation
+        ? navigation.loadEventEnd - navigation.loadEventStart
+        : 0,
       memoryUsage: memory ? memory.usedJSHeapSize : undefined,
       connectionType: (navigator as any).connection?.type,
       effectiveType: (navigator as any).connection?.effectiveType,
@@ -342,9 +368,10 @@ export class ErrorMonitoringService {
   private findSimilarErrors(error: AppError): string[] {
     // Simple similarity check based on error code and message
     return this.errorQueue
-      .filter(report =>
-        report.error.code === error.code &&
-        report.error.message.includes(error.message.split(' ')[0])
+      .filter(
+        report =>
+          report.error.code === error.code &&
+          report.error.message.includes(error.message.split(' ')[0])
       )
       .slice(-5) // Last 5 similar errors
       .map(report => report.id)
@@ -445,7 +472,9 @@ export class ErrorMonitoringService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` }),
+          ...(this.config.apiKey && {
+            Authorization: `Bearer ${this.config.apiKey}`,
+          }),
         },
         body: JSON.stringify({
           type: 'error_report',
@@ -469,7 +498,9 @@ export class ErrorMonitoringService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` }),
+          ...(this.config.apiKey && {
+            Authorization: `Bearer ${this.config.apiKey}`,
+          }),
         },
         body: JSON.stringify({
           type: 'error_batch',
@@ -507,7 +538,9 @@ export class ErrorMonitoringService {
     if (context.breadcrumbs && context.breadcrumbs.length > 0) {
       console.group('Recent Breadcrumbs:')
       context.breadcrumbs.slice(-10).forEach(breadcrumb => {
-        console.log(`[${breadcrumb.level}] ${breadcrumb.category}: ${breadcrumb.message}`)
+        console.log(
+          `[${breadcrumb.level}] ${breadcrumb.category}: ${breadcrumb.message}`
+        )
       })
       console.groupEnd()
     }
@@ -547,17 +580,19 @@ export class ErrorMonitoringService {
       if (stored) {
         const reports = JSON.parse(stored)
         // Add to queue for retry
-        this.errorQueue.push(...reports.map((report: any) => ({
-          ...report,
-          error: {
-            ...report.error,
-            timestamp: new Date(report.error.timestamp),
-          },
-          context: {
-            ...report.context,
-            timestamp: new Date(report.context.timestamp),
-          },
-        })))
+        this.errorQueue.push(
+          ...reports.map((report: any) => ({
+            ...report,
+            error: {
+              ...report.error,
+              timestamp: new Date(report.error.timestamp),
+            },
+            context: {
+              ...report.context,
+              timestamp: new Date(report.context.timestamp),
+            },
+          }))
+        )
 
         // Clear localStorage after loading
         localStorage.removeItem('error_reports')
@@ -579,23 +614,42 @@ export class ErrorMonitoringService {
 // ====================== React Hook ======================
 
 export function useErrorMonitoring(config?: Partial<ErrorMonitoringConfig>) {
-  const [monitoring] = React.useState(() => ErrorMonitoringService.getInstance(config))
+  const [monitoring] = React.useState(() =>
+    ErrorMonitoringService.getInstance(config)
+  )
 
-  const captureError = React.useCallback((error: AppError, context?: Record<string, any>) => {
-    return monitoring.captureError(error, context)
-  }, [monitoring])
+  const captureError = React.useCallback(
+    (error: AppError, context?: Record<string, any>) => {
+      return monitoring.captureError(error, context)
+    },
+    [monitoring]
+  )
 
-  const addBreadcrumb = React.useCallback((level: Breadcrumb['level'], category: string, message: string, data?: Record<string, any>) => {
-    monitoring.addBreadcrumb(level, category, message, data)
-  }, [monitoring])
+  const addBreadcrumb = React.useCallback(
+    (
+      level: Breadcrumb['level'],
+      category: string,
+      message: string,
+      data?: Record<string, any>
+    ) => {
+      monitoring.addBreadcrumb(level, category, message, data)
+    },
+    [monitoring]
+  )
 
-  const setUserContext = React.useCallback((userId: string, userData?: Record<string, any>) => {
-    monitoring.setUserContext(userId, userData)
-  }, [monitoring])
+  const setUserContext = React.useCallback(
+    (userId: string, userData?: Record<string, any>) => {
+      monitoring.setUserContext(userId, userData)
+    },
+    [monitoring]
+  )
 
-  const setCustomContext = React.useCallback((key: string, value: any) => {
-    monitoring.setCustomContext(key, value)
-  }, [monitoring])
+  const setCustomContext = React.useCallback(
+    (key: string, value: any) => {
+      monitoring.setCustomContext(key, value)
+    },
+    [monitoring]
+  )
 
   return {
     captureError,

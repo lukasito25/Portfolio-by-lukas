@@ -9,8 +9,13 @@ import {
   ErrorFactory,
   RetryManager,
   NetworkStatusManager,
-  ErrorCode,
 } from './error-handling'
+import {
+  ErrorCode,
+  ErrorSeverity,
+  getDefaultSeverityForErrorCode,
+  type ErrorCodeType,
+} from './error-constants'
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -96,7 +101,8 @@ class ApiClient {
     }
 
     // Determine caching strategy
-    const enableCaching = !skipCache && (!requestOptions.method || requestOptions.method === 'GET')
+    const enableCaching =
+      !skipCache && (!requestOptions.method || requestOptions.method === 'GET')
 
     // Execute request with retry logic if not disabled
     if (skipRetry || !this.shouldRetry(requestOptions.method)) {
@@ -140,17 +146,17 @@ class ApiClient {
       // Handle network and parsing errors
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
-          throw ErrorFactory.createTimeoutError(
-            'Request timed out',
-            { url, timeout: this.defaultTimeout }
-          )
+          throw ErrorFactory.createTimeoutError('Request timed out', {
+            url,
+            timeout: this.defaultTimeout,
+          })
         }
 
         if (error.message.includes('fetch')) {
-          throw ErrorFactory.createNetworkError(
-            'Network request failed',
-            { url, originalError: error.message }
-          )
+          throw ErrorFactory.createNetworkError('Network request failed', {
+            url,
+            originalError: error.message,
+          })
         }
       }
 
@@ -184,14 +190,14 @@ class ApiClient {
       ErrorCode.VALIDATION_ERROR,
     ]
 
-    return error.retryable && !nonRetryableCodes.includes(error.code)
+    return error.retryable && !nonRetryableCodes.includes(error.code as any)
   }
 
   private createErrorFromApiResponse(response: ApiErrorResponse): AppError {
     const { error } = response
 
     return {
-      code: error.code as ErrorCode,
+      code: error.code as ErrorCodeType,
       message: error.message,
       userMessage: error.message,
       severity: this.getSeverityFromCode(error.code),
@@ -206,25 +212,8 @@ class ApiClient {
   }
 
   private getSeverityFromCode(code: string): any {
-    // Map error codes to severity levels
-    // Using inline enum values to avoid require()
-    const ErrorSeverity = {
-      LOW: 'low',
-      MEDIUM: 'medium',
-      HIGH: 'high',
-      CRITICAL: 'critical'
-    }
-
-    if (code.includes('CRITICAL') || code === 'INTERNAL_SERVER_ERROR') {
-      return ErrorSeverity.CRITICAL
-    }
-    if (code.includes('SERVER') || code.includes('DATABASE')) {
-      return ErrorSeverity.HIGH
-    }
-    if (code.includes('NETWORK') || code.includes('TIMEOUT')) {
-      return ErrorSeverity.MEDIUM
-    }
-    return ErrorSeverity.LOW
+    // Use centralized error severity mapping
+    return getDefaultSeverityForErrorCode(code as any) || ErrorSeverity.LOW
   }
 
   private isRecoverableCode(code: string): boolean {
@@ -243,22 +232,29 @@ class ApiClient {
   }
 
   private isAppError(error: any): error is AppError {
-    return error && typeof error.code === 'string' && typeof error.message === 'string'
+    return (
+      error &&
+      typeof error.code === 'string' &&
+      typeof error.message === 'string'
+    )
   }
 
   // Health check method
   async healthCheck(): Promise<{ status: string; timestamp: string }> {
     try {
-      const response = await this.request<any>('/', { timeout: 5000, retries: 1 })
+      const response = await this.request<any>('/', {
+        timeout: 5000,
+        retries: 1,
+      })
       return {
         status: response.status || 'healthy',
         timestamp: response.timestamp || new Date().toISOString(),
       }
     } catch (error) {
-      throw ErrorFactory.createNetworkError(
-        'Health check failed',
-        { baseUrl: this.baseUrl, error }
-      )
+      throw ErrorFactory.createNetworkError('Health check failed', {
+        baseUrl: this.baseUrl,
+        error,
+      })
     }
   }
 
@@ -267,15 +263,22 @@ class ApiClient {
     try {
       return await this.request<{ projects: any[] }>('/projects', options)
     } catch (error) {
-      throw ErrorFactory.createContentLoadingError('projects', { endpoint: '/projects' })
+      throw ErrorFactory.createContentLoadingError('projects', {
+        endpoint: '/projects',
+      })
     }
   }
 
   async getFeaturedProjects(options?: ApiRequestOptions) {
     try {
-      return await this.request<{ projects: any[] }>('/projects/featured', options)
+      return await this.request<{ projects: any[] }>(
+        '/projects/featured',
+        options
+      )
     } catch (error) {
-      throw ErrorFactory.createContentLoadingError('featured projects', { endpoint: '/projects/featured' })
+      throw ErrorFactory.createContentLoadingError('featured projects', {
+        endpoint: '/projects/featured',
+      })
     }
   }
 
@@ -290,7 +293,10 @@ class ApiClient {
       if (this.isAppError(error) && error.code === ErrorCode.NOT_FOUND) {
         throw ErrorFactory.createNotFoundError('Project', { slug })
       }
-      throw ErrorFactory.createContentLoadingError('project', { slug, endpoint: `/projects/${slug}` })
+      throw ErrorFactory.createContentLoadingError('project', {
+        slug,
+        endpoint: `/projects/${slug}`,
+      })
     }
   }
 
@@ -305,7 +311,9 @@ class ApiClient {
         options
       )
     } catch (error) {
-      throw ErrorFactory.createContentLoadingError('project technologies', { slug })
+      throw ErrorFactory.createContentLoadingError('project technologies', {
+        slug,
+      })
     }
   }
 
@@ -314,7 +322,9 @@ class ApiClient {
     try {
       return await this.request<{ posts: any[] }>('/blog', options)
     } catch (error) {
-      throw ErrorFactory.createContentLoadingError('blog posts', { endpoint: '/blog' })
+      throw ErrorFactory.createContentLoadingError('blog posts', {
+        endpoint: '/blog',
+      })
     }
   }
 
@@ -322,7 +332,9 @@ class ApiClient {
     try {
       return await this.request<{ posts: any[] }>('/blog/featured', options)
     } catch (error) {
-      throw ErrorFactory.createContentLoadingError('featured blog posts', { endpoint: '/blog/featured' })
+      throw ErrorFactory.createContentLoadingError('featured blog posts', {
+        endpoint: '/blog/featured',
+      })
     }
   }
 
@@ -356,16 +368,27 @@ class ApiClient {
   // Technologies API with error handling
   async getTechnologies(options?: ApiRequestOptions) {
     try {
-      return await this.request<{ technologies: any[] }>('/technologies', options)
+      return await this.request<{ technologies: any[] }>(
+        '/technologies',
+        options
+      )
     } catch (error) {
-      throw ErrorFactory.createContentLoadingError('technologies', { endpoint: '/technologies' })
+      throw ErrorFactory.createContentLoadingError('technologies', {
+        endpoint: '/technologies',
+      })
     }
   }
 
   // Auth API with error handling
-  async verifyCredentials(email: string, password: string, options?: ApiRequestOptions) {
+  async verifyCredentials(
+    email: string,
+    password: string,
+    options?: ApiRequestOptions
+  ) {
     if (!email || !password) {
-      throw ErrorFactory.createValidationError('Email and password are required')
+      throw ErrorFactory.createValidationError(
+        'Email and password are required'
+      )
     }
 
     try {
@@ -379,7 +402,9 @@ class ApiClient {
       if (this.isAppError(error)) {
         throw error // Re-throw API errors (unauthorized, etc.)
       }
-      throw ErrorFactory.createFormError('Authentication failed', { email: email.replace(/@.*/, '@***') })
+      throw ErrorFactory.createFormError('Authentication failed', {
+        email: email.replace(/@.*/, '@***'),
+      })
     }
   }
 
@@ -403,7 +428,9 @@ class ApiClient {
     try {
       return await this.request<{ projects: any[] }>('/admin/projects', options)
     } catch (error) {
-      throw ErrorFactory.createContentLoadingError('admin projects', { endpoint: '/admin/projects' })
+      throw ErrorFactory.createContentLoadingError('admin projects', {
+        endpoint: '/admin/projects',
+      })
     }
   }
 
@@ -449,7 +476,9 @@ class ApiClient {
       if (this.isAppError(error)) {
         throw error
       }
-      throw ErrorFactory.createFormError('Failed to update project', { projectId: id })
+      throw ErrorFactory.createFormError('Failed to update project', {
+        projectId: id,
+      })
     }
   }
 
@@ -468,14 +497,18 @@ class ApiClient {
       if (this.isAppError(error)) {
         throw error
       }
-      throw ErrorFactory.createFormError('Failed to delete project', { projectId: id })
+      throw ErrorFactory.createFormError('Failed to delete project', {
+        projectId: id,
+      })
     }
   }
 
   // Recruiter Pages API with error handling
   async getRecruiterPage(slug: string, options?: ApiRequestOptions) {
     if (!slug) {
-      throw ErrorFactory.createValidationError('Recruiter page slug is required')
+      throw ErrorFactory.createValidationError(
+        'Recruiter page slug is required'
+      )
     }
 
     try {
@@ -498,7 +531,9 @@ class ApiClient {
 
   async createRecruiterPage(data: any, options?: ApiRequestOptions) {
     if (!data) {
-      throw ErrorFactory.createValidationError('Recruiter page data is required')
+      throw ErrorFactory.createValidationError(
+        'Recruiter page data is required'
+      )
     }
 
     try {
@@ -515,30 +550,43 @@ class ApiClient {
       if (this.isAppError(error)) {
         throw error
       }
-      throw ErrorFactory.createFormError('Failed to create recruiter page', { data })
+      throw ErrorFactory.createFormError('Failed to create recruiter page', {
+        data,
+      })
     }
   }
 
-  async updateRecruiterPage(id: string, data: any, options?: ApiRequestOptions) {
+  async updateRecruiterPage(
+    id: string,
+    data: any,
+    options?: ApiRequestOptions
+  ) {
     if (!id) {
       throw ErrorFactory.createValidationError('Recruiter page ID is required')
     }
     if (!data) {
-      throw ErrorFactory.createValidationError('Recruiter page data is required')
+      throw ErrorFactory.createValidationError(
+        'Recruiter page data is required'
+      )
     }
 
     try {
-      return await this.request<{ success: boolean }>(`/admin/recruiter/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-        skipRetry: true,
-        ...options,
-      })
+      return await this.request<{ success: boolean }>(
+        `/admin/recruiter/${id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(data),
+          skipRetry: true,
+          ...options,
+        }
+      )
     } catch (error) {
       if (this.isAppError(error)) {
         throw error
       }
-      throw ErrorFactory.createFormError('Failed to update recruiter page', { pageId: id })
+      throw ErrorFactory.createFormError('Failed to update recruiter page', {
+        pageId: id,
+      })
     }
   }
 
@@ -548,16 +596,21 @@ class ApiClient {
     }
 
     try {
-      return await this.request<{ success: boolean }>(`/admin/recruiter/${id}`, {
-        method: 'DELETE',
-        skipRetry: true,
-        ...options,
-      })
+      return await this.request<{ success: boolean }>(
+        `/admin/recruiter/${id}`,
+        {
+          method: 'DELETE',
+          skipRetry: true,
+          ...options,
+        }
+      )
     } catch (error) {
       if (this.isAppError(error)) {
         throw error
       }
-      throw ErrorFactory.createFormError('Failed to delete recruiter page', { pageId: id })
+      throw ErrorFactory.createFormError('Failed to delete recruiter page', {
+        pageId: id,
+      })
     }
   }
 
@@ -573,19 +626,31 @@ class ApiClient {
         options
       )
     } catch (error) {
-      throw ErrorFactory.createContentLoadingError(`content section: ${section}`, { section })
+      throw ErrorFactory.createContentLoadingError(
+        `content section: ${section}`,
+        { section }
+      )
     }
   }
 
   async getAllContent(options?: ApiRequestOptions) {
     try {
-      return await this.request<{ success: boolean; content: any }>('/content', options)
+      return await this.request<{ success: boolean; content: any }>(
+        '/content',
+        options
+      )
     } catch (error) {
-      throw ErrorFactory.createContentLoadingError('content', { endpoint: '/content' })
+      throw ErrorFactory.createContentLoadingError('content', {
+        endpoint: '/content',
+      })
     }
   }
 
-  async updateContentSection(section: string, content: any, options?: ApiRequestOptions) {
+  async updateContentSection(
+    section: string,
+    content: any,
+    options?: ApiRequestOptions
+  ) {
     if (!section) {
       throw ErrorFactory.createValidationError('Content section is required')
     }
@@ -607,7 +672,9 @@ class ApiClient {
       if (this.isAppError(error)) {
         throw error
       }
-      throw ErrorFactory.createFormError('Failed to update content section', { section })
+      throw ErrorFactory.createFormError('Failed to update content section', {
+        section,
+      })
     }
   }
 
@@ -637,21 +704,31 @@ class ApiClient {
       if (this.isAppError(error)) {
         throw error
       }
-      throw ErrorFactory.createFormError('Failed to update content item', { section, key })
+      throw ErrorFactory.createFormError('Failed to update content item', {
+        section,
+        key,
+      })
     }
   }
 
   // Contact submissions API
   async getContactSubmissions(options?: ApiRequestOptions) {
     try {
-      return await this.request<{ submissions: any[] }>('/admin/contact', options)
+      return await this.request<{ submissions: any[] }>(
+        '/admin/contact',
+        options
+      )
     } catch (error) {
       throw ErrorFactory.createContentLoadingError('contact submissions')
     }
   }
 
   // Recruiter analytics API
-  async trackRecruiterPageView(pageId: string, viewData: any, options?: ApiRequestOptions) {
+  async trackRecruiterPageView(
+    pageId: string,
+    viewData: any,
+    options?: ApiRequestOptions
+  ) {
     if (!pageId) {
       throw ErrorFactory.createValidationError('Page ID is required')
     }
@@ -670,11 +747,17 @@ class ApiClient {
       if (this.isAppError(error)) {
         throw error
       }
-      throw ErrorFactory.createFormError('Failed to track page view', { pageId })
+      throw ErrorFactory.createFormError('Failed to track page view', {
+        pageId,
+      })
     }
   }
 
-  async trackRecruiterPageInteraction(pageId: string, interactionData: any, options?: ApiRequestOptions) {
+  async trackRecruiterPageInteraction(
+    pageId: string,
+    interactionData: any,
+    options?: ApiRequestOptions
+  ) {
     if (!pageId) {
       throw ErrorFactory.createValidationError('Page ID is required')
     }
@@ -693,7 +776,9 @@ class ApiClient {
       if (this.isAppError(error)) {
         throw error
       }
-      throw ErrorFactory.createFormError('Failed to track page interaction', { pageId })
+      throw ErrorFactory.createFormError('Failed to track page interaction', {
+        pageId,
+      })
     }
   }
 }

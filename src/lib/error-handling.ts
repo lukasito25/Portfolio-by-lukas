@@ -3,54 +3,23 @@
  * Provides standardized error types, handling, and user-friendly messages
  */
 
+import {
+  ErrorCode,
+  ErrorSeverity,
+  type ErrorCodeType,
+  type ErrorSeverityType,
+} from './error-constants'
+
+// Re-export constants for backward compatibility
+export { ErrorCode, ErrorSeverity, type ErrorCodeType, type ErrorSeverityType }
+
 // ====================== Error Types ======================
 
-export enum ErrorCode {
-  // Network errors
-  NETWORK_ERROR = 'NETWORK_ERROR',
-  TIMEOUT_ERROR = 'TIMEOUT_ERROR',
-  CONNECTION_ERROR = 'CONNECTION_ERROR',
-  OFFLINE_ERROR = 'OFFLINE_ERROR',
-
-  // API errors
-  UNAUTHORIZED = 'UNAUTHORIZED',
-  FORBIDDEN = 'FORBIDDEN',
-  NOT_FOUND = 'NOT_FOUND',
-  VALIDATION_ERROR = 'VALIDATION_ERROR',
-  SERVER_ERROR = 'SERVER_ERROR',
-  RATE_LIMITED = 'RATE_LIMITED',
-
-  // Database errors
-  DATABASE_ERROR = 'DATABASE_ERROR',
-  DATABASE_CONNECTION_ERROR = 'DATABASE_CONNECTION_ERROR',
-  DATABASE_TIMEOUT = 'DATABASE_TIMEOUT',
-
-  // Form errors
-  FORM_VALIDATION_ERROR = 'FORM_VALIDATION_ERROR',
-  FORM_SUBMISSION_ERROR = 'FORM_SUBMISSION_ERROR',
-
-  // Content errors
-  CONTENT_LOADING_ERROR = 'CONTENT_LOADING_ERROR',
-  CONTENT_NOT_FOUND = 'CONTENT_NOT_FOUND',
-  PARTIAL_CONTENT_ERROR = 'PARTIAL_CONTENT_ERROR',
-
-  // Generic errors
-  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
-  CONFIGURATION_ERROR = 'CONFIGURATION_ERROR',
-}
-
-export enum ErrorSeverity {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
-}
-
 export interface AppError {
-  code: ErrorCode
+  code: ErrorCodeType
   message: string
   userMessage: string
-  severity: ErrorSeverity
+  severity: ErrorSeverityType
   timestamp: Date
   context?: Record<string, any>
   stack?: string
@@ -76,7 +45,8 @@ export class ErrorFactory {
     return {
       code: ErrorCode.NETWORK_ERROR,
       message,
-      userMessage: 'Unable to connect to the server. Please check your internet connection.',
+      userMessage:
+        'Unable to connect to the server. Please check your internet connection.',
       severity: ErrorSeverity.MEDIUM,
       timestamp: new Date(),
       context,
@@ -105,7 +75,8 @@ export class ErrorFactory {
     return {
       code: ErrorCode.OFFLINE_ERROR,
       message: 'Device is offline',
-      userMessage: 'You appear to be offline. Please check your internet connection and try again.',
+      userMessage:
+        'You appear to be offline. Please check your internet connection and try again.',
       severity: ErrorSeverity.HIGH,
       timestamp: new Date(),
       recoverable: true,
@@ -216,7 +187,8 @@ export class ErrorFactory {
     return {
       code: ErrorCode.FORM_SUBMISSION_ERROR,
       message,
-      userMessage: 'Failed to submit the form. Please check your input and try again.',
+      userMessage:
+        'Failed to submit the form. Please check your input and try again.',
       severity: ErrorSeverity.MEDIUM,
       timestamp: new Date(),
       context,
@@ -225,16 +197,20 @@ export class ErrorFactory {
     }
   }
 
-  static fromHttpResponse(response: Response, context?: Record<string, any>): AppError {
+  static fromHttpResponse(
+    response: Response,
+    context?: Record<string, any>
+  ): AppError {
     const status = response.status
     const statusText = response.statusText
 
     switch (status) {
       case 400:
-        return this.createValidationError(
-          `HTTP ${status}: ${statusText}`,
-          { ...context, status, statusText }
-        )
+        return this.createValidationError(`HTTP ${status}: ${statusText}`, {
+          ...context,
+          status,
+          statusText,
+        })
       case 401:
         return this.createUnauthorizedError()
       case 403:
@@ -250,7 +226,11 @@ export class ErrorFactory {
           statusCode: status,
         }
       case 404:
-        return this.createNotFoundError('Resource', { ...context, status, statusText })
+        return this.createNotFoundError('Resource', {
+          ...context,
+          status,
+          statusText,
+        })
       case 429:
         return {
           code: ErrorCode.RATE_LIMITED,
@@ -267,10 +247,11 @@ export class ErrorFactory {
       case 502:
       case 503:
       case 504:
-        return this.createServerError(
-          `HTTP ${status}: ${statusText}`,
-          { ...context, status, statusText }
-        )
+        return this.createServerError(`HTTP ${status}: ${statusText}`, {
+          ...context,
+          status,
+          statusText,
+        })
       default:
         return {
           code: ErrorCode.UNKNOWN_ERROR,
@@ -288,11 +269,17 @@ export class ErrorFactory {
 
   static fromError(error: Error, context?: Record<string, any>): AppError {
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      return this.createNetworkError(error.message, { ...context, originalError: error })
+      return this.createNetworkError(error.message, {
+        ...context,
+        originalError: error,
+      })
     }
 
     if (error.name === 'AbortError' || error.message.includes('timeout')) {
-      return this.createTimeoutError(error.message, { ...context, originalError: error })
+      return this.createTimeoutError(error.message, {
+        ...context,
+        originalError: error,
+      })
     }
 
     return {
@@ -387,12 +374,18 @@ export class ErrorHandler {
 
     // In production, you would send this to your error monitoring service
     // Example: Sentry, LogRocket, Bugsnag, etc.
-    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+    if (
+      typeof window !== 'undefined' &&
+      process.env.NODE_ENV === 'production'
+    ) {
       // window.errorMonitoringService?.captureError(logData)
     }
   }
 
-  private handleRecovery(error: AppError, recovery: ErrorRecoveryOptions): void {
+  private handleRecovery(
+    error: AppError,
+    recovery: ErrorRecoveryOptions
+  ): void {
     if (recovery.fallback) {
       try {
         recovery.fallback()
@@ -436,9 +429,10 @@ export class RetryManager {
       try {
         return await operation()
       } catch (error) {
-        const appError = error instanceof Error
-          ? ErrorFactory.fromError(error, { attempt })
-          : error as AppError
+        const appError =
+          error instanceof Error
+            ? ErrorFactory.fromError(error, { attempt })
+            : (error as AppError)
 
         lastError = appError
 
@@ -453,7 +447,9 @@ export class RetryManager {
           maxDelay
         )
 
-        console.info(`Retrying operation (attempt ${attempt + 1}/${maxAttempts}) after ${delay}ms`)
+        console.info(
+          `Retrying operation (attempt ${attempt + 1}/${maxAttempts}) after ${delay}ms`
+        )
         await this.delay(delay)
       }
     }
@@ -533,7 +529,7 @@ export function isRetryableError(error: AppError): boolean {
   return error.retryable
 }
 
-export function getErrorSeverityColor(severity: ErrorSeverity): string {
+export function getErrorSeverityColor(severity: ErrorSeverityType): string {
   switch (severity) {
     case ErrorSeverity.LOW:
       return 'text-yellow-600 bg-yellow-50'
