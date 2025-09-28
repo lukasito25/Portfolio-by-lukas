@@ -1196,7 +1196,14 @@ export default function ContentEditor() {
                             const currentProjects =
                               content?.work?.projects || []
                             const newProjects = [...currentProjects]
-                            if (!newProjects[index]) newProjects[index] = {}
+                            if (!newProjects[index]) {
+                              newProjects[index] = {
+                                title: '',
+                                description: '',
+                                technologies: [],
+                                metrics: [],
+                              }
+                            }
                             if (!newProjects[index].technologies)
                               newProjects[index].technologies = []
                             newProjects[index].technologies.push(
@@ -1276,7 +1283,14 @@ export default function ContentEditor() {
                             const currentProjects =
                               content?.work?.projects || []
                             const newProjects = [...currentProjects]
-                            if (!newProjects[index]) newProjects[index] = {}
+                            if (!newProjects[index]) {
+                              newProjects[index] = {
+                                title: '',
+                                description: '',
+                                technologies: [],
+                                metrics: [],
+                              }
+                            }
                             if (!newProjects[index].metrics)
                               newProjects[index].metrics = []
                             newProjects[index].metrics.push({
