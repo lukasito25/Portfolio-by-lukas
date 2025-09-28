@@ -65,10 +65,11 @@ class ApiClient {
     }
 
     // Use admin proxy for admin routes when running in browser
+    const method = options.method || 'GET'
     const isAdminRoute =
       endpoint.startsWith('/admin') ||
-      (endpoint === '/content' && options.method !== 'GET') ||
-      (endpoint.startsWith('/content/') && options.method !== 'GET')
+      (endpoint === '/content' && method !== 'GET') ||
+      (endpoint.startsWith('/content/') && method !== 'GET')
 
     const isBrowser = typeof window !== 'undefined'
 
