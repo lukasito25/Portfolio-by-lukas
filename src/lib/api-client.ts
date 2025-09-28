@@ -3,7 +3,7 @@
  * Handles all external API calls with comprehensive error handling and retry logic
  */
 
-import { deduplicatedFetch } from './request-deduplication'
+import { deduplicatedFetch, requestDeduplicator } from './request-deduplication'
 import {
   AppError,
   ErrorFactory,
@@ -659,15 +659,25 @@ class ApiClient {
     }
 
     try {
-      return await this.request<{ success: boolean; itemsUpdated: number }>(
-        `/content/${section}`,
-        {
-          method: 'POST',
-          body: JSON.stringify({ content }),
-          skipRetry: true,
-          ...options,
-        }
-      )
+      const result = await this.request<{
+        success: boolean
+        itemsUpdated: number
+      }>(`/content/${section}`, {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+        skipRetry: true,
+        ...options,
+      })
+
+      // Clear cache for content endpoints after successful update
+      if (result.success) {
+        requestDeduplicator.clearCache('/content')
+        console.log(
+          `Cache cleared for content updates after updating section: ${section}`
+        )
+      }
+
+      return result
     } catch (error) {
       if (this.isAppError(error)) {
         throw error
@@ -691,7 +701,7 @@ class ApiClient {
 
     try {
       const keyParam = key.replace(/\./g, '_') // Convert dots to underscores for URL
-      return await this.request<{ success: boolean; id: string }>(
+      const result = await this.request<{ success: boolean; id: string }>(
         `/content/${section}/${keyParam}`,
         {
           method: 'PUT',
@@ -700,6 +710,16 @@ class ApiClient {
           ...options,
         }
       )
+
+      // Clear cache for content endpoints after successful update
+      if (result.success) {
+        requestDeduplicator.clearCache('/content')
+        console.log(
+          `Cache cleared for content updates after updating item: ${section}.${key}`
+        )
+      }
+
+      return result
     } catch (error) {
       if (this.isAppError(error)) {
         throw error
