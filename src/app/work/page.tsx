@@ -93,10 +93,10 @@ export default function WorkPage() {
         {/* Hero Section */}
         <section className="text-center mb-16">
           <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-            {content.hero.title}
+            {content.hero?.title || ''}
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto mb-8">
-            {content.hero.description}
+            {content.hero?.description || ''}
           </p>
           <div className="flex flex-wrap justify-center gap-2">
             <Badge variant="secondary">Digital Sports</Badge>
@@ -116,10 +116,10 @@ export default function WorkPage() {
                   Featured Case Study
                 </Badge>
                 <h2 className="text-3xl lg:text-4xl font-bold mb-6">
-                  {content.featured.title}
+                  {content.featured?.title || ''}
                 </h2>
                 <p className="text-lg text-slate-600 dark:text-slate-300 mb-6">
-                  {content.featured.challenge}
+                  {content.featured?.challenge || ''}
                 </p>
                 <div className="flex flex-wrap gap-4 mb-8">
                   <div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ export default function WorkPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
-                      {content.featured.challenge}
+                      {content.featured?.challenge || ''}
                     </p>
                   </CardContent>
                 </Card>
@@ -161,7 +161,7 @@ export default function WorkPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
-                      {content.featured.solution}
+                      {content.featured?.solution || ''}
                     </p>
                   </CardContent>
                 </Card>
@@ -173,7 +173,7 @@ export default function WorkPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
-                      {content.featured.impact}
+                      {content.featured?.impact || ''}
                     </p>
                   </CardContent>
                 </Card>
@@ -193,7 +193,7 @@ export default function WorkPage() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8 mb-16">
-            {content.projects.map((project, index) => {
+            {(content.projects || []).map((project, index) => {
               const Icon = personalProjectIcons[index % personalProjectIcons.length]
 
               return (
@@ -205,35 +205,35 @@ export default function WorkPage() {
                         <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Icon className="h-8 w-8 text-white" />
                         </div>
-                        <h3 className="text-lg font-bold">{project.title}</h3>
+                        <h3 className="text-lg font-bold">{project?.title || ''}</h3>
                         <p className="text-sm opacity-90">{project.description}</p>
                       </div>
                     </div>
                   </div>
                   <CardHeader>
-                    <CardTitle className="text-xl">{project.title}</CardTitle>
+                    <CardTitle className="text-xl">{project?.title || ''}</CardTitle>
                     <CardDescription>
-                      {project.description}
+                      {project?.description || ''}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-slate-600 dark:text-slate-400 mb-4">
-                      {project.description}
+                      {project?.description || ''}
                     </p>
                     <div className="grid grid-cols-2 gap-4 mb-4">
-                      {project.metrics.slice(0, 2).map((metric, metricIndex) => (
+                      {(project.metrics || []).slice(0, 2).map((metric, metricIndex) => (
                         <div key={metricIndex} className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
                           <div className="font-semibold text-lg text-blue-600 dark:text-blue-400">
-                            {metric.value}
+                            {metric?.value || ''}
                           </div>
                           <div className="text-xs text-slate-600 dark:text-slate-400">
-                            {metric.label}
+                            {metric?.label || ''}
                           </div>
                         </div>
                       ))}
                     </div>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {project.technologies.map((tech, techIndex) => (
+                      {(project.technologies || []).map((tech, techIndex) => (
                         <Badge key={techIndex} variant="outline">{tech}</Badge>
                       ))}
                     </div>
@@ -256,7 +256,7 @@ export default function WorkPage() {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">
-            {content.projects.slice(0, 4).map((project, index) => {
+            {(content.projects || []).slice(0, 4).map((project, index) => {
               const Icon = professionalProjectIcons[index % professionalProjectIcons.length]
 
               return (
@@ -269,24 +269,24 @@ export default function WorkPage() {
                       <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
                     </div>
                     <CardTitle className="text-xl">
-                      {project.title}
+                      {project?.title || ''}
                     </CardTitle>
                     <CardDescription className="text-base">
-                      {project.description}
+                      {project?.description || ''}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-slate-600 dark:text-slate-400 mb-6">
-                      {project.description}
+                      {project?.description || ''}
                     </p>
                     <div className="grid grid-cols-2 gap-4 mb-6">
-                      {project.metrics.slice(0, 2).map((metric, metricIndex) => (
+                      {(project.metrics || []).slice(0, 2).map((metric, metricIndex) => (
                         <div key={metricIndex} className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
                           <div className={`font-semibold text-lg ${professionalProjectIconColors[index % professionalProjectIconColors.length]}`}>
-                            {metric.value}
+                            {metric?.value || ''}
                           </div>
                           <div className="text-sm text-slate-600 dark:text-slate-400">
-                            {metric.label}
+                            {metric?.label || ''}
                           </div>
                         </div>
                       ))}

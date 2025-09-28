@@ -75,17 +75,17 @@ export default function Home() {
           <div className="mb-8 cosmic-float">
             <span className="inline-flex items-center px-6 py-3 bg-white/70 backdrop-blur-sm border border-purple-200 text-purple-800 text-sm font-medium rounded-full shadow-lg">
               <Sparkles className="w-4 h-4 mr-2" />
-              {content.hero.badge}
+              {content.hero?.badge || ''}
             </span>
           </div>
 
           {/* Main Headline */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-8 leading-[1.1] tracking-tight">
-            {content.hero.headline.map((line, index) => (
+            {(content.hero.headline || []).map((line, index) => (
               <span key={index} className="block mb-2">
                 <span
                   className={
-                    index < content.hero.headline.length - 1
+                    index < (content.hero.headline || []).length - 1
                       ? 'gradient-text cosmic-glow'
                       : 'text-gray-900 dark:text-gray-100'
                   }
@@ -98,7 +98,7 @@ export default function Home() {
 
           {/* Subheadline */}
           <p className="text-xl md:text-2xl text-gray-700 mb-12 max-w-4xl mx-auto leading-relaxed">
-            {content.hero.subheadline
+            {(content.hero?.subheadline || '')
               .replace(/13 personnel/g, '')
               .replace(/165M\+ users/g, '')}
             <span className="font-bold text-purple-600 cosmic-pulse">
@@ -138,7 +138,7 @@ export default function Home() {
 
           {/* Impact Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            {content.hero.metrics.map((metric, index) => {
+            {(content.hero.metrics || []).map((metric, index) => {
               const icons = [
                 <Rocket key={`rocket-${index}`} className="w-6 h-6" />,
                 <Users key={`users-${index}`} className="w-6 h-6" />,
@@ -161,9 +161,9 @@ export default function Home() {
                     {icons[index]}
                   </div>
                   <div className="text-3xl font-bold text-gray-900 mb-2">
-                    {metric.value}
+                    {metric?.value || ''}
                   </div>
-                  <div className="text-sm text-gray-600">{metric.label}</div>
+                  <div className="text-sm text-gray-600">{metric?.label || ''}</div>
                 </div>
               )
             })}
@@ -191,7 +191,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {content.competencies.map((competency, index) => {
+            {(content.competencies || []).map((competency, index) => {
               const icons = [
                 <Users key={`users-comp-${index}`} className="w-8 h-8" />,
                 <BarChart3 key={`chart-${index}`} className="w-8 h-8" />,
@@ -220,11 +220,11 @@ export default function Home() {
                       {icons[index]}
                     </div>
                     <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
-                      {competency.title}
+                      {competency?.title || ''}
                     </CardTitle>
                   </CardHeader>
                   <CardDescription className="text-gray-600 leading-relaxed px-6 pb-6">
-                    {competency.description}
+                    {competency?.description || ''}
                   </CardDescription>
                 </Card>
               )
@@ -238,10 +238,10 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            {content.cta.title}
+            {content.cta?.title || ''}
           </h2>
           <p className="text-xl text-white/90 mb-10 leading-relaxed">
-            {content.cta.description}
+            {content.cta?.description || ''}
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Button

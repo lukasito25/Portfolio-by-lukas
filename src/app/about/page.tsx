@@ -54,11 +54,11 @@ export default function AboutPage() {
           <div className="flex flex-col lg:flex-row gap-12 items-start">
             <div className="lg:w-2/3">
               <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-                {content.hero.title}
+                {content.hero?.title || ''}
               </h1>
               <div className="prose prose-lg dark:prose-invert mb-8">
                 <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {content.hero.description}
+                  {content.hero?.description || ''}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 mb-6">
@@ -78,12 +78,12 @@ export default function AboutPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {content.hero.quickStats.map((stat, index) => (
+                  {(content.hero?.quickStats || []).map((stat, index) => (
                     <div key={index} className="flex justify-between">
                       <span className="text-sm text-slate-600 dark:text-slate-400">
-                        {stat.label}
+                        {stat?.label || ''}
                       </span>
-                      <span className="font-semibold">{stat.value}</span>
+                      <span className="font-semibold">{stat?.value || ''}</span>
                     </div>
                   ))}
                 </CardContent>
@@ -95,13 +95,13 @@ export default function AboutPage() {
         {/* Leadership Philosophy */}
         <section className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">{content.philosophy.title}</h2>
+            <h2 className="text-3xl font-bold mb-4">{content.philosophy?.title || ''}</h2>
             <p className="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
-              {content.philosophy.description}
+              {content.philosophy?.description || ''}
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
-            {content.philosophy.cards.map((card, index) => {
+            {(content.philosophy?.cards || []).map((card, index) => {
               const iconConfig = [
                 { icon: Users, bgColor: "bg-blue-100 dark:bg-blue-900", textColor: "text-blue-600 dark:text-blue-400" },
                 { icon: Brain, bgColor: "bg-green-100 dark:bg-green-900", textColor: "text-green-600 dark:text-green-400" },
@@ -116,11 +116,11 @@ export default function AboutPage() {
                     <div className={`w-12 h-12 ${config.bgColor} rounded-lg flex items-center justify-center mb-4`}>
                       <IconComponent className={`h-6 w-6 ${config.textColor}`} />
                     </div>
-                    <CardTitle>{card.title}</CardTitle>
+                    <CardTitle>{card?.title || ''}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-slate-600 dark:text-slate-400">
-                      {card.description}
+                      {card?.description || ''}
                     </p>
                   </CardContent>
                 </Card>
@@ -132,10 +132,10 @@ export default function AboutPage() {
         {/* Professional Journey */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-12 text-center">
-            {content.journey.title}
+            {content.journey?.title || ''}
           </h2>
           <div className="space-y-8">
-            {content.journey.positions.map((position, index) => {
+            {(content.journey?.positions || []).map((position, index) => {
               const iconConfig = [
                 { icon: Briefcase, bgColor: "bg-blue-100 dark:bg-blue-900", textColor: "text-blue-600 dark:text-blue-400" },
                 { icon: TrendingUp, bgColor: "bg-green-100 dark:bg-green-900", textColor: "text-green-600 dark:text-green-400" },
@@ -153,21 +153,21 @@ export default function AboutPage() {
                       </div>
                       <div className="flex-1">
                         <CardTitle className="text-xl">
-                          {position.title}
+                          {position?.title || ''}
                         </CardTitle>
                         <CardDescription className="text-base">
-                          {position.company} • {position.period} • {position.location}
+                          {position?.company || ''} • {position?.period || ''} • {position?.location || ''}
                         </CardDescription>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <p className="mb-4 text-slate-600 dark:text-slate-400">
-                      {position.description}
+                      {position?.description || ''}
                     </p>
                     {position.metrics && position.metrics.length > 0 && (
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {position.metrics.map((metric, metricIndex) => {
+                        {(position.metrics || []).map((metric, metricIndex) => {
                           const colors = [
                             "text-blue-600 dark:text-blue-400",
                             "text-green-600 dark:text-green-400",
@@ -177,10 +177,10 @@ export default function AboutPage() {
                           return (
                             <div key={metricIndex} className="text-center">
                               <div className={`font-semibold text-lg ${colors[metricIndex % colors.length]}`}>
-                                {metric.value}
+                                {metric?.value || ''}
                               </div>
                               <div className="text-sm text-slate-600 dark:text-slate-400">
-                                {metric.label}
+                                {metric?.label || ''}
                               </div>
                             </div>
                           )

@@ -1,25 +1,64 @@
 /**
- * API Client for Cloudflare D1 Worker
- * Handles all external API calls to the Cloudflare Worker
+ * Enhanced API Client for Cloudflare D1 Worker
+ * Handles all external API calls with comprehensive error handling and retry logic
  */
 
 import { deduplicatedFetch } from './request-deduplication'
+import {
+  AppError,
+  ErrorFactory,
+  RetryManager,
+  NetworkStatusManager,
+  ErrorCode,
+} from './error-handling'
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   'https://portfolio-api.hosala-lukas.workers.dev'
 
+export interface ApiRequestOptions extends RequestInit {
+  timeout?: number
+  retries?: number
+  skipRetry?: boolean
+  skipCache?: boolean
+}
+
+export interface ApiResponse<T> {
+  data: T
+  success: boolean
+  timestamp: string
+  requestId?: string
+}
+
+export interface ApiErrorResponse {
+  error: {
+    code: string
+    message: string
+    details?: Record<string, any>
+    timestamp: string
+    requestId?: string
+  }
+}
+
 class ApiClient {
   private baseUrl: string
+  private defaultTimeout: number = 30000 // 30 seconds
+  private networkManager: NetworkStatusManager
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl
+    this.networkManager = NetworkStatusManager.getInstance()
   }
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: ApiRequestOptions = {}
   ): Promise<T> {
+    // Check network status first
+    if (!this.networkManager.getIsOnline()) {
+      throw ErrorFactory.createOfflineError()
+    }
+
     // Use admin proxy for admin routes when running in browser
     const isAdminRoute =
       endpoint.startsWith('/admin') ||
@@ -37,232 +76,619 @@ class ApiClient {
       url = `${this.baseUrl}${endpoint}`
     }
 
+    const {
+      timeout = this.defaultTimeout,
+      retries = 3,
+      skipRetry = false,
+      skipCache = false,
+      ...requestOptions
+    } = options
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...(options.headers as Record<string, string>),
+      ...(requestOptions.headers as Record<string, string>),
     }
 
-    const requestOptions: RequestInit = {
-      ...options,
+    const finalOptions: RequestInit = {
+      ...requestOptions,
       headers,
+      signal: this.createTimeoutSignal(timeout),
     }
 
-    // Use deduplication for all requests to prevent infinite loops
-    // Enable caching for GET requests, disable for mutations
-    const enableCaching = !options.method || options.method === 'GET'
+    // Determine caching strategy
+    const enableCaching = !skipCache && (!requestOptions.method || requestOptions.method === 'GET')
 
-    return deduplicatedFetch<T>(url, requestOptions, enableCaching)
-  }
+    // Execute request with retry logic if not disabled
+    if (skipRetry || !this.shouldRetry(requestOptions.method)) {
+      return this.executeRequest<T>(url, finalOptions, enableCaching)
+    }
 
-  // Projects API
-  async getProjects() {
-    return this.request<{ projects: any[] }>('/projects')
-  }
-
-  async getFeaturedProjects() {
-    return this.request<{ projects: any[] }>('/projects/featured')
-  }
-
-  async getProject(slug: string) {
-    return this.request<{ project: any }>(`/projects/${slug}`)
-  }
-
-  async getProjectTechnologies(slug: string) {
-    return this.request<{ technologies: any[] }>(
-      `/projects/${slug}/technologies`
+    return RetryManager.withRetry(
+      () => this.executeRequest<T>(url, finalOptions, enableCaching),
+      {
+        maxAttempts: retries,
+        baseDelay: 1000,
+        maxDelay: 10000,
+        backoffFactor: 2,
+        shouldRetry: (error: AppError) => this.shouldRetryError(error),
+      }
     )
   }
 
-  // Blog API
-  async getBlogPosts() {
-    return this.request<{ posts: any[] }>('/blog')
+  private async executeRequest<T>(
+    url: string,
+    options: RequestInit,
+    enableCaching: boolean
+  ): Promise<T> {
+    try {
+      const response = await deduplicatedFetch<any>(url, options, enableCaching)
+
+      // Handle different response structures
+      if (response.error) {
+        // API returned an error response
+        throw this.createErrorFromApiResponse(response as ApiErrorResponse)
+      }
+
+      // Return the data based on response structure
+      if (response.data !== undefined) {
+        return response.data
+      }
+
+      // Legacy responses or direct data
+      return response
+    } catch (error) {
+      // Handle network and parsing errors
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw ErrorFactory.createTimeoutError(
+            'Request timed out',
+            { url, timeout: this.defaultTimeout }
+          )
+        }
+
+        if (error.message.includes('fetch')) {
+          throw ErrorFactory.createNetworkError(
+            'Network request failed',
+            { url, originalError: error.message }
+          )
+        }
+      }
+
+      // Re-throw AppError instances
+      if (this.isAppError(error)) {
+        throw error
+      }
+
+      // Convert unknown errors
+      throw ErrorFactory.fromError(error as Error, { url })
+    }
   }
 
-  async getFeaturedBlogPosts() {
-    return this.request<{ posts: any[] }>('/blog/featured')
+  private createTimeoutSignal(timeout: number): AbortSignal {
+    const controller = new AbortController()
+    setTimeout(() => controller.abort(), timeout)
+    return controller.signal
   }
 
-  async getBlogPost(slug: string) {
-    return this.request<{ post: any }>(`/blog/${slug}`)
+  private shouldRetry(method?: string): boolean {
+    // Only retry safe methods
+    return !method || ['GET', 'HEAD', 'OPTIONS'].includes(method.toUpperCase())
   }
 
-  async getBlogPostTags(slug: string) {
-    return this.request<{ tags: any[] }>(`/blog/${slug}/tags`)
+  private shouldRetryError(error: AppError): boolean {
+    // Don't retry certain error types
+    const nonRetryableCodes = [
+      ErrorCode.UNAUTHORIZED,
+      ErrorCode.FORBIDDEN,
+      ErrorCode.NOT_FOUND,
+      ErrorCode.VALIDATION_ERROR,
+    ]
+
+    return error.retryable && !nonRetryableCodes.includes(error.code)
   }
 
-  // Technologies API
-  async getTechnologies() {
-    return this.request<{ technologies: any[] }>('/technologies')
+  private createErrorFromApiResponse(response: ApiErrorResponse): AppError {
+    const { error } = response
+
+    return {
+      code: error.code as ErrorCode,
+      message: error.message,
+      userMessage: error.message,
+      severity: this.getSeverityFromCode(error.code),
+      timestamp: new Date(error.timestamp),
+      context: {
+        details: error.details,
+        requestId: error.requestId,
+      },
+      recoverable: this.isRecoverableCode(error.code),
+      retryable: this.isRetryableCode(error.code),
+    }
   }
 
-  // Auth API
-  async verifyCredentials(email: string, password: string) {
-    return this.request<{ user: any }>('/auth/verify', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    })
+  private getSeverityFromCode(code: string): any {
+    // Map error codes to severity levels
+    const { ErrorSeverity } = require('./error-handling')
+
+    if (code.includes('CRITICAL') || code === 'INTERNAL_SERVER_ERROR') {
+      return ErrorSeverity.CRITICAL
+    }
+    if (code.includes('SERVER') || code.includes('DATABASE')) {
+      return ErrorSeverity.HIGH
+    }
+    if (code.includes('NETWORK') || code.includes('TIMEOUT')) {
+      return ErrorSeverity.MEDIUM
+    }
+    return ErrorSeverity.LOW
   }
 
-  async getUser(id: string) {
-    return this.request<{ user: any }>(`/auth/user/${id}`)
+  private isRecoverableCode(code: string): boolean {
+    const nonRecoverableCodes = ['NOT_FOUND', 'FORBIDDEN']
+    return !nonRecoverableCodes.some(nc => code.includes(nc))
   }
 
-  // Admin API
-  async getAdminProjects() {
-    return this.request<{ projects: any[] }>('/admin/projects')
+  private isRetryableCode(code: string): boolean {
+    const nonRetryableCodes = [
+      'UNAUTHORIZED',
+      'FORBIDDEN',
+      'NOT_FOUND',
+      'VALIDATION_ERROR',
+    ]
+    return !nonRetryableCodes.some(nc => code.includes(nc))
   }
 
-  async createProject(data: any) {
-    return this.request<{ success: boolean; projectId: string }>(
-      '/admin/projects',
-      {
+  private isAppError(error: any): error is AppError {
+    return error && typeof error.code === 'string' && typeof error.message === 'string'
+  }
+
+  // Health check method
+  async healthCheck(): Promise<{ status: string; timestamp: string }> {
+    try {
+      const response = await this.request<any>('/', { timeout: 5000, retries: 1 })
+      return {
+        status: response.status || 'healthy',
+        timestamp: response.timestamp || new Date().toISOString(),
+      }
+    } catch (error) {
+      throw ErrorFactory.createNetworkError(
+        'Health check failed',
+        { baseUrl: this.baseUrl, error }
+      )
+    }
+  }
+
+  // Projects API with error handling
+  async getProjects(options?: ApiRequestOptions) {
+    try {
+      return await this.request<{ projects: any[] }>('/projects', options)
+    } catch (error) {
+      throw ErrorFactory.createContentLoadingError('projects', { endpoint: '/projects' })
+    }
+  }
+
+  async getFeaturedProjects(options?: ApiRequestOptions) {
+    try {
+      return await this.request<{ projects: any[] }>('/projects/featured', options)
+    } catch (error) {
+      throw ErrorFactory.createContentLoadingError('featured projects', { endpoint: '/projects/featured' })
+    }
+  }
+
+  async getProject(slug: string, options?: ApiRequestOptions) {
+    if (!slug) {
+      throw ErrorFactory.createValidationError('Project slug is required')
+    }
+
+    try {
+      return await this.request<{ project: any }>(`/projects/${slug}`, options)
+    } catch (error) {
+      if (this.isAppError(error) && error.code === ErrorCode.NOT_FOUND) {
+        throw ErrorFactory.createNotFoundError('Project', { slug })
+      }
+      throw ErrorFactory.createContentLoadingError('project', { slug, endpoint: `/projects/${slug}` })
+    }
+  }
+
+  async getProjectTechnologies(slug: string, options?: ApiRequestOptions) {
+    if (!slug) {
+      throw ErrorFactory.createValidationError('Project slug is required')
+    }
+
+    try {
+      return await this.request<{ technologies: any[] }>(
+        `/projects/${slug}/technologies`,
+        options
+      )
+    } catch (error) {
+      throw ErrorFactory.createContentLoadingError('project technologies', { slug })
+    }
+  }
+
+  // Blog API with error handling
+  async getBlogPosts(options?: ApiRequestOptions) {
+    try {
+      return await this.request<{ posts: any[] }>('/blog', options)
+    } catch (error) {
+      throw ErrorFactory.createContentLoadingError('blog posts', { endpoint: '/blog' })
+    }
+  }
+
+  async getFeaturedBlogPosts(options?: ApiRequestOptions) {
+    try {
+      return await this.request<{ posts: any[] }>('/blog/featured', options)
+    } catch (error) {
+      throw ErrorFactory.createContentLoadingError('featured blog posts', { endpoint: '/blog/featured' })
+    }
+  }
+
+  async getBlogPost(slug: string, options?: ApiRequestOptions) {
+    if (!slug) {
+      throw ErrorFactory.createValidationError('Blog post slug is required')
+    }
+
+    try {
+      return await this.request<{ post: any }>(`/blog/${slug}`, options)
+    } catch (error) {
+      if (this.isAppError(error) && error.code === ErrorCode.NOT_FOUND) {
+        throw ErrorFactory.createNotFoundError('Blog post', { slug })
+      }
+      throw ErrorFactory.createContentLoadingError('blog post', { slug })
+    }
+  }
+
+  async getBlogPostTags(slug: string, options?: ApiRequestOptions) {
+    if (!slug) {
+      throw ErrorFactory.createValidationError('Blog post slug is required')
+    }
+
+    try {
+      return await this.request<{ tags: any[] }>(`/blog/${slug}/tags`, options)
+    } catch (error) {
+      throw ErrorFactory.createContentLoadingError('blog post tags', { slug })
+    }
+  }
+
+  // Technologies API with error handling
+  async getTechnologies(options?: ApiRequestOptions) {
+    try {
+      return await this.request<{ technologies: any[] }>('/technologies', options)
+    } catch (error) {
+      throw ErrorFactory.createContentLoadingError('technologies', { endpoint: '/technologies' })
+    }
+  }
+
+  // Auth API with error handling
+  async verifyCredentials(email: string, password: string, options?: ApiRequestOptions) {
+    if (!email || !password) {
+      throw ErrorFactory.createValidationError('Email and password are required')
+    }
+
+    try {
+      return await this.request<{ user: any }>('/auth/verify', {
         method: 'POST',
+        body: JSON.stringify({ email, password }),
+        skipRetry: true, // Don't retry auth requests
+        ...options,
+      })
+    } catch (error) {
+      if (this.isAppError(error)) {
+        throw error // Re-throw API errors (unauthorized, etc.)
+      }
+      throw ErrorFactory.createFormError('Authentication failed', { email: email.replace(/@.*/, '@***') })
+    }
+  }
+
+  async getUser(id: string, options?: ApiRequestOptions) {
+    if (!id) {
+      throw ErrorFactory.createValidationError('User ID is required')
+    }
+
+    try {
+      return await this.request<{ user: any }>(`/auth/user/${id}`, options)
+    } catch (error) {
+      if (this.isAppError(error) && error.code === ErrorCode.NOT_FOUND) {
+        throw ErrorFactory.createNotFoundError('User', { userId: id })
+      }
+      throw ErrorFactory.createContentLoadingError('user', { userId: id })
+    }
+  }
+
+  // Admin API with error handling
+  async getAdminProjects(options?: ApiRequestOptions) {
+    try {
+      return await this.request<{ projects: any[] }>('/admin/projects', options)
+    } catch (error) {
+      throw ErrorFactory.createContentLoadingError('admin projects', { endpoint: '/admin/projects' })
+    }
+  }
+
+  async createProject(data: any, options?: ApiRequestOptions) {
+    if (!data) {
+      throw ErrorFactory.createValidationError('Project data is required')
+    }
+
+    try {
+      return await this.request<{ success: boolean; projectId: string }>(
+        '/admin/projects',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+          skipRetry: true, // Don't retry mutations
+          ...options,
+        }
+      )
+    } catch (error) {
+      if (this.isAppError(error)) {
+        throw error
+      }
+      throw ErrorFactory.createFormError('Failed to create project', { data })
+    }
+  }
+
+  async updateProject(id: string, data: any, options?: ApiRequestOptions) {
+    if (!id) {
+      throw ErrorFactory.createValidationError('Project ID is required')
+    }
+    if (!data) {
+      throw ErrorFactory.createValidationError('Project data is required')
+    }
+
+    try {
+      return await this.request<{ success: boolean }>(`/admin/projects/${id}`, {
+        method: 'PUT',
         body: JSON.stringify(data),
+        skipRetry: true,
+        ...options,
+      })
+    } catch (error) {
+      if (this.isAppError(error)) {
+        throw error
       }
-    )
+      throw ErrorFactory.createFormError('Failed to update project', { projectId: id })
+    }
   }
 
-  async updateProject(id: string, data: any) {
-    return this.request<{ success: boolean }>(`/admin/projects/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    })
+  async deleteProject(id: string, options?: ApiRequestOptions) {
+    if (!id) {
+      throw ErrorFactory.createValidationError('Project ID is required')
+    }
+
+    try {
+      return await this.request<{ success: boolean }>(`/admin/projects/${id}`, {
+        method: 'DELETE',
+        skipRetry: true,
+        ...options,
+      })
+    } catch (error) {
+      if (this.isAppError(error)) {
+        throw error
+      }
+      throw ErrorFactory.createFormError('Failed to delete project', { projectId: id })
+    }
   }
 
-  async deleteProject(id: string) {
-    return this.request<{ success: boolean }>(`/admin/projects/${id}`, {
-      method: 'DELETE',
-    })
+  // Recruiter Pages API with error handling
+  async getRecruiterPage(slug: string, options?: ApiRequestOptions) {
+    if (!slug) {
+      throw ErrorFactory.createValidationError('Recruiter page slug is required')
+    }
+
+    try {
+      return await this.request<{ page: any }>(`/recruiter/${slug}`, options)
+    } catch (error) {
+      if (this.isAppError(error) && error.code === ErrorCode.NOT_FOUND) {
+        throw ErrorFactory.createNotFoundError('Recruiter page', { slug })
+      }
+      throw ErrorFactory.createContentLoadingError('recruiter page', { slug })
+    }
   }
 
-  async getAdminBlogPosts() {
-    return this.request<{ posts: any[] }>('/admin/blog')
+  async getAdminRecruiterPages(options?: ApiRequestOptions) {
+    try {
+      return await this.request<{ pages: any[] }>('/admin/recruiter', options)
+    } catch (error) {
+      throw ErrorFactory.createContentLoadingError('admin recruiter pages')
+    }
   }
 
-  // Technologies API (Admin routes)
-  async createTechnology(data: any) {
-    return this.request<{ success: boolean; technologyId: string }>(
-      '/admin/technologies',
-      {
-        method: 'POST',
+  async createRecruiterPage(data: any, options?: ApiRequestOptions) {
+    if (!data) {
+      throw ErrorFactory.createValidationError('Recruiter page data is required')
+    }
+
+    try {
+      return await this.request<{ success: boolean; pageId: string }>(
+        '/admin/recruiter',
+        {
+          method: 'POST',
+          body: JSON.stringify(data),
+          skipRetry: true,
+          ...options,
+        }
+      )
+    } catch (error) {
+      if (this.isAppError(error)) {
+        throw error
+      }
+      throw ErrorFactory.createFormError('Failed to create recruiter page', { data })
+    }
+  }
+
+  async updateRecruiterPage(id: string, data: any, options?: ApiRequestOptions) {
+    if (!id) {
+      throw ErrorFactory.createValidationError('Recruiter page ID is required')
+    }
+    if (!data) {
+      throw ErrorFactory.createValidationError('Recruiter page data is required')
+    }
+
+    try {
+      return await this.request<{ success: boolean }>(`/admin/recruiter/${id}`, {
+        method: 'PUT',
         body: JSON.stringify(data),
+        skipRetry: true,
+        ...options,
+      })
+    } catch (error) {
+      if (this.isAppError(error)) {
+        throw error
       }
-    )
+      throw ErrorFactory.createFormError('Failed to update recruiter page', { pageId: id })
+    }
   }
 
-  async updateTechnology(id: string, data: any) {
-    return this.request<{ success: boolean }>(`/admin/technologies/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    })
-  }
+  async deleteRecruiterPage(id: string, options?: ApiRequestOptions) {
+    if (!id) {
+      throw ErrorFactory.createValidationError('Recruiter page ID is required')
+    }
 
-  async deleteTechnology(id: string) {
-    return this.request<{ success: boolean }>(`/admin/technologies/${id}`, {
-      method: 'DELETE',
-    })
-  }
-
-  // Contact Submissions API (Admin routes)
-  async getContactSubmissions() {
-    return this.request<{ submissions: any[] }>('/admin/contact')
-  }
-
-  async updateContactSubmission(id: string, data: any) {
-    return this.request<{ success: boolean }>(`/admin/contact/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    })
-  }
-
-  // Recruiter Pages API
-  async getRecruiterPage(slug: string) {
-    return this.request<{ page: any }>(`/recruiter/${slug}`)
-  }
-
-  async getAdminRecruiterPages() {
-    return this.request<{ pages: any[] }>('/admin/recruiter')
-  }
-
-  async createRecruiterPage(data: any) {
-    return this.request<{ success: boolean; pageId: string }>(
-      '/admin/recruiter',
-      {
-        method: 'POST',
-        body: JSON.stringify(data),
+    try {
+      return await this.request<{ success: boolean }>(`/admin/recruiter/${id}`, {
+        method: 'DELETE',
+        skipRetry: true,
+        ...options,
+      })
+    } catch (error) {
+      if (this.isAppError(error)) {
+        throw error
       }
-    )
+      throw ErrorFactory.createFormError('Failed to delete recruiter page', { pageId: id })
+    }
   }
 
-  async updateRecruiterPage(id: string, data: any) {
-    return this.request<{ success: boolean }>(`/admin/recruiter/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    })
+  // Content Management API with error handling
+  async getContentSection(section: string, options?: ApiRequestOptions) {
+    if (!section) {
+      throw ErrorFactory.createValidationError('Content section is required')
+    }
+
+    try {
+      return await this.request<{ success: boolean; content: any }>(
+        `/content/${section}`,
+        options
+      )
+    } catch (error) {
+      throw ErrorFactory.createContentLoadingError(`content section: ${section}`, { section })
+    }
   }
 
-  async deleteRecruiterPage(id: string) {
-    return this.request<{ success: boolean }>(`/admin/recruiter/${id}`, {
-      method: 'DELETE',
-    })
+  async getAllContent(options?: ApiRequestOptions) {
+    try {
+      return await this.request<{ success: boolean; content: any }>('/content', options)
+    } catch (error) {
+      throw ErrorFactory.createContentLoadingError('content', { endpoint: '/content' })
+    }
   }
 
-  // Analytics API
-  async trackRecruiterPageView(pageId: string, viewData: any) {
-    return this.request<{ success: boolean }>(
-      `/analytics/recruiter/${pageId}/view`,
-      {
-        method: 'POST',
-        body: JSON.stringify(viewData),
+  async updateContentSection(section: string, content: any, options?: ApiRequestOptions) {
+    if (!section) {
+      throw ErrorFactory.createValidationError('Content section is required')
+    }
+    if (!content) {
+      throw ErrorFactory.createValidationError('Content data is required')
+    }
+
+    try {
+      return await this.request<{ success: boolean; itemsUpdated: number }>(
+        `/content/${section}`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ content }),
+          skipRetry: true,
+          ...options,
+        }
+      )
+    } catch (error) {
+      if (this.isAppError(error)) {
+        throw error
       }
-    )
-  }
-
-  async trackRecruiterPageInteraction(pageId: string, interactionData: any) {
-    return this.request<{ success: boolean }>(
-      `/analytics/recruiter/${pageId}/interaction`,
-      {
-        method: 'POST',
-        body: JSON.stringify(interactionData),
-      }
-    )
-  }
-
-  // Content Management API
-  async getContentSection(section: string) {
-    return this.request<{ success: boolean; content: any }>(
-      `/content/${section}`
-    )
-  }
-
-  async getAllContent() {
-    return this.request<{ success: boolean; content: any }>('/content')
-  }
-
-  async updateContentSection(section: string, content: any) {
-    return this.request<{ success: boolean; itemsUpdated: number }>(
-      `/content/${section}`,
-      {
-        method: 'POST',
-        body: JSON.stringify({ content }),
-      }
-    )
+      throw ErrorFactory.createFormError('Failed to update content section', { section })
+    }
   }
 
   async updateContentItem(
     section: string,
     key: string,
     value: any,
-    type: string = 'text'
+    type: string = 'text',
+    options?: ApiRequestOptions
   ) {
-    const keyParam = key.replace(/\./g, '_') // Convert dots to underscores for URL
-    return this.request<{ success: boolean; id: string }>(
-      `/content/${section}/${keyParam}`,
-      {
-        method: 'PUT',
-        body: JSON.stringify({ value, type }),
+    if (!section || !key) {
+      throw ErrorFactory.createValidationError('Section and key are required')
+    }
+
+    try {
+      const keyParam = key.replace(/\./g, '_') // Convert dots to underscores for URL
+      return await this.request<{ success: boolean; id: string }>(
+        `/content/${section}/${keyParam}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({ value, type }),
+          skipRetry: true,
+          ...options,
+        }
+      )
+    } catch (error) {
+      if (this.isAppError(error)) {
+        throw error
       }
-    )
+      throw ErrorFactory.createFormError('Failed to update content item', { section, key })
+    }
+  }
+
+  // Contact submissions API
+  async getContactSubmissions(options?: ApiRequestOptions) {
+    try {
+      return await this.request<{ submissions: any[] }>('/admin/contact', options)
+    } catch (error) {
+      throw ErrorFactory.createContentLoadingError('contact submissions')
+    }
+  }
+
+  // Recruiter analytics API
+  async trackRecruiterPageView(pageId: string, viewData: any, options?: ApiRequestOptions) {
+    if (!pageId) {
+      throw ErrorFactory.createValidationError('Page ID is required')
+    }
+
+    try {
+      return await this.request<{ success: boolean }>(
+        `/admin/recruiter/${pageId}/analytics/view`,
+        {
+          method: 'POST',
+          body: JSON.stringify(viewData),
+          skipRetry: true,
+          ...options,
+        }
+      )
+    } catch (error) {
+      if (this.isAppError(error)) {
+        throw error
+      }
+      throw ErrorFactory.createFormError('Failed to track page view', { pageId })
+    }
+  }
+
+  async trackRecruiterPageInteraction(pageId: string, interactionData: any, options?: ApiRequestOptions) {
+    if (!pageId) {
+      throw ErrorFactory.createValidationError('Page ID is required')
+    }
+
+    try {
+      return await this.request<{ success: boolean }>(
+        `/admin/recruiter/${pageId}/analytics/interaction`,
+        {
+          method: 'POST',
+          body: JSON.stringify(interactionData),
+          skipRetry: true,
+          ...options,
+        }
+      )
+    } catch (error) {
+      if (this.isAppError(error)) {
+        throw error
+      }
+      throw ErrorFactory.createFormError('Failed to track page interaction', { pageId })
+    }
   }
 }
 

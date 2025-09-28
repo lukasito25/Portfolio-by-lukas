@@ -171,25 +171,25 @@ export default function BlogPage() {
                 <CardHeader>
                   <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-2">
                     <Calendar className="h-4 w-4" />
-                    <span>{article.date}</span>
+                    <span>{article?.date || ''}</span>
                     <span>•</span>
                     <Clock className="h-4 w-4" />
-                    <span>{article.readTime}</span>
+                    <span>{article?.readTime || ''}</span>
                   </div>
                   <CardTitle className="text-xl group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {article.title}
+                    {article?.title || ''}
                   </CardTitle>
                   <CardDescription className="text-base">
-                    {article.description}
+                    {article?.description || ''}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-slate-600 dark:text-slate-400 mb-4">
-                    {article.content}
+                    {article?.content || ''}
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex gap-2">
-                      {article.tags?.map((tag: string, tagIndex: number) => (
+                      {(article.tags || []).map((tag: string, tagIndex: number) => (
                         <Badge key={tagIndex} variant="outline">{tag}</Badge>
                       ))}
                     </div>
@@ -287,11 +287,11 @@ export default function BlogPage() {
               return (
                 <Card key={index} className="text-center group hover:shadow-md transition-shadow">
                   <CardHeader>
-                    <div className={`w-12 h-12 ${getBgColor(area.title)} rounded-lg flex items-center justify-center mx-auto mb-4`}>
-                      {getIcon(area.title)}
+                    <div className={`w-12 h-12 ${getBgColor(area?.title || '')} rounded-lg flex items-center justify-center mx-auto mb-4`}>
+                      {getIcon(area?.title || '')}
                     </div>
-                    <CardTitle>{area.title}</CardTitle>
-                    <CardDescription>{area.description}</CardDescription>
+                    <CardTitle>{area?.title || ''}</CardTitle>
+                    <CardDescription>{area?.description || ''}</CardDescription>
                   </CardHeader>
                 </Card>
               )
