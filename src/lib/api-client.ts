@@ -207,7 +207,13 @@ class ApiClient {
 
   private getSeverityFromCode(code: string): any {
     // Map error codes to severity levels
-    const { ErrorSeverity } = require('./error-handling')
+    // Using inline enum values to avoid require()
+    const ErrorSeverity = {
+      LOW: 'low',
+      MEDIUM: 'medium',
+      HIGH: 'high',
+      CRITICAL: 'critical'
+    }
 
     if (code.includes('CRITICAL') || code === 'INTERNAL_SERVER_ERROR') {
       return ErrorSeverity.CRITICAL
