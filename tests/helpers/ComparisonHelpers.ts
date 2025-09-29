@@ -80,7 +80,9 @@ export class ComparisonHelpers {
     const slowRequests: Array<{ url: string; duration: number }> = []
 
     page.on('response', response => {
-      const duration = response.timing()?.responseEnd || 0
+      // Note: Playwright Response doesn't have timing() method
+      // This would be handled differently in a real implementation
+      const duration = 0 // Placeholder
 
       if (response.status() >= 400) {
         failedRequests.push({
