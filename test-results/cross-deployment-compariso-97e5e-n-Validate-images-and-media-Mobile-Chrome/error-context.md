@@ -1,0 +1,111 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+    - generic [ref=e2]:
+        - banner [ref=e3]:
+            - generic [ref=e5]:
+                - link "Lukas Hosala" [ref=e6] [cursor=pointer]:
+                    - /url: /
+                - generic [ref=e7]:
+                    - button "Switch to dark mode" [ref=e8]:
+                        - img [ref=e9]
+                    - button [ref=e15]:
+                        - img [ref=e16]
+        - main [ref=e17]:
+            - generic [ref=e19]:
+                - generic [ref=e21]:
+                    - generic [ref=e22]:
+                        - heading [level=1]
+                        - generic:
+                            - paragraph
+                        - generic [ref=e23]:
+                            - generic [ref=e24]: Team Leadership
+                            - generic [ref=e25]: Digital Product Management
+                            - generic [ref=e26]: Agile Methodology
+                            - generic [ref=e27]: Strategic Management
+                            - generic [ref=e28]: SEO & Marketing
+                            - generic [ref=e29]: Tech Stack Migration
+                    - heading "Quick Stats" [level=3] [ref=e33]
+                - generic:
+                    - generic:
+                        - heading [level=2]
+                        - paragraph
+                - generic:
+                    - heading [level=2]
+                - generic [ref=e35]:
+                    - heading "Core Competencies" [level=2] [ref=e36]
+                    - generic [ref=e37]:
+                        - generic [ref=e38]:
+                            - heading "Product & Strategy" [level=3] [ref=e39]
+                            - generic [ref=e40]:
+                                - generic [ref=e41]:
+                                    - generic [ref=e42]:
+                                        - generic [ref=e43]: Strategic Management & Planning
+                                        - generic [ref=e44]: Expert
+                                    - progressbar [ref=e45]
+                                - generic [ref=e47]:
+                                    - generic [ref=e48]:
+                                        - generic [ref=e49]: Team Leadership (13+ personnel)
+                                        - generic [ref=e50]: Expert
+                                    - progressbar [ref=e51]
+                                - generic [ref=e53]:
+                                    - generic [ref=e54]:
+                                        - generic [ref=e55]: Product Roadmap & Lifecycle
+                                        - generic [ref=e56]: Expert
+                                    - progressbar [ref=e57]
+                                - generic [ref=e59]:
+                                    - generic [ref=e60]:
+                                        - generic [ref=e61]: International Market Expansion
+                                        - generic [ref=e62]: Advanced
+                                    - progressbar [ref=e63]
+                        - generic [ref=e65]:
+                            - heading "Technical & Digital" [level=3] [ref=e66]
+                            - generic [ref=e67]:
+                                - generic [ref=e68]:
+                                    - generic [ref=e69]:
+                                        - generic [ref=e70]: SEO Strategy & Implementation
+                                        - generic [ref=e71]: Expert
+                                    - progressbar [ref=e72]
+                                - generic [ref=e74]:
+                                    - generic [ref=e75]:
+                                        - generic [ref=e76]: Tech Stack Modernization
+                                        - generic [ref=e77]: Advanced
+                                    - progressbar [ref=e78]
+                                - generic [ref=e80]:
+                                    - generic [ref=e81]:
+                                        - generic [ref=e82]: Agile/Scrum Methodology
+                                        - generic [ref=e83]: Expert
+                                    - progressbar [ref=e84]
+                                - generic [ref=e86]:
+                                    - generic [ref=e87]:
+                                        - generic [ref=e88]: Digital Marketing Integration
+                                        - generic [ref=e89]: Advanced
+                                    - progressbar [ref=e90]
+                - generic [ref=e93]:
+                    - heading "Beyond the Spreadsheets" [level=2] [ref=e94]
+                    - generic [ref=e95]:
+                        - paragraph [ref=e96]: When I'm not leading cross-functional teams or architecting product roadmaps, you'll find me exploring the medieval streets of Volterra, Italy, where I'm currently based. From my Tuscan hillside home, I develop personal projects like fitness apps and productivity tools, bridging the gap between strategic product thinking and hands-on development.
+                        - paragraph [ref=e97]: My journey from Slovakia to international product leadership has taught me that the best insights come from diverse perspectives and real user experiences. I'm passionate about building mental health platforms like VetWell, combining my product expertise with social impact initiatives. Whether it's algorithmic trading at StagStrat or wellness technology, I believe in creating products that genuinely improve people's lives.
+        - contentinfo [ref=e98]:
+            - generic [ref=e100]:
+                - paragraph [ref=e102]: © 2025 Portfolio. Built with Next.js and Tailwind CSS.
+                - generic [ref=e103]:
+                    - link "GitHub" [ref=e104] [cursor=pointer]:
+                        - /url: https://github.com
+                        - img [ref=e105] [cursor=pointer]
+                        - generic [ref=e108] [cursor=pointer]: GitHub
+                    - link "LinkedIn" [ref=e109] [cursor=pointer]:
+                        - /url: https://linkedin.com
+                        - img [ref=e110] [cursor=pointer]
+                        - generic [ref=e114] [cursor=pointer]: LinkedIn
+                    - link "Twitter" [ref=e115] [cursor=pointer]:
+                        - /url: https://twitter.com
+                        - img [ref=e116] [cursor=pointer]
+                        - generic [ref=e118] [cursor=pointer]: Twitter
+                    - link "Email" [ref=e119] [cursor=pointer]:
+                        - /url: mailto:hello@example.com
+                        - img [ref=e120] [cursor=pointer]
+                        - generic [ref=e123] [cursor=pointer]: Email
+    - alert [ref=e124]
+```

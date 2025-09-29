@@ -898,14 +898,29 @@ class DataService {
     if (this.useApi) {
       try {
         const response = await apiClient.getContentSection(section)
-        return response.content
-      } catch (error) {
-        console.error('API failed, falling back to local:', error)
-        if (isBrowser) {
-          throw new Error(
-            'API unavailable and cannot use local database in browser'
-          )
+        const content = response.content
+
+        // Check if content is actually populated (not just an empty object)
+        if (
+          content &&
+          typeof content === 'object' &&
+          Object.keys(content).length > 0
+        ) {
+          return content
         }
+
+        // If API returns empty content, fall back to default
+        console.log(
+          `API returned empty content for section '${section}', using default content`
+        )
+        const { defaultContent } = await import('./content-config')
+        return defaultContent[section as keyof typeof defaultContent] || {}
+      } catch (error) {
+        console.error('API failed, falling back to default content:', error)
+
+        // Always fall back to default content when in browser and API fails
+        const { defaultContent } = await import('./content-config')
+        return defaultContent[section as keyof typeof defaultContent] || {}
       }
     }
 

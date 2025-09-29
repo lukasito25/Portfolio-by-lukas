@@ -20,6 +20,9 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
+    "test:production": "playwright test --config=playwright.config.production.ts",
+    "test:production:headed": "playwright test --config=playwright.config.production.ts --headed",
+    "test:qa": "npm run test:production",
     "db:reset": "prisma migrate reset && npm run db:seed",
     "db:init-production": "node scripts/init-production-db.mjs"
   },
@@ -69,6 +72,7 @@
     ]
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
     "@eslint/eslintrc": "^3",
     "@playwright/test": "^1.55.0",
     "@tailwindcss/postcss": "^4",
