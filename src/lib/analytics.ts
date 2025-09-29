@@ -105,16 +105,49 @@ class Analytics {
       })
 
       if (!response.ok) {
-        // If analytics API is not available (500, 404), silently skip
-        if (response.status >= 500) {
-          console.debug('Analytics service unavailable, skipping tracking')
+        // Handle different error scenarios gracefully
+        if (response.status === 503) {
+          console.debug(
+            'Analytics service temporarily unavailable (503), skipping tracking'
+          )
           return
         }
-        throw new Error(`Analytics API responded with ${response.status}`)
+        if (response.status >= 500) {
+          console.debug(
+            'Analytics service unavailable (server error), skipping tracking'
+          )
+          return
+        }
+        if (response.status === 404) {
+          console.debug('Analytics endpoint not found (404), skipping tracking')
+          return
+        }
+
+        // For other errors, log but continue
+        console.debug(
+          `Analytics API responded with ${response.status}, skipping tracking`
+        )
+        return
+      }
+
+      // Success - optionally log in development
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('Analytics event tracked successfully:', event.name)
       }
     } catch (error) {
       // Gracefully handle all analytics failures - don't break the UI
-      console.debug('Analytics tracking failed, continuing silently:', error)
+      if (error instanceof Error) {
+        // Network errors, parsing errors, etc.
+        console.debug(
+          'Analytics tracking failed (network/parsing error), continuing silently:',
+          error.message
+        )
+      } else {
+        console.debug(
+          'Analytics tracking failed (unknown error), continuing silently:',
+          error
+        )
+      }
     }
   }
 

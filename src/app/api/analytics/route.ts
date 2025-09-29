@@ -2,15 +2,22 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 const USE_API = process.env.NEXT_PUBLIC_USE_API === 'true'
+const DISABLE_LOCAL_ANALYTICS = process.env.DISABLE_LOCAL_ANALYTICS === 'true'
+const HAS_EXTERNAL_ANALYTICS = process.env.EXTERNAL_ANALYTICS_URL || false
 
 // POST - Track analytics events
 export async function POST(request: NextRequest) {
-  // If using external API, disable local analytics to avoid Prisma issues
-  if (USE_API) {
+  // Only disable local analytics if explicitly configured AND external analytics is available
+  if (DISABLE_LOCAL_ANALYTICS && HAS_EXTERNAL_ANALYTICS) {
     return NextResponse.json(
-      { message: 'Analytics disabled when using external API' },
+      { message: 'Analytics disabled - using external analytics service' },
       { status: 503 }
     )
+  }
+
+  // If using API mode but no external analytics, use local analytics as fallback
+  if (USE_API && !HAS_EXTERNAL_ANALYTICS) {
+    console.log('Using local analytics as fallback in API mode')
   }
 
   try {
@@ -91,8 +98,8 @@ export async function POST(request: NextRequest) {
 
 // GET - Retrieve analytics data for dashboard
 export async function GET(request: NextRequest) {
-  // If using external API, return mock data instead of Prisma queries
-  if (USE_API) {
+  // Only use mock data if external analytics is configured
+  if (USE_API && HAS_EXTERNAL_ANALYTICS) {
     const { searchParams } = new URL(request.url)
     const timeframe = searchParams.get('timeframe') || '30d'
 
