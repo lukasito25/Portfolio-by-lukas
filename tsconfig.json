@@ -32,6 +32,7 @@
     "src/lib/analytics.ts",
     "src/lib/api-middleware.ts",
     "src/lib/personalization.ts",
-    "src/middleware.ts"
+    "src/middleware.ts",
+    "tests/**/*"
   ]
 }
