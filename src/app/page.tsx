@@ -39,7 +39,12 @@ export default function Home() {
           setContent(homepageContent)
         }
       } catch (error) {
-        console.error('Failed to load homepage content:', error)
+        console.error(
+          'Failed to load homepage content, using default content:',
+          error
+        )
+        // Ensure we always have content to display
+        setContent(defaultContent.homepage)
       } finally {
         setIsLoading(false)
       }

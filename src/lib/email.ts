@@ -1,6 +1,8 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null
 
 interface ContactEmailData {
   name: string
@@ -17,15 +19,15 @@ interface WelcomeEmailData {
 }
 
 export async function sendContactEmail(data: ContactEmailData) {
-  if (!process.env.RESEND_API_KEY) {
+  if (!resend) {
     console.warn('RESEND_API_KEY not configured, skipping email send')
     return
   }
 
   try {
     const { error } = await resend.emails.send({
-      from: 'Portfolio Contact <noreply@yourportfolio.com>',
-      to: [process.env.ADMIN_EMAIL || 'admin@example.com'],
+      from: 'Portfolio Contact <noreply@lukashosala.com>',
+      to: [process.env.ADMIN_EMAIL || 'lukas.hosala@icloud.com'],
       subject: `New Contact Form Submission: ${data.subject}`,
       html: `
         <h2>New Contact Form Submission</h2>
@@ -63,7 +65,7 @@ export async function sendContactEmail(data: ContactEmailData) {
 async function sendContactAutoReply(data: ContactEmailData) {
   try {
     const { error } = await resend.emails.send({
-      from: 'Lukáš Hošala <noreply@yourportfolio.com>',
+      from: 'Lukáš Hošala <noreply@lukashosala.com>',
       to: [data.email],
       subject: 'Thank you for your message',
       html: `
@@ -97,14 +99,14 @@ async function sendContactAutoReply(data: ContactEmailData) {
 }
 
 export async function sendWelcomeEmail(data: WelcomeEmailData) {
-  if (!process.env.RESEND_API_KEY) {
+  if (!resend) {
     console.warn('RESEND_API_KEY not configured, skipping email send')
     return
   }
 
   try {
     const { error } = await resend.emails.send({
-      from: 'Lukáš Hošala <noreply@yourportfolio.com>',
+      from: 'Lukáš Hošala <noreply@lukashosala.com>',
       to: [data.email],
       subject: 'Welcome to my newsletter!',
       html: `
@@ -152,7 +154,7 @@ export async function sendNewsletterEmail(
   subject: string,
   content: string
 ) {
-  if (!process.env.RESEND_API_KEY) {
+  if (!resend) {
     console.warn('RESEND_API_KEY not configured, skipping email send')
     return
   }
@@ -162,7 +164,7 @@ export async function sendNewsletterEmail(
   for (const subscriber of subscribers) {
     try {
       const { error } = await resend.emails.send({
-        from: 'Lukáš Hošala <newsletter@yourportfolio.com>',
+        from: 'Lukáš Hošala <newsletter@lukashosala.com>',
         to: [subscriber.email],
         subject,
         html: `

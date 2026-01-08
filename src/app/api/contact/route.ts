@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { sendContactEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
       data: {
         name: body.name,
         email: body.email,
-        subject: body.subject || '',
+        subject: body.subject || 'New Contact Form Submission',
         message: body.message,
         phone: body.phone || '',
         company: body.company || '',
@@ -46,8 +47,21 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Here you could add email notification logic
-    // For example, using Resend, SendGrid, or similar service
+    // Send email notification
+    try {
+      await sendContactEmail({
+        name: body.name,
+        email: body.email,
+        subject: body.subject || 'New Contact Form Submission',
+        message: body.message,
+        phone: body.phone,
+        company: body.company,
+      })
+      console.log('Contact email sent successfully')
+    } catch (emailError) {
+      console.error('Failed to send contact email:', emailError)
+      // Continue execution even if email fails
+    }
 
     console.log('New contact submission:', {
       id: contactSubmission.id,
