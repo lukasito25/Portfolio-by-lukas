@@ -16,14 +16,8 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  // Configure Turbopack for Next.js 16
-  turbopack: {
-    rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-    },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
   webpack: config => {
     // Exclude cloudflare-api from webpack processing

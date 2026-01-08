@@ -16,6 +16,6 @@ echo "🌱 Seeding database..."
 npm run db:seed
 
 echo "🏗️ Building Next.js application..."
-npx next build --webpack
+npx next build
 
 echo "✅ Build completed successfully!"
