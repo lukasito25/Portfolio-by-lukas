@@ -36,13 +36,28 @@ export default function Home() {
       try {
         // Only try to load from API if we're using API mode
         if (process.env.NEXT_PUBLIC_USE_API === 'true') {
+          console.log('Attempting to load content from API...')
           const homepageContent =
             await dataService.getContentSection('homepage')
-          if (homepageContent && Object.keys(homepageContent).length > 0) {
+          console.log('API response:', homepageContent)
+
+          // Only use API content if it has competencies data
+          if (
+            homepageContent &&
+            Object.keys(homepageContent).length > 0 &&
+            homepageContent.competencies &&
+            homepageContent.competencies.length > 0
+          ) {
+            console.log('Using API content')
             setContent(homepageContent)
+          } else {
+            console.log('API content incomplete, using default content')
+            setContent(defaultContent.homepage)
           }
+        } else {
+          console.log('API disabled, using default content')
+          setContent(defaultContent.homepage)
         }
-        // If not using API or if API fails, we already have default content set
       } catch (error) {
         console.error(
           'Failed to load homepage content, using default content:',
@@ -204,7 +219,11 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {(content.competencies || []).map((competency, index) => {
+            {(
+              content.competencies ||
+              defaultContent.homepage.competencies ||
+              []
+            ).map((competency, index) => {
               const icons = [
                 <Users key={`users-comp-${index}`} className="w-8 h-8" />,
                 <BarChart3 key={`chart-${index}`} className="w-8 h-8" />,
