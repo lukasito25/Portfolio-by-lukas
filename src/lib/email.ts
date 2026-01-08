@@ -26,8 +26,8 @@ export async function sendContactEmail(data: ContactEmailData) {
 
   try {
     const { error } = await resend.emails.send({
-      from: 'Portfolio Contact <noreply@lukashosala.com>',
-      to: [process.env.ADMIN_EMAIL || 'lukas.hosala@icloud.com'],
+      from: 'Portfolio Contact <onboarding@resend.dev>',
+      to: [process.env.ADMIN_EMAIL || 'hosala.lukas@gmail.com'],
       subject: `New Contact Form Submission: ${data.subject}`,
       html: `
         <h2>New Contact Form Submission</h2>
@@ -63,9 +63,14 @@ export async function sendContactEmail(data: ContactEmailData) {
 }
 
 async function sendContactAutoReply(data: ContactEmailData) {
+  if (!resend) {
+    console.warn('RESEND_API_KEY not configured, skipping auto-reply email')
+    return
+  }
+
   try {
     const { error } = await resend.emails.send({
-      from: 'Lukáš Hošala <noreply@lukashosala.com>',
+      from: 'Lukáš Hošala <onboarding@resend.dev>',
       to: [data.email],
       subject: 'Thank you for your message',
       html: `
@@ -106,7 +111,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
 
   try {
     const { error } = await resend.emails.send({
-      from: 'Lukáš Hošala <noreply@lukashosala.com>',
+      from: 'Lukáš Hošala <onboarding@resend.dev>',
       to: [data.email],
       subject: 'Welcome to my newsletter!',
       html: `
@@ -164,7 +169,7 @@ export async function sendNewsletterEmail(
   for (const subscriber of subscribers) {
     try {
       const { error } = await resend.emails.send({
-        from: 'Lukáš Hošala <newsletter@lukashosala.com>',
+        from: 'Lukáš Hošala <onboarding@resend.dev>',
         to: [subscriber.email],
         subject,
         html: `
