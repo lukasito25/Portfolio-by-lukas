@@ -79,8 +79,23 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Contact submission error:', error)
 
+    // Provide more specific error details
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error'
+    const errorDetails = error instanceof Error ? error.stack : String(error)
+
+    console.error('Error details:', {
+      message: errorMessage,
+      stack: errorDetails,
+      timestamp: new Date().toISOString(),
+    })
+
     return NextResponse.json(
-      { error: 'Failed to submit contact form' },
+      {
+        error: 'Failed to submit contact form',
+        details:
+          process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+      },
       { status: 500 }
     )
   }

@@ -34,10 +34,15 @@ export default function Home() {
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const homepageContent = await dataService.getContentSection('homepage')
-        if (homepageContent && Object.keys(homepageContent).length > 0) {
-          setContent(homepageContent)
+        // Only try to load from API if we're using API mode
+        if (process.env.NEXT_PUBLIC_USE_API === 'true') {
+          const homepageContent =
+            await dataService.getContentSection('homepage')
+          if (homepageContent && Object.keys(homepageContent).length > 0) {
+            setContent(homepageContent)
+          }
         }
+        // If not using API or if API fails, we already have default content set
       } catch (error) {
         console.error(
           'Failed to load homepage content, using default content:',
