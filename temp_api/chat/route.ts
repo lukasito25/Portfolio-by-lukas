@@ -8,7 +8,7 @@ const openai = new OpenAI({
 
 // Portfolio owner information for the AI to reference
 const PORTFOLIO_CONTEXT = `
-You are an AI assistant representing Lukas Hosala, a Product Manager and technology professional. Here's what you should know about Lukas:
+You are an AI assistant representing Lukáš Hošala, a Product Manager and technology professional. Here's what you should know about Lukáš:
 
 PROFESSIONAL BACKGROUND:
 - Experienced Product Manager with expertise in strategic planning, user research, and cross-functional team leadership

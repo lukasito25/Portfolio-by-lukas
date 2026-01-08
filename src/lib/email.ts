@@ -63,7 +63,7 @@ export async function sendContactEmail(data: ContactEmailData) {
 async function sendContactAutoReply(data: ContactEmailData) {
   try {
     const { error } = await resend.emails.send({
-      from: 'Lukas Hosala <noreply@yourportfolio.com>',
+      from: 'Lukáš Hošala <noreply@yourportfolio.com>',
       to: [data.email],
       subject: 'Thank you for your message',
       html: `
@@ -78,7 +78,7 @@ async function sendContactAutoReply(data: ContactEmailData) {
 
         <p>I typically respond within 24-48 hours. If your inquiry is urgent, please feel free to reach out via other channels listed on my portfolio.</p>
 
-        <p>Best regards,<br>Lukas Hosala</p>
+        <p>Best regards,<br>Lukáš Hošala</p>
 
         <hr style="margin: 20px 0;">
         <p style="color: #666; font-size: 12px;">
@@ -104,7 +104,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
 
   try {
     const { error } = await resend.emails.send({
-      from: 'Lukas Hosala <noreply@yourportfolio.com>',
+      from: 'Lukáš Hošala <noreply@yourportfolio.com>',
       to: [data.email],
       subject: 'Welcome to my newsletter!',
       html: `
@@ -126,7 +126,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
 
         <p>Thanks again for joining me on this journey!</p>
 
-        <p>Best regards,<br>Lukas Hosala</p>
+        <p>Best regards,<br>Lukáš Hošala</p>
 
         <hr style="margin: 20px 0;">
         <p style="color: #666; font-size: 12px;">
@@ -162,7 +162,7 @@ export async function sendNewsletterEmail(
   for (const subscriber of subscribers) {
     try {
       const { error } = await resend.emails.send({
-        from: 'Lukas Hosala <newsletter@yourportfolio.com>',
+        from: 'Lukáš Hošala <newsletter@yourportfolio.com>',
         to: [subscriber.email],
         subject,
         html: `

@@ -7,17 +7,14 @@ import { RateLimiterMemory } from 'rate-limiter-flexible'
 // Rate limiter instances
 const rateLimiters = {
   general: new RateLimiterMemory({
-    keyspace: 'general',
     points: parseInt(process.env.RATE_LIMIT_REQUESTS_PER_MINUTE || '30'),
     duration: 60,
   }),
   contact: new RateLimiterMemory({
-    keyspace: 'contact',
     points: 5, // 5 contact form submissions per hour
     duration: 3600,
   }),
   newsletter: new RateLimiterMemory({
-    keyspace: 'newsletter',
     points: 3, // 3 newsletter signups per hour
     duration: 3600,
   }),
@@ -95,7 +92,7 @@ export function withCors(handler: CorsHandler) {
 
 export function getClientIdentifier(req: NextRequest): string {
   const forwarded = req.headers.get('x-forwarded-for')
-  const ip = forwarded ? forwarded.split(',')[0] : req.ip
+  const ip = forwarded ? forwarded.split(',')[0] : req.headers.get('x-real-ip')
   return ip || 'anonymous'
 }
 

@@ -1,6 +1,8 @@
 'use client'
 
+import { Metadata } from 'next'
 import { useState, useEffect } from 'react'
+
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -62,7 +64,10 @@ export default function WorkPage() {
           setContent(workContent)
         }
       } catch (fetchError) {
-        console.error('Failed to fetch work content, using fallback:', fetchError)
+        console.error(
+          'Failed to fetch work content, using fallback:',
+          fetchError
+        )
         // Keep default content as fallback
       } finally {
         setIsLoading(false)
@@ -79,7 +84,9 @@ export default function WorkPage() {
           <div className="flex items-center justify-center min-h-screen">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-slate-600 dark:text-slate-400">Loading work content...</p>
+              <p className="text-slate-600 dark:text-slate-400">
+                Loading work content...
+              </p>
             </div>
           </div>
         </div>
@@ -172,9 +179,7 @@ export default function WorkPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm">
-                      {content.featured?.impact || ''}
-                    </p>
+                    <p className="text-sm">{content.featured?.impact || ''}</p>
                   </CardContent>
                 </Card>
               </div>
@@ -182,18 +187,17 @@ export default function WorkPage() {
           </div>
         </section>
 
-        {/* Personal Projects Section */}
-        <section className="mb-20">
+        {/* Personal Projects Section - Temporarily Hidden */}
+        {/* <section className="mb-20">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Personal Projects</h2>
+            <h2 className="text-3xl font-bold mb-4">{content.personalProjects?.title || 'Entrepreneurial Ventures'}</h2>
             <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Side projects showcasing full-stack development, wellness
-              technology, and social impact initiatives I've built and launched.
+              {content.personalProjects?.subtitle || 'Side projects showcasing full-stack development and business innovation.'}
             </p>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8 mb-16">
-            {(content.projects || []).map((project, index) => {
+            {(content.personalProjects?.projects || []).map((project, index) => {
               const Icon = personalProjectIcons[index % personalProjectIcons.length]
 
               return (
@@ -242,64 +246,88 @@ export default function WorkPage() {
               )
             })}
           </div>
-        </section>
+        </section> */}
 
         {/* Professional Projects Grid */}
         <section className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Professional Projects</h2>
+            <h2 className="text-3xl font-bold mb-4">
+              {content.professionalProjects?.title || 'Professional Projects'}
+            </h2>
             <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Enterprise projects from my experience at adidas International
-              Marketing B.V., StagStrat, and international product management
-              roles.
+              {content.professionalProjects?.subtitle ||
+                'Enterprise projects from my experience at adidas and international product management roles.'}
             </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8">
-            {(content.projects || []).slice(0, 4).map((project, index) => {
-              const Icon = professionalProjectIcons[index % professionalProjectIcons.length]
+            {(content.professionalProjects?.projects || []).map(
+              (project, index) => {
+                const Icon =
+                  professionalProjectIcons[
+                    index % professionalProjectIcons.length
+                  ]
 
-              return (
-                <Card key={index} className="group hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className={`w-12 h-12 ${professionalProjectColors[index % professionalProjectColors.length]} rounded-lg flex items-center justify-center mb-4`}>
-                        <Icon className={`h-6 w-6 ${professionalProjectIconColors[index % professionalProjectIconColors.length]}`} />
-                      </div>
-                      <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
-                    </div>
-                    <CardTitle className="text-xl">
-                      {project?.title || ''}
-                    </CardTitle>
-                    <CardDescription className="text-base">
-                      {project?.description || ''}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-600 dark:text-slate-400 mb-6">
-                      {project?.description || ''}
-                    </p>
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      {(project.metrics || []).slice(0, 2).map((metric, metricIndex) => (
-                        <div key={metricIndex} className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                          <div className={`font-semibold text-lg ${professionalProjectIconColors[index % professionalProjectIconColors.length]}`}>
-                            {metric?.value || ''}
-                          </div>
-                          <div className="text-sm text-slate-600 dark:text-slate-400">
-                            {metric?.label || ''}
-                          </div>
+                return (
+                  <Card
+                    key={index}
+                    className="group hover:shadow-lg transition-shadow"
+                  >
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div
+                          className={`w-12 h-12 ${professionalProjectColors[index % professionalProjectColors.length]} rounded-lg flex items-center justify-center mb-4`}
+                        >
+                          <Icon
+                            className={`h-6 w-6 ${professionalProjectIconColors[index % professionalProjectIconColors.length]}`}
+                          />
                         </div>
-                      ))}
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {project.technologies.slice(0, 3).map((tech, techIndex) => (
-                        <Badge key={techIndex} variant="outline">{tech}</Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
+                        <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
+                      </div>
+                      <CardTitle className="text-xl">
+                        {project?.title || ''}
+                      </CardTitle>
+                      <CardDescription className="text-base">
+                        {project?.description || ''}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-slate-600 dark:text-slate-400 mb-6">
+                        {project?.description || ''}
+                      </p>
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        {(project.metrics || [])
+                          .slice(0, 2)
+                          .map((metric, metricIndex) => (
+                            <div
+                              key={metricIndex}
+                              className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg"
+                            >
+                              <div
+                                className={`font-semibold text-lg ${professionalProjectIconColors[index % professionalProjectIconColors.length]}`}
+                              >
+                                {metric?.value || ''}
+                              </div>
+                              <div className="text-sm text-slate-600 dark:text-slate-400">
+                                {metric?.label || ''}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {(project.technologies || [])
+                          .slice(0, 3)
+                          .map((tech, techIndex) => (
+                            <Badge key={techIndex} variant="outline">
+                              {tech}
+                            </Badge>
+                          ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              }
+            )}
           </div>
         </section>
 

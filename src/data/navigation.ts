@@ -21,11 +21,11 @@ export const mainNavigation: NavItem[] = [
     href: '/work',
     description: 'View my projects',
   },
-  {
-    label: 'Blog',
-    href: '/blog',
-    description: 'Read my thoughts',
-  },
+  // {
+  //   label: 'Blog',
+  //   href: '/blog',
+  //   description: 'Read my thoughts',
+  // },
   {
     label: 'Contact',
     href: '/contact',
@@ -51,7 +51,7 @@ export const socialLinks = [
   },
   {
     label: 'Email',
-    href: 'mailto:hello@example.com',
+    href: 'mailto:lukas.hosala@icloud.com',
     icon: 'Mail',
   },
 ]

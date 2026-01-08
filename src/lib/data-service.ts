@@ -115,14 +115,36 @@ class DataService {
   }
 
   async getProject(slug: string) {
+    // Try local API first in development or browser
+    if (isDevelopment || isBrowser) {
+      try {
+        const response = await fetch(`/api/projects/${slug}`)
+        if (response.ok) {
+          const data = await response.json()
+          return data.project
+        }
+      } catch (error) {
+        console.error('Local API failed for getProject:', error)
+      }
+    }
+
     if (this.useApi) {
       try {
         const { project } = await apiClient.getProject(slug)
-        const { technologies } = await apiClient.getProjectTechnologies(slug)
-        return { ...project, technologies }
+        return project // technologies are already included in the API response
       } catch (error) {
         console.error('API failed, falling back to local:', error)
         if (isBrowser) {
+          // In browser, try local API as fallback
+          try {
+            const response = await fetch(`/api/projects/${slug}`)
+            if (response.ok) {
+              const data = await response.json()
+              return data.project
+            }
+          } catch (localError) {
+            console.error('Local API fallback failed:', localError)
+          }
           throw new Error(
             'API unavailable and cannot use local database in browser'
           )

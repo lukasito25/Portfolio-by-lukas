@@ -1,5 +1,6 @@
 'use client'
 
+import { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
@@ -163,7 +164,9 @@ export default function Home() {
                   <div className="text-3xl font-bold text-gray-900 mb-2">
                     {metric?.value || ''}
                   </div>
-                  <div className="text-sm text-gray-600">{metric?.label || ''}</div>
+                  <div className="text-sm text-gray-600">
+                    {metric?.label || ''}
+                  </div>
                 </div>
               )
             })}
@@ -171,10 +174,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Project Carousel Section */}
-      <section className="py-24 bg-gray-50">
+      {/* Project Carousel Section - Temporarily Disabled */}
+      {/* <section className="py-24 bg-gray-50">
         <ProjectCarousel />
-      </section>
+      </section> */}
 
       {/* Core Competencies */}
       <section className="py-24">

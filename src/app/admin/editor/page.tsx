@@ -1101,211 +1101,261 @@ export default function ContentEditor() {
                   <CardTitle>Projects</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {(content?.work?.projects || []).map((project, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex gap-2 mb-2">
-                        <Input
-                          value={project?.title || ''}
+                  {(content?.work?.professionalProjects?.projects || []).map(
+                    (project, index) => (
+                      <div key={index} className="border rounded-lg p-4">
+                        <div className="flex gap-2 mb-2">
+                          <Input
+                            value={project?.title || ''}
+                            onChange={e => {
+                              const currentProjects =
+                                content?.work?.professionalProjects?.projects ||
+                                []
+                              const newProjects = [...currentProjects]
+                              if (newProjects[index]) {
+                                newProjects[index].title = e.target.value
+                              }
+                              updateContent(
+                                ['work', 'professionalProjects', 'projects'],
+                                newProjects
+                              )
+                            }}
+                            placeholder="Project Title"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              removeArrayItem(['work', 'projects'], index)
+                            }
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <Textarea
+                          value={project?.description || ''}
                           onChange={e => {
                             const currentProjects =
-                              content?.work?.projects || []
+                              content?.work?.professionalProjects?.projects ||
+                              []
                             const newProjects = [...currentProjects]
                             if (newProjects[index]) {
-                              newProjects[index].title = e.target.value
+                              newProjects[index].description = e.target.value
                             }
                             updateContent(['work', 'projects'], newProjects)
                           }}
-                          placeholder="Project Title"
+                          placeholder="Project Description"
+                          rows={2}
+                          className="mb-2"
                         />
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            removeArrayItem(['work', 'projects'], index)
-                          }
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <Textarea
-                        value={project?.description || ''}
-                        onChange={e => {
-                          const currentProjects = content?.work?.projects || []
-                          const newProjects = [...currentProjects]
-                          if (newProjects[index]) {
-                            newProjects[index].description = e.target.value
-                          }
-                          updateContent(['work', 'projects'], newProjects)
-                        }}
-                        placeholder="Project Description"
-                        rows={2}
-                        className="mb-2"
-                      />
 
-                      <div className="mb-2">
-                        <Label>Technologies</Label>
-                        {(project?.technologies || []).map(
-                          (tech, techIndex) => (
-                            <div key={techIndex} className="flex gap-2 mt-1">
-                              <Input
-                                value={tech || ''}
-                                onChange={e => {
-                                  const currentProjects =
-                                    content?.work?.projects || []
-                                  const newProjects = [...currentProjects]
-                                  if (newProjects[index]?.technologies) {
-                                    newProjects[index].technologies[techIndex] =
-                                      e.target.value
-                                  }
-                                  updateContent(
-                                    ['work', 'projects'],
-                                    newProjects
-                                  )
-                                }}
-                                placeholder="Technology"
-                              />
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  const currentProjects =
-                                    content?.work?.projects || []
-                                  const newProjects = [...currentProjects]
-                                  if (newProjects[index]?.technologies) {
-                                    newProjects[index].technologies =
-                                      newProjects[index].technologies.filter(
-                                        (_, i) => i !== techIndex
-                                      )
-                                  }
-                                  updateContent(
-                                    ['work', 'projects'],
-                                    newProjects
-                                  )
-                                }}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          )
-                        )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-2"
-                          onClick={() => {
-                            const currentProjects =
-                              content?.work?.projects || []
-                            const newProjects = [...currentProjects]
-                            if (!newProjects[index]) {
-                              newProjects[index] = {
-                                title: '',
-                                description: '',
-                                technologies: [],
-                                metrics: [],
-                              }
-                            }
-                            if (!newProjects[index].technologies)
-                              newProjects[index].technologies = []
-                            newProjects[index].technologies.push(
-                              'New Technology'
+                        <div className="mb-2">
+                          <Label>Technologies</Label>
+                          {(project?.technologies || []).map(
+                            (tech, techIndex) => (
+                              <div key={techIndex} className="flex gap-2 mt-1">
+                                <Input
+                                  value={tech || ''}
+                                  onChange={e => {
+                                    const currentProjects =
+                                      content?.work?.professionalProjects
+                                        ?.projects || []
+                                    const newProjects = [...currentProjects]
+                                    if (newProjects[index]?.technologies) {
+                                      newProjects[index].technologies[
+                                        techIndex
+                                      ] = e.target.value
+                                    }
+                                    updateContent(
+                                      ['work', 'projects'],
+                                      newProjects
+                                    )
+                                  }}
+                                  placeholder="Technology"
+                                />
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const currentProjects =
+                                      content?.work?.professionalProjects
+                                        ?.projects || []
+                                    const newProjects = [...currentProjects]
+                                    if (newProjects[index]?.technologies) {
+                                      newProjects[index].technologies =
+                                        newProjects[index].technologies.filter(
+                                          (_, i) => i !== techIndex
+                                        )
+                                    }
+                                    updateContent(
+                                      ['work', 'projects'],
+                                      newProjects
+                                    )
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             )
-                            updateContent(['work', 'projects'], newProjects)
-                          }}
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Technology
-                        </Button>
-                      </div>
-
-                      <div>
-                        <Label>Metrics</Label>
-                        {(project?.metrics || []).map((metric, metricIndex) => (
-                          <div key={metricIndex} className="flex gap-2 mt-1">
-                            <Input
-                              value={metric?.label || ''}
-                              onChange={e => {
-                                const currentProjects =
-                                  content?.work?.projects || []
-                                const newProjects = [...currentProjects]
-                                if (
-                                  newProjects[index]?.metrics?.[metricIndex]
-                                ) {
-                                  newProjects[index].metrics[
-                                    metricIndex
-                                  ].label = e.target.value
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            onClick={() => {
+                              const currentProjects =
+                                content?.work?.professionalProjects?.projects ||
+                                []
+                              const newProjects = [...currentProjects]
+                              if (!newProjects[index]) {
+                                newProjects[index] = {
+                                  title: '',
+                                  description: '',
+                                  technologies: [],
+                                  metrics: [],
                                 }
-                                updateContent(['work', 'projects'], newProjects)
-                              }}
-                              placeholder="Metric Label"
-                            />
-                            <Input
-                              value={metric?.value || ''}
-                              onChange={e => {
-                                const currentProjects =
-                                  content?.work?.projects || []
-                                const newProjects = [...currentProjects]
-                                if (
-                                  newProjects[index]?.metrics?.[metricIndex]
-                                ) {
-                                  newProjects[index].metrics[
-                                    metricIndex
-                                  ].value = e.target.value
-                                }
-                                updateContent(['work', 'projects'], newProjects)
-                              }}
-                              placeholder="Metric Value"
-                              className="w-32"
-                            />
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                const currentProjects =
-                                  content?.work?.projects || []
-                                const newProjects = [...currentProjects]
-                                if (newProjects[index]?.metrics) {
-                                  newProjects[index].metrics = newProjects[
-                                    index
-                                  ].metrics.filter((_, i) => i !== metricIndex)
-                                }
-                                updateContent(['work', 'projects'], newProjects)
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        ))}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-2"
-                          onClick={() => {
-                            const currentProjects =
-                              content?.work?.projects || []
-                            const newProjects = [...currentProjects]
-                            if (!newProjects[index]) {
-                              newProjects[index] = {
-                                title: '',
-                                description: '',
-                                technologies: [],
-                                metrics: [],
                               }
-                            }
-                            if (!newProjects[index].metrics)
-                              newProjects[index].metrics = []
-                            newProjects[index].metrics.push({
-                              label: 'New Metric',
-                              value: '0',
-                            })
-                            updateContent(['work', 'projects'], newProjects)
-                          }}
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Metric
-                        </Button>
+                              if (!newProjects[index].technologies)
+                                newProjects[index].technologies = []
+                              newProjects[index].technologies.push(
+                                'New Technology'
+                              )
+                              updateContent(
+                                ['work', 'professionalProjects', 'projects'],
+                                newProjects
+                              )
+                            }}
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Technology
+                          </Button>
+                        </div>
+
+                        <div>
+                          <Label>Metrics</Label>
+                          {(project?.metrics || []).map(
+                            (metric, metricIndex) => (
+                              <div
+                                key={metricIndex}
+                                className="flex gap-2 mt-1"
+                              >
+                                <Input
+                                  value={metric?.label || ''}
+                                  onChange={e => {
+                                    const currentProjects =
+                                      content?.work?.professionalProjects
+                                        ?.projects || []
+                                    const newProjects = [...currentProjects]
+                                    if (
+                                      newProjects[index]?.metrics?.[metricIndex]
+                                    ) {
+                                      newProjects[index].metrics[
+                                        metricIndex
+                                      ].label = e.target.value
+                                    }
+                                    updateContent(
+                                      [
+                                        'work',
+                                        'professionalProjects',
+                                        'projects',
+                                      ],
+                                      newProjects
+                                    )
+                                  }}
+                                  placeholder="Metric Label"
+                                />
+                                <Input
+                                  value={metric?.value || ''}
+                                  onChange={e => {
+                                    const currentProjects =
+                                      content?.work?.professionalProjects
+                                        ?.projects || []
+                                    const newProjects = [...currentProjects]
+                                    if (
+                                      newProjects[index]?.metrics?.[metricIndex]
+                                    ) {
+                                      newProjects[index].metrics[
+                                        metricIndex
+                                      ].value = e.target.value
+                                    }
+                                    updateContent(
+                                      [
+                                        'work',
+                                        'professionalProjects',
+                                        'projects',
+                                      ],
+                                      newProjects
+                                    )
+                                  }}
+                                  placeholder="Metric Value"
+                                  className="w-32"
+                                />
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const currentProjects =
+                                      content?.work?.professionalProjects
+                                        ?.projects || []
+                                    const newProjects = [...currentProjects]
+                                    if (newProjects[index]?.metrics) {
+                                      newProjects[index].metrics = newProjects[
+                                        index
+                                      ].metrics.filter(
+                                        (_, i) => i !== metricIndex
+                                      )
+                                    }
+                                    updateContent(
+                                      [
+                                        'work',
+                                        'professionalProjects',
+                                        'projects',
+                                      ],
+                                      newProjects
+                                    )
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            )
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            onClick={() => {
+                              const currentProjects =
+                                content?.work?.professionalProjects?.projects ||
+                                []
+                              const newProjects = [...currentProjects]
+                              if (!newProjects[index]) {
+                                newProjects[index] = {
+                                  title: '',
+                                  description: '',
+                                  technologies: [],
+                                  metrics: [],
+                                }
+                              }
+                              if (!newProjects[index].metrics)
+                                newProjects[index].metrics = []
+                              newProjects[index].metrics.push({
+                                label: 'New Metric',
+                                value: '0',
+                              })
+                              updateContent(
+                                ['work', 'professionalProjects', 'projects'],
+                                newProjects
+                              )
+                            }}
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Metric
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                   <Button
                     variant="outline"
                     onClick={() =>

@@ -2,9 +2,9 @@ import { Metadata } from 'next'
 
 // SEO constants
 export const SEO_CONFIG = {
-  siteName: 'Lukas Hosala - Product Manager',
+  siteName: 'Lukáš Hošala - Product Manager',
   siteUrl: process.env.NEXTAUTH_URL || 'https://portfolio.lukashosala.com',
-  defaultTitle: 'Lukas Hosala - Product Manager & Technology Leader',
+  defaultTitle: 'Lukáš Hošala - Product Manager & Technology Leader',
   defaultDescription:
     'Experienced Product Manager specializing in user-centered design, strategic planning, and cross-functional team leadership. Helping companies build products that users love.',
   defaultKeywords: [
@@ -55,9 +55,9 @@ export function generateMetadata({
     title: pageTitle,
     description: pageDescription,
     keywords: pageKeywords.join(', '),
-    authors: [{ name: 'Lukas Hosala' }],
-    creator: 'Lukas Hosala',
-    publisher: 'Lukas Hosala',
+    authors: [{ name: 'Lukáš Hošala' }],
+    creator: 'Lukáš Hošala',
+    publisher: 'Lukáš Hošala',
 
     // Robots
     robots: {
@@ -117,7 +117,7 @@ export function generatePersonStructuredData() {
   return {
     '@context': 'https://schema.org',
     '@type': 'Person',
-    name: 'Lukas Hosala',
+    name: 'Lukáš Hošala',
     jobTitle: 'Product Manager',
     description: SEO_CONFIG.defaultDescription,
     url: SEO_CONFIG.siteUrl,
@@ -154,11 +154,11 @@ export function generateWebsiteStructuredData() {
     url: SEO_CONFIG.siteUrl,
     author: {
       '@type': 'Person',
-      name: 'Lukas Hosala',
+      name: 'Lukáš Hošala',
     },
     publisher: {
       '@type': 'Person',
-      name: 'Lukas Hosala',
+      name: 'Lukáš Hošala',
     },
     inLanguage: 'en-US',
   }
@@ -198,12 +198,12 @@ export function generateArticleStructuredData(article: {
     dateModified: article.dateModified || article.datePublished,
     author: {
       '@type': 'Person',
-      name: 'Lukas Hosala',
+      name: 'Lukáš Hošala',
       url: SEO_CONFIG.siteUrl,
     },
     publisher: {
       '@type': 'Person',
-      name: 'Lukas Hosala',
+      name: 'Lukáš Hošala',
       url: SEO_CONFIG.siteUrl,
     },
     image: article.image || `${SEO_CONFIG.siteUrl}/og-image.jpg`,

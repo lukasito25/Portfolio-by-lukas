@@ -1,4 +1,4 @@
-# Lukas Hosala - Portfolio Website
+# Lukáš Hošala - Portfolio Website
 
 A modern, full-stack portfolio application built with Next.js 15 and a hybrid data architecture supporting both local development and cloud-based production deployment.
 

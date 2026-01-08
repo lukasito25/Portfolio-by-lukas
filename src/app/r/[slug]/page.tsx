@@ -25,7 +25,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${page.title} | Lukas Hosala - Product Manager`,
+    title: `${page.title} | Lukáš Hošala - Product Manager`,
     description: `Personalized proposal for ${page.companyName} - Strategic product management solutions tailored for your organization`,
     openGraph: {
       title: page.title,

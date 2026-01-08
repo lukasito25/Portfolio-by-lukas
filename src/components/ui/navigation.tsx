@@ -19,7 +19,7 @@ export function Navigation() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="text-xl font-bold gradient-text">
-            Lukas Hosala
+            Lukáš Hošala
           </Link>
 
           {/* Desktop Navigation */}

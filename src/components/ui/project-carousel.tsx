@@ -3,16 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import {
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
-  Github,
-  Star,
-  TrendingUp,
-  Users,
-  DollarSign,
-} from 'lucide-react'
+import { ChevronLeft, ChevronRight, ExternalLink, Github } from 'lucide-react'
 import { Badge } from './badge'
 import { Button } from './button'
 import { Card, CardContent } from './card'
@@ -52,8 +43,12 @@ export function ProjectCarousel() {
     const fetchProjects = async () => {
       try {
         setIsLoading(true)
-        const fetchedProjects = await dataService.getFeaturedProjects()
-        setProjects(fetchedProjects)
+        const response = await fetch('/api/projects?featured=true&limit=6')
+        if (!response.ok) {
+          throw new Error('Failed to fetch projects')
+        }
+        const data = await response.json()
+        setProjects(data.projects || [])
         setError(null)
       } catch (err) {
         setError('Failed to load projects')
@@ -239,34 +234,32 @@ export function ProjectCarousel() {
               {currentProject.excerpt || currentProject.description}
             </p>
 
-            {/* Metrics */}
-            <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="text-center p-4 bg-gray-50 rounded-xl">
-                <div className="flex justify-center mb-2 text-purple-600">
-                  <Users className="w-4 h-4" />
+            {/* Project Highlights */}
+            <div className="mb-8">
+              <div className="grid grid-cols-1 gap-3">
+                <div className="flex items-center text-gray-700">
+                  <div className="w-2 h-2 bg-purple-600 rounded-full mr-3"></div>
+                  <span className="font-medium">
+                    Professional project from{' '}
+                    {currentProject.category || 'Product Management'}
+                  </span>
                 </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">
-                  {currentProject.views.toLocaleString()}
+                <div className="flex items-center text-gray-700">
+                  <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
+                  <span className="font-medium">
+                    Real-world business impact and proven results
+                  </span>
                 </div>
-                <div className="text-sm text-gray-600">Views</div>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-xl">
-                <div className="flex justify-center mb-2 text-green-600">
-                  <TrendingUp className="w-4 h-4" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">
-                  {currentProject.likes}
-                </div>
-                <div className="text-sm text-gray-600">Likes</div>
-              </div>
-              <div className="text-center p-4 bg-gray-50 rounded-xl">
-                <div className="flex justify-center mb-2 text-blue-600">
-                  <Star className="w-4 h-4" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">
-                  {currentProject.technologies?.length || 0}
-                </div>
-                <div className="text-sm text-gray-600">Technologies</div>
+                {currentProject.technologies &&
+                  currentProject.technologies.length > 0 && (
+                    <div className="flex items-center text-gray-700">
+                      <div className="w-2 h-2 bg-green-600 rounded-full mr-3"></div>
+                      <span className="font-medium">
+                        {currentProject.technologies.length} key technologies
+                        utilized
+                      </span>
+                    </div>
+                  )}
               </div>
             </div>
 

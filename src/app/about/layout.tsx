@@ -1,9 +1,28 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'About - Lukas Hosala | Senior Product Manager',
+  title: 'About Lukáš Hošala - Senior Product Manager Story',
   description:
-    'Senior Product Manager with 8+ years of international experience at adidas Digital Sports and fintech startups. MBA graduate specializing in digital product development and team leadership.',
+    "Learn about Lukáš Hošala's journey from Slovakia to leading international teams at adidas Digital Sports (165M+ users) and fintech startups. Now based in Volterra, Italy.",
+  keywords: [
+    'About Lukáš Hošala',
+    'Product Manager Career',
+    'adidas Digital Sports',
+    'International Experience',
+    'Team Leadership',
+    'Volterra Italy',
+    'Professional Journey',
+    'Strategic Management',
+  ],
+  openGraph: {
+    title: 'About Lukáš Hošala - Senior Product Manager Story',
+    description:
+      'Learn about my journey from Slovakia to leading international teams at adidas Digital Sports and fintech startups.',
+    url: 'https://lukashosala.com/about',
+  },
+  alternates: {
+    canonical: 'https://lukashosala.com/about',
+  },
 }
 
 export default function AboutLayout({

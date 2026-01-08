@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Metadata } from 'next'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -167,15 +168,15 @@ export default function ContactPage() {
                   <CardContent className="space-y-4">
                     <div className="flex items-center gap-3 text-sm">
                       <Mail className="w-4 h-4 text-blue-600" />
-                      <span>lukas.hosala@example.com</span>
+                      <span>lukas.hosala@icloud.com</span>
                     </div>
                     <div className="flex items-center gap-3 text-sm">
                       <Phone className="w-4 h-4 text-green-600" />
-                      <span>Available upon request</span>
+                      <span>+39 379 3110473</span>
                     </div>
                     <div className="flex items-center gap-3 text-sm">
                       <MapPin className="w-4 h-4 text-red-600" />
-                      <span>Available for remote & international projects</span>
+                      <span>Volterra, Italy</span>
                     </div>
                   </CardContent>
                 </Card>

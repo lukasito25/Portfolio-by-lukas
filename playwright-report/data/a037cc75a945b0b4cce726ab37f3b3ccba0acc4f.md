@@ -1,0 +1,165 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+    - generic [ref=e2]:
+        - banner [ref=e3]:
+            - generic [ref=e5]:
+                - link "Lukas Hosala" [ref=e6] [cursor=pointer]:
+                    - /url: /
+                - generic [ref=e7]:
+                    - navigation [ref=e8]:
+                        - link "Home" [ref=e9] [cursor=pointer]:
+                            - /url: /
+                        - link "About" [ref=e10] [cursor=pointer]:
+                            - /url: /about
+                        - link "Skills" [ref=e11] [cursor=pointer]:
+                            - /url: /skills
+                        - link "Work" [ref=e12] [cursor=pointer]:
+                            - /url: /work
+                        - link "Blog" [ref=e13] [cursor=pointer]:
+                            - /url: /blog
+                        - link "Contact" [ref=e14] [cursor=pointer]:
+                            - /url: /contact
+                    - button "Switch to dark mode" [ref=e15]:
+                        - img [ref=e16]
+        - main [ref=e22]:
+            - generic [ref=e23]:
+                - generic [ref=e26]:
+                    - generic [ref=e29]:
+                        - heading "Admin Dashboard" [level=1] [ref=e31]
+                        - generic [ref=e32]:
+                            - term [ref=e33]: Account status
+                            - definition [ref=e34]: Welcome, lukas.hosala@gmail.com
+                    - button "Sign Out" [ref=e36]:
+                        - img [ref=e37]
+                        - text: Sign Out
+                - generic [ref=e40]:
+                    - generic [ref=e41]:
+                        - generic [ref=e42]:
+                            - generic [ref=e44]:
+                                - img [ref=e47]
+                                - generic [ref=e50]:
+                                    - term [ref=e51]: Content Editor
+                                    - definition [ref=e52]: Edit Site Content
+                            - link "Open Editor →" [ref=e55] [cursor=pointer]:
+                                - /url: /admin/editor
+                        - generic [ref=e56]:
+                            - generic [ref=e58]:
+                                - img [ref=e61]
+                                - generic [ref=e64]:
+                                    - term [ref=e65]: Projects
+                                    - definition [ref=e66]:
+                                        - img [ref=e67]
+                            - link "Manage Projects →" [ref=e74] [cursor=pointer]:
+                                - /url: /admin/projects
+                        - generic [ref=e75]:
+                            - generic [ref=e77]:
+                                - img [ref=e80]
+                                - generic [ref=e83]:
+                                    - term [ref=e84]: Blog
+                                    - definition [ref=e85]:
+                                        - img [ref=e86]
+                            - link "Manage Blog →" [ref=e93] [cursor=pointer]:
+                                - /url: /admin/blog
+                        - generic [ref=e94]:
+                            - generic [ref=e96]:
+                                - img [ref=e99]
+                                - generic [ref=e102]:
+                                    - term [ref=e103]: Technologies
+                                    - definition [ref=e104]:
+                                        - img [ref=e105]
+                            - link "Manage Skills →" [ref=e112] [cursor=pointer]:
+                                - /url: /admin/skills
+                        - generic [ref=e113]:
+                            - generic [ref=e115]:
+                                - img [ref=e118]
+                                - generic [ref=e121]:
+                                    - term [ref=e122]: Contact
+                                    - definition [ref=e123]:
+                                        - img [ref=e124]
+                            - link "Manage Submissions →" [ref=e131] [cursor=pointer]:
+                                - /url: /admin/contact
+                        - generic [ref=e132]:
+                            - generic [ref=e134]:
+                                - img [ref=e137]
+                                - generic [ref=e140]:
+                                    - term [ref=e141]: Recruiter Pages
+                                    - definition [ref=e142]: Strategic Proposals
+                            - link "Manage Pages →" [ref=e145] [cursor=pointer]:
+                                - /url: /admin/recruiter
+                        - generic [ref=e146]:
+                            - generic [ref=e148]:
+                                - img [ref=e151]
+                                - generic [ref=e154]:
+                                    - term [ref=e155]: Analytics
+                                    - definition [ref=e156]:
+                                        - img [ref=e157]
+                            - link "View Dashboard →" [ref=e164] [cursor=pointer]:
+                                - /url: /admin/analytics
+                        - generic [ref=e165]:
+                            - generic [ref=e167]:
+                                - img [ref=e170]
+                                - generic [ref=e173]:
+                                    - term [ref=e174]: Database
+                                    - definition [ref=e175]: Prisma Studio
+                            - generic [ref=e178]: 'Run: npm run db:studio'
+                    - generic [ref=e180]:
+                        - heading "Quick Start Guide" [level=3] [ref=e181]
+                        - paragraph [ref=e183]: "Your backend infrastructure is ready! Here's what you can do next:"
+                        - list [ref=e185]:
+                            - listitem [ref=e186]:
+                                - strong [ref=e187]: 'Explore the API:'
+                                - text: Visit the API endpoints above to see your data
+                            - listitem [ref=e188]:
+                                - strong [ref=e189]: 'Manage Database:'
+                                - text: Run
+                                - code [ref=e190]: npm run db:studio
+                                - text: to open Prisma Studio
+                            - listitem [ref=e191]:
+                                - strong [ref=e192]: 'Test Contact Form:'
+                                - text: Try the
+                                - code [ref=e193]: POST /api/contact
+                                - text: endpoint
+                            - listitem [ref=e194]:
+                                - strong [ref=e195]: 'Check Analytics:'
+                                - text: Page views are automatically tracked when enabled
+                            - listitem [ref=e196]:
+                                - strong [ref=e197]: 'Customize Content:'
+                                - text: Edit seed data in
+                                - code [ref=e198]: prisma/seed.ts
+        - contentinfo [ref=e199]:
+            - generic [ref=e201]:
+                - paragraph [ref=e203]: © 2026 Portfolio. Built with Next.js and Tailwind CSS.
+                - generic [ref=e204]:
+                    - link "GitHub" [ref=e205] [cursor=pointer]:
+                        - /url: https://github.com
+                        - img [ref=e206] [cursor=pointer]
+                        - generic [ref=e209] [cursor=pointer]: GitHub
+                    - link "LinkedIn" [ref=e210] [cursor=pointer]:
+                        - /url: https://linkedin.com
+                        - img [ref=e211] [cursor=pointer]
+                        - generic [ref=e215] [cursor=pointer]: LinkedIn
+                    - link "Twitter" [ref=e216] [cursor=pointer]:
+                        - /url: https://twitter.com
+                        - img [ref=e217] [cursor=pointer]
+                        - generic [ref=e219] [cursor=pointer]: Twitter
+                    - link "Email" [ref=e220] [cursor=pointer]:
+                        - /url: mailto:hello@example.com
+                        - img [ref=e221] [cursor=pointer]
+                        - generic [ref=e224] [cursor=pointer]: Email
+    - generic [ref=e229] [cursor=pointer]:
+        - button "Open Next.js Dev Tools" [ref=e230] [cursor=pointer]:
+            - img [ref=e231] [cursor=pointer]
+        - generic [ref=e234] [cursor=pointer]:
+            - button "Open issues overlay" [ref=e235] [cursor=pointer]:
+                - generic [ref=e236] [cursor=pointer]:
+                    - generic [ref=e237] [cursor=pointer]: '1'
+                    - generic [ref=e238] [cursor=pointer]: '2'
+                - generic [ref=e239] [cursor=pointer]:
+                    - text: Issue
+                    - generic [ref=e240] [cursor=pointer]: s
+            - button "Collapse issues badge" [ref=e241] [cursor=pointer]:
+                - img [ref=e242] [cursor=pointer]
+    - alert [ref=e244]
+```

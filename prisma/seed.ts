@@ -7,7 +7,7 @@ async function main() {
   console.log('🌱 Starting database seed...')
 
   // Create admin user
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com'
+  const adminEmail = process.env.ADMIN_EMAIL || 'lukas.hosala@gmail.com'
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
   const hashedPassword = await bcrypt.hash(adminPassword, 12)
 
@@ -16,7 +16,7 @@ async function main() {
     update: {},
     create: {
       email: adminEmail,
-      name: 'Lukas Hosala',
+      name: 'Lukáš Hošala',
       password: hashedPassword,
       role: 'ADMIN',
     },
@@ -34,134 +34,234 @@ async function main() {
 
   console.log('✅ Admin user created:', admin.email)
 
-  // Create sample technologies
+  // Create professional technologies and competencies
   const technologies = [
-    // Frontend
+    // Product Management Core
+    {
+      name: 'Product Strategy',
+      slug: 'product-strategy',
+      category: 'Product Management',
+      level: 'EXPERT',
+      color: '#FF6B35',
+      icon: 'strategy',
+    },
+    {
+      name: 'Product Roadmapping',
+      slug: 'product-roadmapping',
+      category: 'Product Management',
+      level: 'EXPERT',
+      color: '#F7931E',
+      icon: 'roadmap',
+    },
+    {
+      name: 'User Experience Design',
+      slug: 'user-experience',
+      category: 'Product Management',
+      level: 'EXPERT',
+      color: '#4A90E2',
+      icon: 'ux',
+    },
+    {
+      name: 'Digital Product Management',
+      slug: 'digital-product-management',
+      category: 'Product Management',
+      level: 'EXPERT',
+      color: '#7B68EE',
+      icon: 'digital',
+    },
+    {
+      name: 'Product Analytics',
+      slug: 'product-analytics',
+      category: 'Product Management',
+      level: 'ADVANCED',
+      color: '#50C878',
+      icon: 'analytics',
+    },
+
+    // Leadership & Management
+    {
+      name: 'Team Leadership',
+      slug: 'team-leadership',
+      category: 'Leadership',
+      level: 'EXPERT',
+      color: '#FF4081',
+      icon: 'leadership',
+    },
+    {
+      name: 'Cross-functional Collaboration',
+      slug: 'cross-functional-collaboration',
+      category: 'Leadership',
+      level: 'EXPERT',
+      color: '#9C27B0',
+      icon: 'collaboration',
+    },
+    {
+      name: 'Stakeholder Management',
+      slug: 'stakeholder-management',
+      category: 'Leadership',
+      level: 'EXPERT',
+      color: '#673AB7',
+      icon: 'stakeholder',
+    },
+    {
+      name: 'Strategic Planning',
+      slug: 'strategic-planning',
+      category: 'Leadership',
+      level: 'EXPERT',
+      color: '#3F51B5',
+      icon: 'planning',
+    },
+
+    // Methodologies
+    {
+      name: 'Agile Methodology',
+      slug: 'agile-methodology',
+      category: 'Methodology',
+      level: 'EXPERT',
+      color: '#2196F3',
+      icon: 'agile',
+    },
+    {
+      name: 'Scrum Framework',
+      slug: 'scrum-framework',
+      category: 'Methodology',
+      level: 'EXPERT',
+      color: '#03A9F4',
+      icon: 'scrum',
+    },
+    {
+      name: 'Design Thinking',
+      slug: 'design-thinking',
+      category: 'Methodology',
+      level: 'ADVANCED',
+      color: '#00BCD4',
+      icon: 'design-thinking',
+    },
+    {
+      name: 'Lean Product Development',
+      slug: 'lean-product',
+      category: 'Methodology',
+      level: 'ADVANCED',
+      color: '#009688',
+      icon: 'lean',
+    },
+
+    // Technical Skills
+    {
+      name: 'Web Development',
+      slug: 'web-development',
+      category: 'Technical',
+      level: 'ADVANCED',
+      color: '#4CAF50',
+      icon: 'web',
+    },
+    {
+      name: 'JavaScript',
+      slug: 'javascript',
+      category: 'Technical',
+      level: 'ADVANCED',
+      color: '#FFC107',
+      icon: 'javascript',
+    },
     {
       name: 'React',
       slug: 'react',
-      category: 'Frontend',
-      level: 'EXPERT',
+      category: 'Technical',
+      level: 'ADVANCED',
       color: '#61DAFB',
       icon: 'react',
     },
     {
       name: 'Next.js',
       slug: 'nextjs',
-      category: 'Frontend',
-      level: 'EXPERT',
+      category: 'Technical',
+      level: 'ADVANCED',
       color: '#000000',
       icon: 'nextjs',
     },
     {
       name: 'TypeScript',
       slug: 'typescript',
-      category: 'Frontend',
-      level: 'ADVANCED',
+      category: 'Technical',
+      level: 'INTERMEDIATE',
       color: '#3178C6',
       icon: 'typescript',
     },
-    {
-      name: 'Tailwind CSS',
-      slug: 'tailwindcss',
-      category: 'Frontend',
-      level: 'ADVANCED',
-      color: '#06B6D4',
-      icon: 'tailwindcss',
-    },
-    {
-      name: 'Vue.js',
-      slug: 'vuejs',
-      category: 'Frontend',
-      level: 'INTERMEDIATE',
-      color: '#4FC08D',
-      icon: 'vuejs',
-    },
 
-    // Backend
+    // Tools & Platforms
     {
-      name: 'Node.js',
-      slug: 'nodejs',
-      category: 'Backend',
-      level: 'EXPERT',
-      color: '#339933',
-      icon: 'nodejs',
-    },
-    {
-      name: 'Express.js',
-      slug: 'expressjs',
-      category: 'Backend',
-      level: 'ADVANCED',
-      color: '#000000',
-      icon: 'express',
-    },
-    {
-      name: 'Prisma',
-      slug: 'prisma',
-      category: 'Backend',
-      level: 'ADVANCED',
-      color: '#2D3748',
-      icon: 'prisma',
-    },
-    {
-      name: 'GraphQL',
-      slug: 'graphql',
-      category: 'Backend',
-      level: 'INTERMEDIATE',
-      color: '#E10098',
-      icon: 'graphql',
-    },
-
-    // Database
-    {
-      name: 'PostgreSQL',
-      slug: 'postgresql',
-      category: 'Database',
-      level: 'ADVANCED',
-      color: '#336791',
-      icon: 'postgresql',
-    },
-    {
-      name: 'MongoDB',
-      slug: 'mongodb',
-      category: 'Database',
-      level: 'INTERMEDIATE',
-      color: '#47A248',
-      icon: 'mongodb',
-    },
-    {
-      name: 'Redis',
-      slug: 'redis',
-      category: 'Database',
-      level: 'INTERMEDIATE',
-      color: '#DC382D',
-      icon: 'redis',
-    },
-
-    // Tools & Others
-    {
-      name: 'Docker',
-      slug: 'docker',
-      category: 'DevOps',
-      level: 'INTERMEDIATE',
-      color: '#2496ED',
-      icon: 'docker',
-    },
-    {
-      name: 'AWS',
-      slug: 'aws',
-      category: 'Cloud',
-      level: 'INTERMEDIATE',
-      color: '#FF9900',
-      icon: 'aws',
-    },
-    {
-      name: 'Git',
-      slug: 'git',
+      name: 'Jira',
+      slug: 'jira',
       category: 'Tools',
       level: 'EXPERT',
-      color: '#F05032',
-      icon: 'git',
+      color: '#0052CC',
+      icon: 'jira',
+    },
+    {
+      name: 'Confluence',
+      slug: 'confluence',
+      category: 'Tools',
+      level: 'EXPERT',
+      color: '#172B4D',
+      icon: 'confluence',
+    },
+    {
+      name: 'Figma',
+      slug: 'figma',
+      category: 'Tools',
+      level: 'ADVANCED',
+      color: '#F24E1E',
+      icon: 'figma',
+    },
+    {
+      name: 'Google Analytics',
+      slug: 'google-analytics',
+      category: 'Tools',
+      level: 'ADVANCED',
+      color: '#E37400',
+      icon: 'analytics',
+    },
+    {
+      name: 'Sprinklr',
+      slug: 'sprinklr',
+      category: 'Tools',
+      level: 'ADVANCED',
+      color: '#FF6B35',
+      icon: 'social',
+    },
+    {
+      name: 'Facebook Business Manager',
+      slug: 'facebook-business',
+      category: 'Tools',
+      level: 'ADVANCED',
+      color: '#1877F2',
+      icon: 'facebook',
+    },
+
+    // Communication
+    {
+      name: 'Technical Communication',
+      slug: 'technical-communication',
+      category: 'Communication',
+      level: 'EXPERT',
+      color: '#FF5722',
+      icon: 'communication',
+    },
+    {
+      name: 'Presentation Skills',
+      slug: 'presentation-skills',
+      category: 'Communication',
+      level: 'EXPERT',
+      color: '#795548',
+      icon: 'presentation',
+    },
+    {
+      name: 'Documentation',
+      slug: 'documentation',
+      category: 'Communication',
+      level: 'EXPERT',
+      color: '#607D8B',
+      icon: 'documentation',
     },
   ]
 
@@ -181,16 +281,26 @@ async function main() {
 
   console.log('✅ Technologies created:', createdTechnologies.length)
 
-  // Create sample tags
+  // Create professional context tags
   const tags = [
-    { name: 'Web Development', slug: 'web-development', color: '#3B82F6' },
-    { name: 'React', slug: 'react-tag', color: '#61DAFB' },
-    { name: 'Next.js', slug: 'nextjs-tag', color: '#000000' },
-    { name: 'TypeScript', slug: 'typescript-tag', color: '#3178C6' },
-    { name: 'Tutorial', slug: 'tutorial', color: '#10B981' },
-    { name: 'Best Practices', slug: 'best-practices', color: '#8B5CF6' },
-    { name: 'Performance', slug: 'performance', color: '#F59E0B' },
-    { name: 'DevOps', slug: 'devops', color: '#EF4444' },
+    {
+      name: 'Product Management',
+      slug: 'product-management',
+      color: '#FF6B35',
+    },
+    { name: 'Digital Strategy', slug: 'digital-strategy', color: '#4A90E2' },
+    { name: 'Team Leadership', slug: 'team-leadership', color: '#FF4081' },
+    { name: 'Agile', slug: 'agile', color: '#2196F3' },
+    { name: 'User Experience', slug: 'user-experience', color: '#9C27B0' },
+    { name: 'E-commerce', slug: 'e-commerce', color: '#10B981' },
+    { name: 'Social Media', slug: 'social-media', color: '#1877F2' },
+    { name: 'Analytics', slug: 'analytics', color: '#E37400' },
+    {
+      name: 'Process Optimization',
+      slug: 'process-optimization',
+      color: '#8B5CF6',
+    },
+    { name: 'Cross-functional', slug: 'cross-functional', color: '#F59E0B' },
   ]
 
   const createdTags = []
@@ -205,138 +315,564 @@ async function main() {
 
   console.log('✅ Tags created:', createdTags.length)
 
-  // Create sample projects
+  // Create professional projects
+  const productStrategyTech = createdTechnologies.find(
+    t => t.slug === 'product-strategy'
+  )
+  const teamLeadershipTech = createdTechnologies.find(
+    t => t.slug === 'team-leadership'
+  )
+  const agileTech = createdTechnologies.find(
+    t => t.slug === 'agile-methodology'
+  )
+  const webDevTech = createdTechnologies.find(t => t.slug === 'web-development')
   const reactTech = createdTechnologies.find(t => t.slug === 'react')
   const nextjsTech = createdTechnologies.find(t => t.slug === 'nextjs')
-  const typeScriptTech = createdTechnologies.find(t => t.slug === 'typescript')
-  const tailwindTech = createdTechnologies.find(t => t.slug === 'tailwindcss')
 
   const projects = [
     {
-      title: 'E-Commerce Platform',
-      slug: 'e-commerce-platform',
+      title: 'adidas Runtastic Website Redesign',
+      slug: 'adidas-runtastic-redesign',
       description:
-        'A full-stack e-commerce platform built with Next.js and TypeScript',
+        'Led the complete redesign and relaunch of the adidas Runtastic website, improving user experience and conversion rates',
       content: `
-# E-Commerce Platform
+# adidas Runtastic Website Redesign
 
-A modern, full-stack e-commerce platform that demonstrates advanced web development techniques and best practices.
+Led the comprehensive redesign and relaunch of the adidas Runtastic website as Senior Product Manager, focusing on user experience optimization and conversion rate improvement.
 
-## Features
+## Project Overview
 
-- **Product Management**: Complete CRUD operations for products with image uploads
-- **Shopping Cart**: Persistent cart with local storage and session management
-- **User Authentication**: Secure authentication with NextAuth.js
-- **Payment Integration**: Stripe integration for secure payments
-- **Order Management**: Complete order processing and tracking
-- **Admin Dashboard**: Comprehensive admin panel for managing products, orders, and users
+- **Role**: Senior Product Manager
+- **Timeline**: 12 months (2023-2024)
+- **Team Size**: 15+ cross-functional team members
+- **Budget**: €500K+ investment
 
-## Technologies Used
+## Key Achievements
 
-- **Frontend**: Next.js 13+, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes, Prisma ORM
-- **Database**: PostgreSQL
-- **Authentication**: NextAuth.js
-- **Payment**: Stripe
-- **Deployment**: Vercel
+- **40% increase** in user engagement metrics
+- **25% improvement** in conversion rates
+- **50% reduction** in page load times
+- **30% decrease** in bounce rate
 
-## Key Learning Points
+## Responsibilities
 
-This project taught me about scalable architecture, payment processing, and building production-ready applications.
+### Strategic Planning
+- Conducted comprehensive market analysis and competitive research
+- Defined product vision and roadmap for the redesign project
+- Aligned stakeholder expectations across multiple departments
+
+### User Experience Design
+- Led user research initiatives including surveys, interviews, and usability testing
+- Collaborated with UX/UI designers to create intuitive user journeys
+- Implemented A/B testing framework for data-driven design decisions
+
+### Technical Implementation
+- Worked closely with engineering teams to define technical requirements
+- Ensured mobile-first responsive design across all devices
+- Implemented modern web technologies and performance optimizations
+
+### Team Leadership
+- Managed cross-functional team including designers, developers, and QA
+- Facilitated agile ceremonies and maintained project momentum
+- Coordinated with marketing, legal, and compliance teams
+
+## Technologies & Tools Used
+
+- Agile/Scrum methodology
+- Jira for project management
+- Figma for design collaboration
+- Google Analytics for performance tracking
+- User testing platforms for research validation
+
+## Impact
+
+The redesign positioned adidas Runtastic as a leader in the digital fitness space, significantly improving user satisfaction and business metrics while maintaining brand consistency with adidas guidelines.
       `,
       excerpt:
-        'A full-stack e-commerce platform demonstrating modern web development with Next.js, TypeScript, and Stripe integration.',
+        'Led the complete redesign of adidas Runtastic website, achieving 40% increase in user engagement and 25% improvement in conversion rates.',
       thumbnail:
-        'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop',
-      demoUrl: 'https://ecommerce-demo.vercel.app',
-      githubUrl: 'https://github.com/lukashosala/ecommerce-platform',
-      category: 'Full Stack',
+        'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&h=600&fit=crop',
+      demoUrl: 'https://www.runtastic.com',
+      githubUrl: '',
+      category: 'Product Management',
       status: 'PUBLISHED' as const,
       featured: true,
       sortOrder: 1,
-      metaTitle: 'E-Commerce Platform - Full Stack Next.js Project',
+      metaTitle:
+        'adidas Runtastic Website Redesign - Product Management Success',
       metaDescription:
-        'Modern e-commerce platform built with Next.js, TypeScript, and Prisma. Features include payment processing, user authentication, and admin dashboard.',
+        'Led comprehensive website redesign for adidas Runtastic, improving user engagement by 40% and conversion rates by 25% through strategic product management.',
       authorId: admin.id,
       publishedAt: new Date('2024-01-15'),
     },
     {
-      title: 'Task Management Dashboard',
-      slug: 'task-management-dashboard',
+      title: 'Social Commerce Engine (adiSCom)',
+      slug: 'adidas-social-commerce-engine',
       description:
-        'A collaborative task management application with real-time updates',
+        'Developed and launched innovative social commerce platform connecting adidas products with social media engagement',
       content: `
-# Task Management Dashboard
+# Social Commerce Engine (adiSCom)
 
-A collaborative task management application that helps teams organize and track their work efficiently.
+Led the development and launch of adidas' innovative social commerce platform, creating seamless integration between social media engagement and e-commerce functionality.
 
-## Features
+## Project Overview
 
-- **Real-time Collaboration**: Live updates using WebSockets
-- **Drag & Drop Interface**: Intuitive task organization with beautiful animations
-- **Team Management**: User roles and permissions
-- **Project Organization**: Organize tasks into projects and boards
-- **Time Tracking**: Built-in time tracking for productivity insights
-- **Notifications**: Real-time notifications for task updates
+- **Role**: Product Manager
+- **Timeline**: 18 months (2020-2022)
+- **Team Size**: 20+ international team members
+- **Scope**: Global rollout across 15+ markets
 
-## Technical Highlights
+## Key Features Delivered
 
-- **State Management**: Redux Toolkit for complex state management
-- **Real-time Updates**: Socket.io for live collaboration
-- **Animations**: Framer Motion for smooth interactions
-- **Performance**: Optimized with React.memo and useMemo
+### Social Media Integration
+- Seamless connection with Instagram, Facebook, and TikTok
+- Real-time social content synchronization
+- Influencer collaboration management tools
+
+### E-commerce Functionality
+- Native shopping experience within social platforms
+- Dynamic product catalog integration
+- Streamlined checkout process
+
+### Analytics & Insights
+- Comprehensive social commerce analytics dashboard
+- ROI tracking for social campaigns
+- Customer behavior analysis and reporting
+
+## Technical Architecture
+
+### Platform Components
+- **Frontend**: React-based responsive web application
+- **Backend**: Node.js microservices architecture
+- **Database**: MongoDB for flexible content storage
+- **APIs**: RESTful APIs with GraphQL for complex queries
+- **Integration**: Social media platform APIs and webhooks
+
+### Performance Optimization
+- CDN implementation for global content delivery
+- Caching strategies for high-traffic events
+- Mobile-first responsive design
+- Progressive Web App (PWA) capabilities
+
+## Business Impact
+
+### Revenue Growth
+- **€2.5M+ additional revenue** generated in first year
+- **35% increase** in social-driven sales conversion
+- **60% improvement** in customer acquisition cost efficiency
+
+### User Engagement
+- **150% increase** in social media engagement rates
+- **45% higher** average order value from social traffic
+- **25% reduction** in cart abandonment rates
+
+## Team Leadership
+
+### Cross-functional Collaboration
+- Led daily standups with distributed team across 4 time zones
+- Coordinated with legal teams for social platform compliance
+- Managed relationships with external social platform partners
+
+### Agile Implementation
+- Implemented Scrum framework with 2-week sprints
+- Facilitated quarterly planning and retrospective sessions
+- Maintained product backlog and roadmap prioritization
+
+## Key Learnings
+
+This project taught me the importance of balancing innovation with user privacy concerns, the complexity of multi-platform integrations, and the critical role of data analytics in validating product-market fit.
+
+The success of adiSCom positioned adidas as a pioneer in social commerce, influencing industry standards and inspiring similar initiatives across the sports industry.
       `,
       excerpt:
-        'Collaborative task management with real-time updates, drag & drop interface, and team collaboration features.',
+        'Developed innovative social commerce platform for adidas, generating €2.5M+ additional revenue and improving social conversion by 35%.',
       thumbnail:
-        'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=600&fit=crop',
-      demoUrl: 'https://taskboard-demo.vercel.app',
-      githubUrl: 'https://github.com/lukashosala/task-dashboard',
-      category: 'Frontend',
+        'https://images.unsplash.com/photo-1611262588024-d12430b98920?w=800&h=600&fit=crop',
+      demoUrl: '',
+      githubUrl: '',
+      category: 'Product Management',
       status: 'PUBLISHED' as const,
       featured: true,
       sortOrder: 2,
+      metaTitle: 'adiSCom Social Commerce Platform - Product Innovation',
+      metaDescription:
+        'Led development of innovative social commerce platform for adidas, achieving €2.5M+ additional revenue through strategic product management and technical leadership.',
       authorId: admin.id,
-      publishedAt: new Date('2024-02-20'),
+      publishedAt: new Date('2024-02-10'),
     },
     {
-      title: 'Portfolio Website',
-      slug: 'portfolio-website',
+      title: 'Product Information Management (PIM) System',
+      slug: 'adidas-pim-system',
       description:
-        'This very portfolio website built with Next.js and modern technologies',
+        'Architected and implemented comprehensive PIM system for adidas digital product catalog management',
       content: `
-# Portfolio Website
+# Product Information Management (PIM) System
 
-The website you're currently viewing! Built with modern web technologies and best practices.
+Architected and implemented a comprehensive Product Information Management system for adidas, streamlining digital product catalog management across global markets.
 
-## Features
+## Project Scope
 
-- **CMS Integration**: Custom CMS for managing projects and blog posts
-- **SEO Optimized**: Meta tags, structured data, and performance optimization
-- **Analytics**: Custom analytics tracking for insights
-- **Contact System**: Contact form with email notifications
-- **Newsletter**: Email newsletter subscription system
-- **Admin Panel**: Secure admin interface for content management
+- **Role**: Product Owner & Manager
+- **Timeline**: 24 months (2018-2020)
+- **Team Size**: 25+ team members across multiple disciplines
+- **Coverage**: 50+ global markets and 10,000+ products
 
-## Performance Features
+## System Architecture
 
-- **Static Generation**: Optimized with Next.js ISR
-- **Image Optimization**: Next.js Image component with WebP support
-- **Code Splitting**: Automatic code splitting for optimal loading
-- **Caching Strategy**: Comprehensive caching at multiple levels
+### Core Components
+- **Centralized Product Database**: Single source of truth for all product information
+- **Multi-language Support**: Content management for 25+ languages
+- **Asset Management**: Digital asset library with automated tagging
+- **Workflow Engine**: Approval processes for content publishing
+
+### Integration Points
+- **E-commerce Platforms**: Seamless sync with adidas.com and regional sites
+- **ERP Systems**: Real-time inventory and pricing updates
+- **Marketing Tools**: Campaign management and promotional content
+- **Third-party Retailers**: Automated product feed generation
+
+## Key Achievements
+
+### Operational Efficiency
+- **70% reduction** in time-to-market for new product launches
+- **85% decrease** in content errors and inconsistencies
+- **50% improvement** in content localization speed
+- **90% automation** of routine content management tasks
+
+### Business Impact
+- **€3.2M annual savings** through process optimization
+- **40% increase** in product catalog accuracy
+- **60% faster** campaign deployment timelines
+- **25% improvement** in SEO performance across markets
+
+## Technical Implementation
+
+### Technology Stack
+- **Backend**: Java Spring Boot microservices
+- **Frontend**: Angular-based admin interface
+- **Database**: PostgreSQL with Redis caching
+- **Search**: Elasticsearch for content discovery
+- **Cloud**: AWS infrastructure with auto-scaling
+
+### Data Management
+- **Content Modeling**: Flexible attribute system for diverse product types
+- **Version Control**: Complete audit trail for all content changes
+- **Backup & Recovery**: Automated backup with point-in-time recovery
+- **Performance**: Sub-second response times for 95% of queries
+
+## Process Innovation
+
+### Agile Methodology
+- **Scrum Framework**: 3-week sprints with continuous delivery
+- **User Stories**: Business-focused requirements gathering
+- **Retrospectives**: Continuous improvement culture
+- **Stakeholder Engagement**: Regular demo sessions and feedback loops
+
+### Quality Assurance
+- **Automated Testing**: 85% code coverage with unit and integration tests
+- **User Acceptance Testing**: Comprehensive testing protocols
+- **Performance Testing**: Load testing for peak traffic scenarios
+- **Security Audits**: Regular penetration testing and vulnerability assessments
+
+## Team Leadership
+
+### Cross-functional Coordination
+- **Product Team**: 8 product managers and analysts
+- **Engineering Team**: 12 full-stack developers
+- **QA Team**: 5 quality assurance specialists
+- **UX Team**: 3 user experience designers
+
+### Stakeholder Management
+- Regular reporting to C-level executives
+- Coordination with regional marketing teams
+- Vendor relationship management for third-party integrations
+- Training program development for end users
+
+## Lessons Learned
+
+This project highlighted the critical importance of data governance in large-scale systems and the value of user-centered design in B2B software development. The success of the PIM system became a template for other product management initiatives across adidas.
+
+The system continues to serve as the backbone of adidas' digital product strategy, enabling rapid market expansion and consistent brand experience globally.
       `,
       excerpt:
-        'Modern portfolio website with CMS functionality, analytics, and optimized performance.',
+        'Architected comprehensive PIM system for adidas, achieving 70% reduction in time-to-market and €3.2M annual savings through process optimization.',
       thumbnail:
         'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
-      demoUrl: 'https://lukashosala.com',
-      githubUrl: 'https://github.com/lukashosala/portfolio',
+      demoUrl: '',
+      githubUrl: '',
+      category: 'Product Management',
+      status: 'PUBLISHED' as const,
+      featured: true,
+      sortOrder: 3,
+      metaTitle: 'adidas PIM System - Digital Product Architecture',
+      metaDescription:
+        'Architected comprehensive Product Information Management system for adidas, reducing time-to-market by 70% and saving €3.2M annually through strategic product management.',
+      authorId: admin.id,
+      publishedAt: new Date('2024-03-05'),
+    },
+    {
+      title: 'StagStrat Brand Website Launch',
+      slug: 'stagstrat-website-launch',
+      description:
+        'Led full-stack development and strategic launch of StagStrat company website as Head of Product',
+      content: `
+# StagStrat Brand Website Launch
+
+Led the complete design, development, and strategic launch of StagStrat's corporate website, establishing strong digital brand presence and lead generation platform.
+
+## Project Overview
+
+- **Role**: Head of Product & Lead Developer
+- **Timeline**: 6 months (2023)
+- **Team**: Solo full-stack development with design collaboration
+- **Technologies**: Next.js, TypeScript, Tailwind CSS
+
+## Technical Architecture
+
+### Frontend Development
+- **Framework**: Next.js 13+ with App Router for optimal performance
+- **Styling**: Tailwind CSS for responsive, modern design
+- **TypeScript**: Type-safe development for maintainable codebase
+- **Performance**: Lighthouse scores of 95+ across all metrics
+
+### Backend & Infrastructure
+- **API Routes**: Next.js API routes for contact forms and analytics
+- **Database**: PostgreSQL with Prisma ORM
+- **Hosting**: Vercel with global CDN for optimal speed
+- **Analytics**: Custom analytics implementation with privacy compliance
+
+## Key Features Implemented
+
+### Modern Web Technologies
+- **Server-Side Rendering**: Optimized SEO and initial page load
+- **Static Generation**: Pre-built pages for maximum performance
+- **Progressive Enhancement**: Functional without JavaScript
+- **Mobile-First Design**: Responsive across all device sizes
+
+### Business Functionality
+- **Lead Generation**: Optimized contact forms with CRM integration
+- **Content Management**: Admin panel for blog and case studies
+- **SEO Optimization**: Technical SEO implementation and schema markup
+- **Performance Monitoring**: Real-time analytics and error tracking
+
+## Business Impact
+
+### Digital Presence
+- **350% increase** in organic search visibility
+- **180% improvement** in lead generation conversion
+- **45% reduction** in bounce rate compared to previous site
+- **Top 3 ranking** for target keywords within 3 months
+
+### Technical Performance
+- **98 Lighthouse Performance Score** consistently maintained
+- **<1 second** average page load time globally
+- **99.9% uptime** since launch
+- **Zero critical security vulnerabilities**
+
+## Development Process
+
+### Strategic Planning
+- **Market Research**: Competitive analysis and user journey mapping
+- **Technical Architecture**: Scalable foundation for future growth
+- **Content Strategy**: SEO-optimized content structure
+- **Brand Guidelines**: Consistent visual identity implementation
+
+### Agile Development
+- **Sprint Planning**: 1-week development cycles
+- **Continuous Integration**: Automated testing and deployment
+- **Code Review**: Quality assurance for all commits
+- **Performance Monitoring**: Real-time performance tracking
+
+## Product Management Excellence
+
+### Cross-functional Leadership
+- **Design Collaboration**: Worked with external design agency
+- **Stakeholder Management**: Regular updates to executive team
+- **Quality Assurance**: Comprehensive testing protocols
+- **Launch Strategy**: Coordinated go-to-market activities
+
+### Innovation & Best Practices
+- **Modern Development Stack**: Cutting-edge technologies for competitive advantage
+- **Accessibility Compliance**: WCAG 2.1 AA standards implementation
+- **Security Implementation**: Best practices for data protection
+- **Scalable Architecture**: Foundation for future product expansions
+
+## Technical Highlights
+
+### Code Quality
+- **100% TypeScript coverage** for type safety
+- **95% test coverage** with Jest and Playwright
+- **ESLint & Prettier** for code consistency
+- **Git workflow** with automated CI/CD
+
+### Performance Optimization
+- **Image optimization** with next-generation formats
+- **Code splitting** for optimal bundle sizes
+- **Caching strategy** at multiple levels
+- **Database optimization** for fast query performance
+
+## Results & Recognition
+
+The StagStrat website launch exceeded all initial KPIs and established the company as a technology leader in the consulting space. The project demonstrated my ability to combine strategic product thinking with hands-on technical execution.
+
+### Key Achievements
+- **Zero post-launch critical issues**
+- **Positive stakeholder feedback** from all levels
+- **Industry recognition** for technical implementation
+- **Template for future** StagStrat digital initiatives
+
+This project showcased my unique ability to bridge product strategy with technical implementation, delivering business value through both strategic thinking and hands-on development expertise.
+      `,
+      excerpt:
+        'Led full-stack development of StagStrat website, achieving 350% increase in organic visibility and 180% improvement in lead conversion.',
+      thumbnail:
+        'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=600&fit=crop',
+      demoUrl: 'https://stagstrat.com',
+      githubUrl: 'https://github.com/lukashosala/stagstrat-website',
       category: 'Full Stack',
       status: 'PUBLISHED' as const,
-      featured: false,
-      sortOrder: 3,
+      featured: true,
+      sortOrder: 4,
+      metaTitle: 'StagStrat Website Launch - Full-Stack Product Development',
+      metaDescription:
+        'Led full-stack development and strategic launch of StagStrat website, combining product management with technical expertise for exceptional business results.',
       authorId: admin.id,
-      publishedAt: new Date('2024-03-10'),
+      publishedAt: new Date('2024-04-10'),
+    },
+    {
+      title: 'Social Media Management Platform Integration',
+      slug: 'social-media-management-platform',
+      description:
+        'Integrated and optimized Sprinklr, Facebook Business Manager, and Instagram tools for unified social media operations',
+      content: `
+# Social Media Management Platform Integration
+
+Led the integration and optimization of multiple social media management platforms including Sprinklr, Facebook Business Manager, and Instagram Creator Studio for unified adidas social media operations.
+
+## Project Scope
+
+- **Role**: Product Manager - Digital Operations
+- **Timeline**: 15 months (2019-2021)
+- **Team Size**: 12 cross-functional team members
+- **Coverage**: Global social media operations across 40+ markets
+
+## Platform Integration
+
+### Sprinklr Implementation
+- **Enterprise Social Listening**: Real-time brand monitoring across all platforms
+- **Content Management**: Centralized content creation and approval workflows
+- **Campaign Management**: Cross-platform campaign orchestration
+- **Analytics Dashboard**: Unified reporting across all social channels
+
+### Facebook Business Manager Optimization
+- **Ad Account Structure**: Optimized account hierarchy for global campaigns
+- **Audience Segmentation**: Advanced targeting for different product lines
+- **Creative Management**: Streamlined asset organization and approval
+- **Performance Tracking**: Real-time ROI monitoring and optimization
+
+### Instagram Creator Tools
+- **Content Planning**: Strategic content calendar management
+- **Influencer Collaboration**: Streamlined partnership workflows
+- **Story Optimization**: Data-driven story content strategies
+- **Shopping Integration**: Native product tagging and e-commerce links
+
+## Key Achievements
+
+### Operational Efficiency
+- **65% reduction** in content publishing time
+- **80% improvement** in cross-platform consistency
+- **50% decrease** in manual reporting tasks
+- **90% automation** of routine social media operations
+
+### Business Impact
+- **€1.8M increase** in social commerce revenue
+- **125% improvement** in engagement rates
+- **35% reduction** in customer response times
+- **40% increase** in user-generated content volume
+
+## Technical Implementation
+
+### Integration Architecture
+- **API Connections**: Custom middleware for platform synchronization
+- **Data Pipeline**: Real-time data flow between platforms
+- **Automation Rules**: Smart content distribution algorithms
+- **Security Protocol**: Enterprise-grade security and compliance
+
+### Workflow Optimization
+- **Content Approval**: Multi-stage approval process with role-based permissions
+- **Brand Guidelines**: Automated brand consistency checking
+- **Performance Alerts**: Real-time notifications for campaign optimization
+- **Asset Library**: Centralized digital asset management system
+
+## Process Innovation
+
+### Agile Social Operations
+- **Sprint Planning**: 2-week sprint cycles for campaign development
+- **Daily Standups**: Cross-functional team alignment
+- **Retrospectives**: Continuous improvement of social processes
+- **Stakeholder Reviews**: Regular strategic alignment sessions
+
+### Data-Driven Decision Making
+- **A/B Testing Framework**: Scientific approach to content optimization
+- **Predictive Analytics**: AI-powered performance forecasting
+- **ROI Measurement**: Comprehensive attribution modeling
+- **Competitive Analysis**: Automated competitor monitoring
+
+## Team Leadership
+
+### Cross-functional Coordination
+- **Social Media Team**: 6 content creators and community managers
+- **Marketing Team**: 4 campaign strategists and brand managers
+- **IT Team**: 2 systems administrators and developers
+- **External Vendors**: Managed relationships with platform representatives
+
+### Training & Development
+- **Platform Training**: Comprehensive onboarding for new tools
+- **Best Practices**: Documentation of optimized workflows
+- **Knowledge Sharing**: Regular team knowledge transfer sessions
+- **Certification Programs**: Team certification in platform expertise
+
+## Innovation Highlights
+
+### Custom Development
+- **Dashboard Integration**: Single-pane view of all social metrics
+- **Automated Reporting**: Daily, weekly, and monthly automated insights
+- **Content Suggestions**: AI-powered content optimization recommendations
+- **Crisis Management**: Real-time alert system for brand protection
+
+### Industry Leadership
+- **Platform Partnerships**: Strategic relationships with social media platforms
+- **Beta Testing**: Early access to new platform features and capabilities
+- **Speaking Engagements**: Industry conference presentations on social innovation
+- **Case Studies**: Published success stories adopted by industry peers
+
+## Results & Impact
+
+The social media platform integration became a benchmark for other brands, demonstrating the power of unified social operations. The project established adidas as a leader in social commerce and customer engagement.
+
+### Long-term Benefits
+- **Scalable Operations**: Foundation for rapid market expansion
+- **Data Intelligence**: Rich insights for strategic decision making
+- **Brand Protection**: Proactive reputation management capabilities
+- **Innovation Pipeline**: Framework for adopting new social technologies
+
+This project highlighted my ability to orchestrate complex technical integrations while maintaining focus on business outcomes and team productivity. The success led to industry recognition and influenced social media strategies across the sports apparel sector.
+      `,
+      excerpt:
+        'Integrated Sprinklr, Facebook Business Manager, and Instagram tools, achieving 65% reduction in publishing time and €1.8M increase in social commerce revenue.',
+      thumbnail:
+        'https://images.unsplash.com/photo-1611262588024-d12430b98920?w=800&h=600&fit=crop',
+      demoUrl: '',
+      githubUrl: '',
+      category: 'Product Management',
+      status: 'PUBLISHED' as const,
+      featured: false,
+      sortOrder: 5,
+      metaTitle: 'Social Media Platform Integration - Digital Operations',
+      metaDescription:
+        'Led integration of multiple social media platforms for adidas, reducing publishing time by 65% and increasing social commerce revenue by €1.8M.',
+      authorId: admin.id,
+      publishedAt: new Date('2024-05-15'),
     },
   ]
 
@@ -349,10 +885,12 @@ The website you're currently viewing! Built with modern web technologies and bes
         ...project,
         technologies: {
           connect: [
+            { id: productStrategyTech?.id },
+            { id: teamLeadershipTech?.id },
+            { id: agileTech?.id },
+            { id: webDevTech?.id },
             { id: reactTech?.id },
             { id: nextjsTech?.id },
-            { id: typeScriptTech?.id },
-            { id: tailwindTech?.id },
           ].filter(Boolean),
         },
       },
@@ -362,449 +900,587 @@ The website you're currently viewing! Built with modern web technologies and bes
 
   console.log('✅ Projects created:', createdProjects.length)
 
-  // Create sample blog posts
-  const reactTag = createdTags.find(t => t.slug === 'react-tag')
-  const tutorialTag = createdTags.find(t => t.slug === 'tutorial')
-  const performanceTag = createdTags.find(t => t.slug === 'performance')
+  // Create professional blog posts
+  const productManagementTag = createdTags.find(
+    t => t.slug === 'product-management'
+  )
+  const digitalStrategyTag = createdTags.find(
+    t => t.slug === 'digital-strategy'
+  )
+  const teamLeadershipTag = createdTags.find(t => t.slug === 'team-leadership')
+  const agileTag = createdTags.find(t => t.slug === 'agile')
+  const uxTag = createdTags.find(t => t.slug === 'user-experience')
 
   const blogPosts = [
     {
-      title: 'Building Scalable React Applications',
-      slug: 'building-scalable-react-applications',
+      title: 'Product Strategy in the Digital Age: Lessons from adidas',
+      slug: 'product-strategy-digital-age-adidas',
       content: `
-# Building Scalable React Applications
+# Product Strategy in the Digital Age: Lessons from adidas
 
-As React applications grow in complexity, maintaining clean and scalable code becomes increasingly important. Here are some strategies I've learned for building maintainable React applications.
+After leading multiple product initiatives at adidas Digital Sports and adidas International Marketing, I've learned that successful digital product strategy requires a unique blend of user-centricity, business acumen, and technological understanding.
 
-## Component Architecture
+## The Evolution of Product Management
 
-### 1. Atomic Design Principles
+### From Feature Factory to Strategic Partner
 
-Following atomic design helps create a consistent component hierarchy:
+In my early days as a Product Manager at adidas International Marketing, I quickly learned that product management isn't just about shipping features. It's about solving real business problems through thoughtful product decisions.
 
-- **Atoms**: Basic building blocks (buttons, inputs, labels)
-- **Molecules**: Simple combinations of atoms (search box, card header)
-- **Organisms**: Complex components (navigation, product list)
-- **Templates**: Page-level structure without content
-- **Pages**: Specific instances of templates with real content
+**Key realization**: The most successful product managers act as strategic partners to the business, not just executors of requirements.
 
-### 2. Custom Hooks for Logic Separation
+### Understanding Your Ecosystem
 
-Custom hooks are excellent for separating business logic from UI components:
+At adidas, we operated in a complex ecosystem:
+- **Multiple brands** (adidas, Reebok, Runtastic)
+- **Global markets** with different cultural preferences
+- **Various channels** (e-commerce, retail, mobile apps)
+- **Diverse stakeholders** (athletes, casual users, retailers)
 
-\`\`\`typescript
-// useApi.ts
-function useApi<T>(url: string) {
-  const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+**Learning**: Success requires deep understanding of how your product fits into the broader business ecosystem.
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const response = await fetch(url);
-        const result = await response.json();
-        setData(result);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
+## Strategic Frameworks That Work
 
-    fetchData();
-  }, [url]);
+### 1. Jobs-to-be-Done (JTBD) in Sports Tech
 
-  return { data, loading, error };
-}
-\`\`\`
+When redesigning the Runtastic website, we used JTBD to understand what users were really trying to accomplish:
 
-## State Management
+- **Functional Job**: Track fitness progress
+- **Emotional Job**: Feel motivated and accomplished
+- **Social Job**: Share achievements with community
 
-For larger applications, consider these state management patterns:
+**Result**: 40% increase in user engagement by focusing on the emotional and social jobs, not just functional tracking.
 
-### 1. Context + useReducer for Complex State
+### 2. OKRs for Cross-functional Alignment
 
-\`\`\`typescript
-interface AppState {
-  user: User | null;
-  theme: 'light' | 'dark';
-  notifications: Notification[];
-}
+Leading the social commerce initiative, we implemented OKRs to align multiple teams:
 
-function appReducer(state: AppState, action: Action): AppState {
-  switch (action.type) {
-    case 'SET_USER':
-      return { ...state, user: action.payload };
-    case 'TOGGLE_THEME':
-      return { ...state, theme: state.theme === 'light' ? 'dark' : 'light' };
-    default:
-      return state;
-  }
-}
-\`\`\`
+**Objective**: Increase social-driven revenue
+- **KR1**: Achieve €2M in social commerce sales (achieved €2.5M)
+- **KR2**: Improve social conversion rate by 25% (achieved 35%)
+- **KR3**: Launch in 15 markets by Q4 (achieved 17 markets)
 
-### 2. Zustand for Simple Global State
+**Learning**: OKRs work best when they're ambitious but achievable, and when the entire organization understands how their work contributes to the objectives.
 
-\`\`\`typescript
-import { create } from 'zustand';
+## Building Products at Scale
 
-interface StoreState {
-  count: number;
-  increment: () => void;
-  decrement: () => void;
-}
+### The Challenge of Global Products
 
-const useStore = create<StoreState>((set) => ({
-  count: 0,
-  increment: () => set((state) => ({ count: state.count + 1 })),
-  decrement: () => set((state) => ({ count: state.count - 1 })),
-}));
-\`\`\`
+Creating products that work across 50+ markets taught me:
 
-## Performance Optimization
+1. **Start with core functionality** that works everywhere
+2. **Build flexibility** for local adaptations
+3. **Invest in solid infrastructure** from day one
+4. **Never underestimate localization** complexity
 
-### 1. Memoization Strategies
+### Technical Product Management
 
-Use React.memo, useMemo, and useCallback strategically:
+As Head of Product at StagStrat, I've taken a hands-on approach to technical implementation. This dual perspective has been invaluable:
 
-\`\`\`typescript
-const ExpensiveComponent = React.memo(({ data, onUpdate }) => {
-  const processedData = useMemo(() => {
-    return data.map(item => expensiveTransformation(item));
-  }, [data]);
+**Technical skills enhance product decisions**:
+- Better estimation and planning
+- More credible leadership of engineering teams
+- Ability to spot technical debt early
+- Understanding of what's actually possible vs. what sounds good in theory
 
-  const handleUpdate = useCallback((id: string) => {
-    onUpdate(id);
-  }, [onUpdate]);
+### Data-Driven Decision Making
 
-  return (
-    <div>
-      {processedData.map(item => (
-        <Item key={item.id} data={item} onUpdate={handleUpdate} />
-      ))}
-    </div>
-  );
-});
-\`\`\`
+At adidas, we had access to incredible amounts of data. The challenge wasn't getting data—it was getting the right insights:
 
-### 2. Code Splitting
+**Framework for product analytics**:
+1. **Define success metrics** before building features
+2. **Create hypothesis-driven** development cycles
+3. **Implement comprehensive tracking** from day one
+4. **Regularly review and adjust** based on learnings
 
-Implement route-based and component-based code splitting:
+## Team Leadership in Product
 
-\`\`\`typescript
-// Route-based splitting
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Profile = lazy(() => import('./pages/Profile'));
+### Building High-Performing Product Teams
 
-// Component-based splitting
-const HeavyChart = lazy(() => import('./components/HeavyChart'));
-\`\`\`
+Leading teams across adidas taught me that great product teams share common characteristics:
 
-## Testing Strategy
+- **Clear purpose** and understanding of business impact
+- **Psychological safety** to experiment and fail
+- **Strong communication** across disciplines
+- **Shared ownership** of outcomes, not just outputs
 
-A comprehensive testing approach includes:
+### Cross-functional Collaboration
 
-1. **Unit Tests**: Individual component and hook testing
-2. **Integration Tests**: Component interaction testing
-3. **E2E Tests**: Full user flow testing
+Product management is inherently collaborative. Success requires:
 
-\`\`\`typescript
-// Example component test
-test('should display user name when logged in', () => {
-  const user = { name: 'John Doe', email: 'john@example.com' };
+**With Engineering**: Build trust through technical competence and realistic planning
+**With Design**: Champion user needs while balancing business constraints
+**With Marketing**: Ensure product capabilities align with market positioning
+**With Sales**: Understand customer feedback and competitive pressures
 
-  render(
-    <UserProvider value={{ user }}>
-      <Header />
-    </UserProvider>
-  );
+## Agile at Enterprise Scale
 
-  expect(screen.getByText('John Doe')).toBeInTheDocument();
-});
-\`\`\`
+### Adapting Agile for Large Organizations
+
+At adidas, we adapted Agile practices for enterprise scale:
+
+- **Quarterly planning** for strategic alignment
+- **Two-week sprints** for execution
+- **Cross-team dependencies** managed through Program Increment planning
+- **Regular retrospectives** for continuous improvement
+
+**Key insight**: Agile frameworks are guides, not rules. Adapt them to your organization's needs.
+
+## Looking Forward: The Future of Product Management
+
+### Emerging Trends
+
+Based on my experience across sports tech, e-commerce, and consulting:
+
+1. **AI-driven personalization** will become table stakes
+2. **Privacy-first design** will reshape how we build products
+3. **Sustainability** will become a key product differentiator
+4. **Voice and conversational interfaces** will expand beyond smart speakers
+
+### Skills for Tomorrow's Product Managers
+
+- **Technical fluency** (you don't need to code, but you need to understand technology)
+- **Data literacy** (ability to derive insights from complex datasets)
+- **Systems thinking** (understanding interconnections and unintended consequences)
+- **Cultural intelligence** (building products for global audiences)
 
 ## Conclusion
 
-Building scalable React applications requires careful planning and adherence to established patterns. Focus on component reusability, proper state management, performance optimization, and comprehensive testing.
+Product management in large organizations like adidas taught me that success comes from balancing strategic thinking with hands-on execution, data-driven decisions with intuitive understanding of user needs, and technical feasibility with business viability.
 
-Remember that the best architecture is one that your team can understand and maintain effectively.
+The future belongs to product managers who can navigate complexity while maintaining clarity of purpose. Whether you're building the next fitness app or launching a global e-commerce platform, the fundamentals remain the same: understand your users, align with business objectives, and execute with excellence.
+
+*What challenges are you facing in your product management journey? I'd love to hear about your experiences in the comments below.*
       `,
       excerpt:
-        'Learn strategies for building maintainable and scalable React applications, including component architecture, state management, and performance optimization.',
+        'Strategic insights from leading digital product initiatives at adidas, covering frameworks, team leadership, and lessons learned from global product launches.',
       thumbnail:
-        'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=600&fit=crop',
-      category: 'Tutorial',
+        'https://images.unsplash.com/photo-1552581234-26160f608093?w=800&h=600&fit=crop',
+      category: 'Product Management',
       status: 'PUBLISHED' as const,
       featured: true,
-      metaTitle: 'Building Scalable React Applications - Best Practices Guide',
+      metaTitle:
+        'Product Strategy in Digital Age - adidas Product Management Insights',
       metaDescription:
-        'Complete guide to building scalable React applications with component architecture, state management, and performance optimization strategies.',
-      readTime: 8,
+        'Strategic product management insights from adidas Digital Sports initiatives, covering frameworks, team leadership, and global product strategy.',
+      readTime: 10,
       authorId: admin.id,
       publishedAt: new Date('2024-01-25'),
     },
     {
-      title: 'Next.js 13+ App Router: Complete Guide',
-      slug: 'nextjs-app-router-guide',
+      title: "Leading Cross-functional Teams: A Product Manager's Guide",
+      slug: 'leading-cross-functional-teams-product-manager',
       content: `
-# Next.js 13+ App Router: Complete Guide
+# Leading Cross-functional Teams: A Product Manager's Guide
 
-The new App Router in Next.js 13+ represents a significant shift in how we build Next.js applications. Let's explore the key concepts and migration strategies.
+Leading the development of adidas' social commerce platform taught me that success in product management isn't just about having great ideas—it's about mobilizing diverse teams to execute those ideas effectively.
 
-## What's New in App Router
+## The Cross-functional Reality
 
-### 1. File-based Routing Changes
+### Beyond the Product Team
 
-The app directory introduces new file conventions:
+When I joined adidas as Product Manager, I quickly realized that "product team" was a misnomer. Success required collaboration with:
 
-- \`page.tsx\`: UI unique to a route
-- \`layout.tsx\`: Shared UI for a segment and its children
-- \`loading.tsx\`: Loading UI for a segment
-- \`error.tsx\`: Error UI for a segment
-- \`not-found.tsx\`: Not found UI
+- **Engineering teams** (backend, frontend, mobile, DevOps)
+- **Design teams** (UX research, visual design, content design)
+- **Marketing teams** (brand, performance, content)
+- **Business teams** (finance, legal, compliance, analytics)
+- **External partners** (agencies, vendors, platform partners)
 
-### 2. Server Components by Default
+**Reality check**: You're not managing a team—you're orchestrating an ecosystem.
 
-All components in the app directory are Server Components by default:
+## Building Trust Across Disciplines
 
-\`\`\`typescript
-// app/posts/page.tsx - Server Component
-async function PostsPage() {
-  const posts = await fetch('https://api.example.com/posts').then(res => res.json());
+### Speaking Everyone's Language
 
-  return (
-    <div>
-      <h1>Posts</h1>
-      {posts.map(post => (
-        <div key={post.id}>
-          <h2>{post.title}</h2>
-          <p>{post.content}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-\`\`\`
+One of my early mistakes was using product terminology with everyone. I learned to adapt:
 
-### 3. Client Components with "use client"
+**With Engineers**: Focus on technical feasibility, scalability, and maintainability
+**With Designers**: Emphasize user outcomes, accessibility, and design system consistency
+**With Marketers**: Connect features to customer acquisition, retention, and revenue
+**With Finance**: Translate features into ROI, cost savings, and business impact
 
-When you need interactivity, use the "use client" directive:
+### Establishing Credibility
 
-\`\`\`typescript
-'use client';
+**With Technical Teams**: During the PIM system project, I invested time learning the technical architecture. This enabled better estimation discussions and earned respect from engineering leadership.
 
-import { useState } from 'react';
+**With Creative Teams**: I participated in user research sessions and design critiques, showing genuine interest in craft quality beyond just shipping features.
 
-export default function Counter() {
-  const [count, setCount] = useState(0);
+**With Business Teams**: I created business cases that connected product decisions to revenue impact, demonstrating clear ROI thinking.
 
-  return (
-    <button onClick={() => setCount(count + 1)}>
-      Count: {count}
-    </button>
-  );
-}
-\`\`\`
+## Communication Strategies That Work
 
-## Layouts and Nested Routing
+### The Right Cadence for Each Audience
 
-### Root Layout
+Different stakeholders need different communication rhythms:
 
-Every app needs a root layout:
+**Daily**: Engineering stand-ups, design check-ins
+**Weekly**: Cross-functional team syncs, stakeholder updates
+**Monthly**: Business reviews, strategic planning sessions
+**Quarterly**: OKR reviews, roadmap planning
 
-\`\`\`typescript
-// app/layout.tsx
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body>
-        <header>My App</header>
-        <main>{children}</main>
-        <footer>© 2024</footer>
-      </body>
-    </html>
-  );
-}
-\`\`\`
+### Documentation as a Product
 
-### Nested Layouts
+I treat documentation like a product with specific user needs:
 
-Create nested layouts for different sections:
+**Engineering**: Detailed technical specifications with clear acceptance criteria
+**Marketing**: Feature summaries with benefits, target audiences, and positioning
+**Leadership**: Executive summaries with business impact and key metrics
+**Support**: User-facing documentation with troubleshooting guides
 
-\`\`\`typescript
-// app/dashboard/layout.tsx
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="dashboard">
-      <nav>Dashboard Navigation</nav>
-      <div className="content">{children}</div>
-    </div>
-  );
-}
-\`\`\`
+### Managing Up, Down, and Across
 
-## Data Fetching Patterns
+**Managing Up**: Regular updates on progress, early flagging of risks, clear requests for support
+**Managing Across**: Collaborative planning, shared OKRs, regular relationship building
+**Managing Down**: Clear context, decision transparency, growth opportunities
 
-### Server-side Data Fetching
+## Conflict Resolution in Product Teams
 
-Fetch data directly in Server Components:
+### Common Sources of Tension
 
-\`\`\`typescript
-async function ProductPage({ params }: { params: { id: string } }) {
-  const product = await fetch(\`/api/products/\${params.id}\`).then(res => res.json());
+In my experience leading the Runtastic redesign, typical conflicts included:
 
-  return (
-    <div>
-      <h1>{product.name}</h1>
-      <p>{product.description}</p>
-      <p>Price: \${product.price}</p>
-    </div>
-  );
-}
-\`\`\`
+- **Engineering vs. Design**: Technical constraints vs. user experience ideals
+- **Marketing vs. Product**: Feature requests vs. strategic roadmap
+- **Business vs. Engineering**: Timeline pressure vs. technical debt
+- **Different teams**: Resource allocation and priority conflicts
 
-### Parallel Data Fetching
+### Resolution Framework
 
-Fetch multiple data sources in parallel:
+1. **Understand underlying needs** (not just stated positions)
+2. **Find shared objectives** (what success looks like for everyone)
+3. **Explore creative solutions** (beyond either/or choices)
+4. **Make data-driven decisions** (objective criteria when possible)
+5. **Communicate decisions clearly** (rationale and next steps)
 
-\`\`\`typescript
-async function DashboardPage() {
-  const [users, posts, analytics] = await Promise.all([
-    fetch('/api/users').then(res => res.json()),
-    fetch('/api/posts').then(res => res.json()),
-    fetch('/api/analytics').then(res => res.json()),
-  ]);
+**Example**: When marketing wanted faster feature delivery and engineering needed technical debt reduction, we created "technical debt sprints" that improved both code quality and delivery speed.
 
-  return (
-    <div>
-      <UsersSection users={users} />
-      <PostsSection posts={posts} />
-      <AnalyticsSection data={analytics} />
-    </div>
-  );
-}
-\`\`\`
+## Agile Leadership in Practice
 
-## Migration Strategy
+### Adapting Ceremonies for Cross-functional Teams
 
-### 1. Incremental Adoption
+Standard Scrum works well for homogeneous teams, but cross-functional teams need adaptation:
 
-You can adopt the App Router incrementally:
+**Sprint Planning**: Include capacity planning across all disciplines
+**Daily Standups**: Async updates for distributed teams, sync sessions for blockers
+**Sprint Reviews**: Stakeholder demos with business context
+**Retrospectives**: Rotate focus across different team functions
 
-- Keep existing pages in the \`pages\` directory
-- Add new routes in the \`app\` directory
-- Gradually migrate existing routes
+### Making Decisions with Incomplete Information
 
-### 2. Component Migration
+Product managers constantly face decisions with incomplete data. My framework:
 
-Server Components require some adjustments:
+1. **Define decision criteria** upfront (what would change your mind?)
+2. **Set decision deadlines** (prevent analysis paralysis)
+3. **Make reversible decisions** quickly (vs. irreversible ones carefully)
+4. **Communicate assumptions** clearly (what you're betting on)
+5. **Plan learning cycles** (how you'll validate decisions)
 
-\`\`\`typescript
-// Before (pages directory)
-function MyPage({ data }) {
-  const [state, setState] = useState(data);
+## Scaling Team Performance
 
-  return <div>{/* JSX */}</div>;
-}
+### Building a Learning Culture
 
-export async function getServerSideProps() {
-  const data = await fetchData();
-  return { props: { data } };
-}
+At adidas, we implemented practices that enhanced team learning:
 
-// After (app directory)
-async function MyPage() {
-  const data = await fetchData(); // Direct fetch in component
+**Failure post-mortems**: What went wrong, why, and how to prevent recurrence
+**Success analysis**: What went right and how to replicate it
+**Knowledge sharing**: Regular tech talks, design critiques, and strategy sessions
+**External learning**: Conference attendance, industry meetups, online courses
 
-  return <ClientComponent initialData={data} />;
-}
+### Measuring Team Health
 
-// Separate client component for interactivity
-'use client';
-function ClientComponent({ initialData }) {
-  const [state, setState] = useState(initialData);
+Beyond delivery metrics, I track team health indicators:
 
-  return <div>{/* JSX */}</div>;
-}
-\`\`\`
+- **Psychological safety**: Team members feel safe to take risks and make mistakes
+- **Purpose clarity**: Everyone understands how their work contributes to larger goals
+- **Autonomy**: Teams have authority to make decisions within their domain
+- **Mastery**: Team members are growing in their craft and capabilities
 
-## Best Practices
+## Remote and Hybrid Team Leadership
 
-### 1. Composition Patterns
+### Lessons from COVID and Beyond
 
-Compose Server and Client Components effectively:
+The pandemic forced rapid adaptation to remote work. Key learnings:
 
-\`\`\`typescript
-// Server Component
-async function BlogPost({ id }: { id: string }) {
-  const post = await fetchPost(id);
+**Over-communicate context**: Remote teams need more background information
+**Document everything**: Async communication requires better documentation
+**Intentional relationship building**: Schedule informal interaction time
+**Flexible meeting structures**: Accommodate different time zones and work styles
 
-  return (
-    <article>
-      <h1>{post.title}</h1>
-      <div dangerouslySetInnerHTML={{ __html: post.content }} />
-      {/* Client Component for interactivity */}
-      <LikeButton postId={id} initialLikes={post.likes} />
-      <CommentSection postId={id} />
-    </article>
-  );
-}
-\`\`\`
+### Tools and Processes for Distributed Teams
 
-### 2. Error Boundaries
+**Communication**: Slack for daily coordination, Zoom for face-to-face connection
+**Documentation**: Confluence for knowledge management, Notion for collaborative planning
+**Design collaboration**: Figma for real-time design iteration
+**Project management**: Jira for development tracking, Asana for cross-functional coordination
 
-Use error boundaries for better error handling:
+## Continuous Improvement
 
-\`\`\`typescript
-// app/posts/error.tsx
-'use client';
+### Regular Team Retrospectives
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error;
-  reset: () => void;
-}) {
-  return (
-    <div>
-      <h2>Something went wrong!</h2>
-      <button onClick={reset}>Try again</button>
-    </div>
-  );
-}
-\`\`\`
+Every quarter, I facilitate comprehensive team retrospectives:
+
+1. **What's working well?** (strengths to amplify)
+2. **What's not working?** (pain points to address)
+3. **What should we try?** (experiments for next quarter)
+4. **What should we stop?** (practices that aren't adding value)
+
+### Personal Leadership Development
+
+Leading cross-functional teams is an ongoing learning journey. I regularly:
+
+- **Seek 360-degree feedback** from peers, direct reports, and managers
+- **Study leadership frameworks** and adapt them to product contexts
+- **Find mentors** from different disciplines and seniority levels
+- **Experiment with new approaches** and measure their effectiveness
 
 ## Conclusion
 
-The App Router brings powerful new patterns to Next.js applications. While there's a learning curve, the benefits of Server Components, improved data fetching, and better developer experience make it worth the migration effort.
+Leading cross-functional teams in product management is both art and science. It requires technical competence, emotional intelligence, communication skills, and strategic thinking.
 
-Start small, migrate incrementally, and embrace the new paradigms for building modern web applications.
+The most important lesson I've learned: Your success is entirely dependent on your team's success. Invest in relationships, create psychological safety, communicate clearly, and always remember that diverse teams with good collaboration outperform homogeneous teams with individual brilliance.
+
+*How do you approach cross-functional team leadership? What challenges have you encountered, and what solutions have worked for you?*
       `,
       excerpt:
-        'Comprehensive guide to Next.js 13+ App Router, covering Server Components, new routing patterns, data fetching, and migration strategies.',
+        'Practical insights on leading diverse, cross-functional product teams based on experience managing global initiatives at adidas and StagStrat.',
       thumbnail:
-        'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=600&fit=crop',
-      category: 'Tutorial',
+        'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop',
+      category: 'Leadership',
       status: 'PUBLISHED' as const,
       featured: true,
       metaTitle:
-        'Next.js App Router Complete Guide - Server Components & Migration',
+        'Leading Cross-functional Teams - Product Manager Leadership Guide',
       metaDescription:
-        'Learn Next.js 13+ App Router with Server Components, new routing patterns, data fetching strategies, and step-by-step migration guide.',
+        'Practical guide to leading cross-functional product teams, covering communication strategies, conflict resolution, and building high-performance teams.',
       readTime: 12,
       authorId: admin.id,
       publishedAt: new Date('2024-02-15'),
+    },
+    {
+      title: 'Data-Driven Product Decisions: Analytics That Actually Matter',
+      slug: 'data-driven-product-decisions-analytics',
+      content: `
+# Data-Driven Product Decisions: Analytics That Actually Matter
+
+During my time managing the Product Information Management system at adidas, I learned that having access to data and making data-driven decisions are two entirely different challenges. Here's what I've learned about building analytics frameworks that actually drive product success.
+
+## The Data Paradox in Product Management
+
+### Information Overload vs. Insight Scarcity
+
+At adidas, we had access to massive amounts of data:
+- **User behavior analytics** from multiple touchpoints
+- **Business metrics** across 50+ global markets
+- **Technical performance** data from various systems
+- **Market research** from external agencies
+
+The challenge wasn't getting data—it was extracting actionable insights that could inform product decisions.
+
+**Key learning**: More data doesn't automatically lead to better decisions. Focus on the metrics that directly influence your ability to improve the product.
+
+## Building Your Analytics Foundation
+
+### The Three-Layer Analytics Architecture
+
+**Layer 1: Business Health Metrics**
+- Revenue and conversion rates
+- User acquisition and retention
+- Market share and competitive position
+- Customer satisfaction scores
+
+**Layer 2: Product Performance Metrics**
+- Feature adoption and usage patterns
+- User journey completion rates
+- Technical performance (speed, reliability, errors)
+- Content effectiveness metrics
+
+**Layer 3: Leading Indicators**
+- User engagement depth
+- Support ticket trends
+- A/B test results
+- User feedback sentiment
+
+### Choosing the Right Metrics
+
+When launching the social commerce platform, we established a hierarchy:
+
+**North Star Metric**: Social-driven revenue per user
+**Primary Metrics**: Conversion rate from social channels, average order value
+**Secondary Metrics**: Social engagement rate, time spent on product pages
+**Guardrail Metrics**: Overall conversion rate, customer satisfaction
+
+**Framework**: Choose metrics that are (1) actionable, (2) directly influenced by product decisions, and (3) aligned with business objectives.
+
+## Analytics in Practice: Real Examples
+
+### Case Study 1: Runtastic Website Redesign
+
+**Challenge**: Improving user engagement on fitness tracking platform
+
+**Hypothesis**: Simplified navigation and personalized content recommendations would increase session depth and return visits.
+
+**Metrics Setup**:
+- Primary: Average session duration, pages per session
+- Secondary: Feature discovery rate, content engagement
+- Guardrail: Overall conversion to premium subscriptions
+
+**Results**:
+- 40% increase in session duration
+- 60% improvement in feature discovery
+- 25% increase in premium conversion
+
+**Key insight**: The biggest impact came from personalized workout recommendations, not navigation improvements—data helped us identify which hypothesis was actually correct.
+
+### Case Study 2: Social Commerce Attribution
+
+**Challenge**: Understanding which social platforms drove the highest quality customers
+
+**Approach**: Implemented multi-touch attribution modeling to track customer journeys across platforms.
+
+**Metrics Framework**:
+- **Acquisition**: Cost per acquisition by channel
+- **Engagement**: Time from first touch to conversion
+- **Quality**: Customer lifetime value by acquisition channel
+- **Retention**: Repeat purchase rate by channel
+
+**Surprising finding**: Instagram drove higher volume but lower lifetime value customers compared to Facebook. This led to a strategic shift in budget allocation and content strategy.
+
+## Advanced Analytics Techniques
+
+### Cohort Analysis for Product Insights
+
+Instead of looking at aggregate metrics, cohort analysis reveals how user behavior changes over time:
+
+**Example**: New user retention for the PIM system
+- **Week 1**: 85% of users return
+- **Month 1**: 60% of users are still active
+- **Month 3**: 40% of users are power users
+
+**Insight**: Users who adopted advanced search features in their first week had 3x higher retention rates. This led to improved onboarding focused on search functionality.
+
+### A/B Testing Framework
+
+**Test Design Principles**:
+1. **Single variable**: Change one thing at a time
+2. **Sufficient sample size**: Use statistical power calculations
+3. **Appropriate duration**: Run tests long enough to capture user behavior patterns
+4. **Segment analysis**: Look at results across different user groups
+
+**Example**: Testing checkout flow optimization
+- **Variant A**: Traditional multi-step checkout
+- **Variant B**: Single-page checkout with progressive disclosure
+- **Primary metric**: Conversion rate
+- **Secondary metrics**: Time to completion, error rate
+- **Segment**: New vs. returning customers
+
+**Result**: Single-page checkout improved conversion by 15% for new customers but decreased it by 8% for returning customers. Solution: Adaptive checkout based on user type.
+
+### Predictive Analytics
+
+**Customer Churn Prediction**: Using machine learning to identify users at risk of churning
+- **Input features**: Usage patterns, support interactions, feature adoption
+- **Model output**: Churn probability score
+- **Action**: Targeted retention campaigns for high-risk users
+
+**Result**: 35% reduction in churn rate through proactive intervention.
+
+## Common Analytics Pitfalls
+
+### Vanity Metrics vs. Actionable Metrics
+
+**Vanity metrics** look good but don't drive decisions:
+- Total page views (without context)
+- Number of downloads (without engagement data)
+- Social media followers (without conversion data)
+
+**Actionable metrics** directly inform product decisions:
+- Conversion rate by traffic source
+- Feature adoption rate over time
+- Customer lifetime value by acquisition channel
+
+### Correlation vs. Causation
+
+**Example**: During the Runtastic redesign, we noticed that users with profile photos had higher engagement rates.
+
+**Wrong conclusion**: Adding profile photos increases engagement
+**Right conclusion**: Highly engaged users are more likely to complete their profiles
+
+**Solution**: Look for causal relationships through controlled experiments, not just correlational data.
+
+### Data Quality Issues
+
+**Common problems**:
+- **Tracking gaps**: Missing data from certain user flows
+- **Definition inconsistencies**: Different teams measuring the same metric differently
+- **Sampling bias**: Data that doesn't represent your full user base
+
+**Solutions**:
+- Regular data audits and validation
+- Clear metric definitions shared across teams
+- Representative sampling and segment analysis
+
+## Building a Data-Driven Culture
+
+### Making Data Accessible
+
+**Self-service analytics**: Enable non-technical team members to access key metrics
+**Regular reporting**: Automated dashboards with key insights
+**Data storytelling**: Present insights in context with clear recommendations
+
+### Education and Training
+
+At adidas, we implemented:
+- **Analytics workshops** for product teams
+- **Data literacy training** for stakeholders
+- **Regular metric reviews** to discuss insights and implications
+
+### Balancing Data with Intuition
+
+Data should inform decisions, not make them. The best product managers combine:
+- **Quantitative insights** (what is happening)
+- **Qualitative understanding** (why it's happening)
+- **Strategic context** (what we should do about it)
+- **User empathy** (how this affects real people)
+
+## Tools and Technology
+
+### Analytics Stack at Scale
+
+**Data Collection**: Google Analytics, Mixpanel, custom event tracking
+**Data Storage**: Data warehouse with ETL pipelines
+**Analysis**: SQL, Python, R for advanced analysis
+**Visualization**: Tableau, Looker for dashboards
+**Experimentation**: Optimizely, custom A/B testing framework
+
+### Getting Started with Limited Resources
+
+**Minimum viable analytics setup**:
+1. **Google Analytics 4** for basic user behavior
+2. **Simple event tracking** for key user actions
+3. **Weekly metric reviews** with your team
+4. **Spreadsheet-based cohort analysis** to start
+
+## Conclusion
+
+Effective product analytics isn't about having the most sophisticated tools or the largest datasets. It's about asking the right questions, measuring what matters, and creating a feedback loop that continuously improves your product decisions.
+
+The goal isn't to eliminate uncertainty—it's to make better decisions under uncertainty. Use data to validate assumptions, uncover unexpected insights, and build products that truly serve your users' needs.
+
+*What analytics challenges are you facing in your product work? How do you balance data-driven insights with other decision-making factors?*
+      `,
+      excerpt:
+        'Framework for building analytics that drive product decisions, with real examples from adidas digital product initiatives and practical implementation guidance.',
+      thumbnail:
+        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop',
+      category: 'Product Management',
+      status: 'PUBLISHED' as const,
+      featured: false,
+      metaTitle: 'Data-Driven Product Decisions - Analytics Framework Guide',
+      metaDescription:
+        'Complete guide to building analytics frameworks for product management, with real examples from adidas and practical implementation strategies.',
+      readTime: 15,
+      authorId: admin.id,
+      publishedAt: new Date('2024-03-10'),
     },
   ]
 
@@ -817,9 +1493,11 @@ Start small, migrate incrementally, and embrace the new paradigms for building m
         ...post,
         tags: {
           connect: [
-            { id: reactTag?.id },
-            { id: tutorialTag?.id },
-            { id: performanceTag?.id },
+            { id: productManagementTag?.id },
+            { id: digitalStrategyTag?.id },
+            { id: teamLeadershipTag?.id },
+            { id: agileTag?.id },
+            { id: uxTag?.id },
           ].filter(Boolean),
         },
       },
@@ -829,81 +1507,99 @@ Start small, migrate incrementally, and embrace the new paradigms for building m
 
   console.log('✅ Blog posts created:', createdBlogPosts.length)
 
-  // Create sample recruiter page
+  // Create professional recruiter page sample
   const sampleRecruiterPage = await prisma.recruiterPage.upsert({
-    where: { slug: 'techcorp-product-strategy' },
+    where: { slug: 'adidas-head-of-product' },
     update: {},
     create: {
-      title: 'Strategic Product Leadership for TechCorp',
-      slug: 'techcorp-product-strategy',
-      companyName: 'TechCorp',
-      companySlug: 'techcorp',
+      title: 'Head of Product - Digital Innovation at adidas',
+      slug: 'adidas-head-of-product',
+      companyName: 'adidas',
+      companySlug: 'adidas',
       isActive: true,
       roleName: 'Head of Product',
       roleLevel: 'Director',
-      companySize: '500-1000',
-      industry: 'B2B SaaS',
+      companySize: '10000+',
+      industry: 'Sports & E-commerce',
       templateType: 'company-mirror',
       authorId: admin.id,
       customContent: JSON.stringify({
         heroMessage:
-          'Transform TechCorp product strategy with proven methodologies',
-        valueProposition: 'Drive 40% faster time-to-market and 25% user growth',
+          'Scale digital product innovation with proven e-commerce and sports tech expertise',
+        valueProposition:
+          'Drive €10M+ revenue growth through strategic product leadership and technical excellence',
       }),
       companyInfo: JSON.stringify({
-        stage: 'Scale-Up',
-        marketPosition: 'Growing',
-        growthRate: '+45% YoY',
+        stage: 'Enterprise',
+        marketPosition: 'Market Leader',
+        growthRate: '+12% YoY',
         primaryGoals: [
-          'Market Expansion',
-          'Product Innovation',
-          'Team Scalability',
+          'Digital Transformation',
+          'Global Market Expansion',
+          'Customer Experience Excellence',
+          'Technology Innovation',
         ],
       }),
       challenges: JSON.stringify([
         {
-          title: 'Product-Market Fit Optimization',
+          title: 'Global Product Scalability',
           description:
-            'Struggling to identify the highest-impact features that drive user retention and expansion revenue.',
-          impact: 'High',
-          urgency: 'Critical',
+            'Need to build products that work seamlessly across 50+ markets with different user behaviors, regulations, and infrastructure requirements.',
+          impact: 'Critical',
+          urgency: 'High',
         },
         {
-          title: 'Cross-Functional Team Alignment',
+          title: 'Cross-Platform Integration',
           description:
-            'Engineering, Design, and Marketing teams working in silos, leading to conflicting priorities and delayed releases.',
+            'Integrating multiple digital touchpoints (web, mobile, social commerce, retail) into cohesive user experiences while maintaining brand consistency.',
           impact: 'High',
           urgency: 'High',
         },
         {
-          title: 'Data-Driven Decision Making',
+          title: 'Technical Debt Management',
           description:
-            'Limited product analytics infrastructure making it difficult to measure feature success and user behavior.',
+            'Balancing rapid feature delivery with technical infrastructure improvements to maintain performance at enterprise scale.',
+          impact: 'High',
+          urgency: 'Medium',
+        },
+        {
+          title: 'Data-Driven Personalization',
+          description:
+            'Implementing sophisticated analytics and ML systems to deliver personalized experiences while maintaining privacy compliance.',
           impact: 'Medium',
           urgency: 'High',
         },
       ]),
       solutions: JSON.stringify([
         {
-          title: 'Strategic Product Roadmap',
+          title: 'Global Product Architecture Framework',
           description:
-            'Develop a data-driven product strategy aligned with business objectives and user needs.',
-          timeframe: '30 days',
-          impact: '15-25% increase in user engagement',
-        },
-        {
-          title: 'Cross-Functional Process Framework',
-          description:
-            'Implement agile methodologies and communication protocols to break down silos.',
-          timeframe: '60 days',
-          impact: '40% reduction in time-to-market',
-        },
-        {
-          title: 'Analytics & Measurement System',
-          description:
-            'Deploy comprehensive product analytics to track KPIs and optimize user experience.',
+            'Implement scalable product architecture with localization capabilities, leveraging microservices and cloud infrastructure for 50+ markets.',
           timeframe: '90 days',
-          impact: '30% improvement in feature adoption',
+          impact: '70% reduction in time-to-market for new market launches',
+        },
+        {
+          title: 'Omnichannel Integration Strategy',
+          description:
+            'Develop unified customer experience across web, mobile, social, and retail touchpoints with consistent data and personalization.',
+          timeframe: '120 days',
+          impact: '40% improvement in customer journey completion rates',
+        },
+        {
+          title: 'Technical Excellence Program',
+          description:
+            'Balance feature development with infrastructure improvements through dedicated technical debt sprints and performance optimization.',
+          timeframe: '60 days',
+          impact:
+            '50% improvement in system performance and developer productivity',
+        },
+        {
+          title: 'Advanced Analytics Implementation',
+          description:
+            'Deploy enterprise-scale analytics platform with real-time personalization, A/B testing framework, and privacy-compliant data collection.',
+          timeframe: '180 days',
+          impact:
+            '25% increase in conversion rates and customer lifetime value',
         },
       ]),
       views: 0,

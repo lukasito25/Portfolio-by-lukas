@@ -118,7 +118,7 @@ export function CompanyMirrorTemplate({ page }: CompanyMirrorTemplateProps) {
             </h1>
 
             <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-              A comprehensive proposal from Lukas Hosala demonstrating how
+              A comprehensive proposal from Lukáš Hošala demonstrating how
               strategic product management can accelerate {page.companyName}'s
               growth through proven methodologies that have scaled platforms to
               165M+ users and managed 13+ cross-functional teams.
