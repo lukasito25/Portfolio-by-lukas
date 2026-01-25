@@ -128,7 +128,7 @@ export const defaultContent: SiteContent = {
         { value: '8+', label: 'Years Experience' },
         { value: '165M+', label: 'Users Reached' },
         { value: '13', label: 'Max Team Size' },
-        { value: '4', label: 'Countries' },
+        { value: '3', label: 'Countries' },
       ],
     },
     competencies: [
@@ -178,7 +178,7 @@ export const defaultContent: SiteContent = {
         { label: 'Years of Experience', value: '8+' },
         { label: 'Global Users Reached', value: '165M+' },
         { label: 'Max Team Size', value: '13' },
-        { label: 'Countries Worked', value: '4' },
+        { label: 'Countries Worked', value: '3' },
       ],
     },
     philosophy: {
@@ -223,7 +223,7 @@ export const defaultContent: SiteContent = {
         {
           title: 'Head of Product',
           company: 'StagStrat | Algorithmic Trading Startup',
-          period: '2022 - Present',
+          period: '2025 - Present',
           location: 'Remote (Colorado, USA)',
           description:
             'Orchestrating development and product lifecycle of algorithmic trading platform. Created comprehensive product roadmap, launched complete website, and implemented SEO optimization plan for revolutionary trading solutions in the fintech space.',
@@ -256,15 +256,15 @@ export const defaultContent: SiteContent = {
     hero: {
       title: 'Insights from the Field',
       description:
-        'Real stories and lessons learned from 8+ years managing international teams at adidas Digital Sports and fintech startups. Currently based in Volterra, Italy, sharing insights from leading teams of 13 across four countries while serving 165M+ users globally.',
+        'Real stories and lessons learned from 8+ years managing international teams at adidas Digital Sports and fintech startups. Currently based in Volterra, Italy, sharing insights from leading teams of 13 across three countries while serving 165M+ users globally.',
     },
     featured: {
       title:
-        'From Volterra to Global Impact: Managing International Teams Across Four Countries',
+        'From Volterra to Global Impact: Managing International Teams Across Three Countries',
       description:
         'Real insights from my experience leading cross-functional teams of up to 13 personnel at adidas Digital Sports while based in Volterra, Italy. From managing external freelancers to coordinating complex website redesigns across Austria, Netherlands, Colorado, and Italy while serving 165M+ users globally.',
       keyInsights: [
-        'Communication strategies across four countries and multiple time zones',
+        'Communication strategies across three countries and multiple time zones',
         'Managing cultural differences in distributed teams',
         'Coordinating complex technical migrations with zero downtime',
         'Building trust and accountability from a remote Italian hilltop town',
@@ -277,7 +277,7 @@ export const defaultContent: SiteContent = {
         description:
           'How I went from Sport Management graduate to leading international product teams at adidas Digital Sports serving 165M+ users, now based in medieval Tuscany.',
         content:
-          "After leading teams across four countries from Slovakia to my current base in Volterra, Italy, I've learned that great collaboration isn't about processes—it's about people and cultural understanding. Here's how to build international teams that move fast and build together.",
+          "After leading teams across three countries from Slovakia to my current base in Volterra, Italy, I've learned that great collaboration isn't about processes—it's about people and cultural understanding. Here's how to build international teams that move fast and build together.",
         date: 'January 8, 2025',
         readTime: '6 min read',
         tags: ['Leadership', 'International Teams'],
@@ -348,7 +348,7 @@ export const defaultContent: SiteContent = {
     hero: {
       title: 'Building Products That Scale Globally',
       description:
-        '8+ years of international product management experience delivering digital solutions that serve millions of users globally, from my base in Volterra, Italy to teams across four countries.',
+        '8+ years of international product management experience delivering digital solutions that serve millions of users globally, from my base in Volterra, Italy to teams across three countries.',
     },
     featured: {
       title: 'adidas Runtastic Website Redesign: Serving 165M+ Global Users',
@@ -357,7 +357,7 @@ export const defaultContent: SiteContent = {
       solution:
         'Orchestrated cross-functional teams of 13 personnel across Austria, Netherlands, and remote locations, implementing agile methodologies and strategic project management to deliver rebranded content, new technology stack, and integrated SEO marketing strategy.',
       impact:
-        'Successfully migrated 165M+ users to new platform with zero downtime, improved site performance by 40%, and enhanced user experience across 15+ countries while maintaining business continuity from a medieval Tuscan hilltop town.',
+        'Successfully migrated 165M+ users to new platform with zero downtime, improved site performance by 55%, and enhanced user experience across 15+ countries while maintaining business continuity from a medieval Tuscan hilltop town.',
     },
     professionalProjects: {
       title: 'Professional Projects',
@@ -379,7 +379,7 @@ export const defaultContent: SiteContent = {
             { label: 'Global Users', value: '165M+' },
             { label: 'Team Size', value: '13' },
             { label: 'Downtime', value: 'Zero' },
-            { label: 'Performance', value: '+40%' },
+            { label: 'Performance', value: '+55%' },
           ],
         },
         {
