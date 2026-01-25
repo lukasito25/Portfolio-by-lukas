@@ -33,6 +33,9 @@ export default function Home() {
 
   useEffect(() => {
     const loadContent = async () => {
+      // Set loading to false immediately to prevent hanging
+      setIsLoading(false)
+
       try {
         // Only try to load from API if we're using API mode
         if (process.env.NEXT_PUBLIC_USE_API === 'true') {
@@ -65,8 +68,6 @@ export default function Home() {
         )
         // Ensure we always have content to display
         setContent(defaultContent.homepage)
-      } finally {
-        setIsLoading(false)
       }
     }
 
