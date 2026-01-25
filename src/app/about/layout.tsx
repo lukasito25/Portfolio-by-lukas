@@ -3,25 +3,32 @@ import { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'About Lukáš Hošala - Senior Product Manager Story',
   description:
-    "Learn about Lukáš Hošala's journey from Slovakia to leading international teams at adidas Digital Sports (165M+ users) and fintech startups. Now based in Volterra, Italy.",
+    'From Slovakia to the hills of Tuscany: discover how Lukáš turned sport management studies into a career building digital products that millions of people use daily. The unconventional path to product leadership.',
   keywords: [
     'About Lukáš Hošala',
     'Product Manager Career',
     'adidas Digital Sports',
-    'International Experience',
+    'Cross-functional Teams',
+    '13+ Members',
+    '3 Countries',
+    '165 Million Users',
     'Team Leadership',
-    'Volterra Italy',
+    'Agile Methodology',
+    'B2B B2C Products',
+    'StagStrat',
+    'Italy EU',
     'Professional Journey',
     'Strategic Management',
+    'MBA Graduate',
   ],
   openGraph: {
     title: 'About Lukáš Hošala - Senior Product Manager Story',
     description:
       'Learn about my journey from Slovakia to leading international teams at adidas Digital Sports and fintech startups.',
-    url: 'https://lukashosala.com/about',
+    url: 'https://portfolio-by-lukas.vercel.app/about',
   },
   alternates: {
-    canonical: 'https://lukashosala.com/about',
+    canonical: 'https://portfolio-by-lukas.vercel.app/about',
   },
 }
 

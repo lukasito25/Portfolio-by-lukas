@@ -145,8 +145,8 @@ export default function ContactPage() {
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Ready to scale your product, build world-class teams, or expand into
-            new markets? Let&apos;s discuss how my experience leading 165M+ user
-            products can help accelerate your growth.
+            new markets? Let&apos;s discuss how my experience building products
+            that millions trust products can help accelerate your growth.
           </p>
         </div>
       </section>
@@ -176,7 +176,7 @@ export default function ContactPage() {
                     </div>
                     <div className="flex items-center gap-3 text-sm">
                       <MapPin className="w-4 h-4 text-red-600" />
-                      <span>Volterra, Italy</span>
+                      <span>Italy, EU</span>
                     </div>
                   </CardContent>
                 </Card>

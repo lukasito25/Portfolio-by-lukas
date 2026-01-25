@@ -21,4 +21,4 @@ User-agent: Bingbot
 Allow: /
 
 # Sitemap location
-Sitemap: https://lukashosala.com/sitemap.xml
+Sitemap: https://portfolio-by-lukas.vercel.app/sitemap.xml

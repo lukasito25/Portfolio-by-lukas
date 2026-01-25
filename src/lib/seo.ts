@@ -3,7 +3,7 @@ import { Metadata } from 'next'
 // SEO constants
 export const SEO_CONFIG = {
   siteName: 'Lukáš Hošala - Product Manager',
-  siteUrl: process.env.NEXTAUTH_URL || 'https://portfolio.lukashosala.com',
+  siteUrl: process.env.NEXTAUTH_URL || 'https://portfolio-by-lukas.vercel.app',
   defaultTitle: 'Lukáš Hošala - Product Manager & Technology Leader',
   defaultDescription:
     'Experienced Product Manager specializing in user-centered design, strategic planning, and cross-functional team leadership. Helping companies build products that users love.',
@@ -20,7 +20,7 @@ export const SEO_CONFIG = {
     'Data-driven Decisions',
   ],
   twitterHandle: '@lukashosala',
-  linkedinProfile: 'https://linkedin.com/in/lukashosala',
+  linkedinProfile: 'https://linkedin.com/in/hosala',
   githubProfile: 'https://github.com/lukashosala',
 }
 

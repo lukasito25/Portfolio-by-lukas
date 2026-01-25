@@ -3,7 +3,7 @@ import { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Skills & Expertise - Product Management, Team Leadership & Strategy',
   description:
-    '8+ years of product management expertise including team leadership (13 personnel), digital transformation, agile methodology, and strategic management. Proven experience at adidas Digital Sports and fintech.',
+    'Eight years of building products that actually work, leading international teams, and making complex technology feel simple. From scaling platforms for millions of users to launching fintech startups that traders trust.',
   keywords: [
     'Product Management Skills',
     'Team Leadership',
@@ -47,11 +47,11 @@ export default function SkillsPage() {
       title: 'Leadership & Management',
       icon: '👥',
       skills: [
-        { name: 'Team Leadership (13+ people)', level: 95 },
+        { name: 'Leading diverse international teams', level: 95 },
         { name: 'Cross-functional Collaboration', level: 92 },
         { name: 'Stakeholder Management', level: 90 },
-        { name: 'International Team Coordination', level: 88 },
-        { name: 'Freelancer Management', level: 85 },
+        { name: 'Coordinating across time zones & cultures', level: 88 },
+        { name: 'Integrating external talent seamlessly', level: 85 },
         { name: 'Performance Management', level: 90 },
       ],
     },
@@ -59,11 +59,11 @@ export default function SkillsPage() {
       title: 'Technical & Development',
       icon: '⚙️',
       skills: [
-        { name: 'API Integration & Management', level: 85 },
-        { name: 'Tech Stack Modernization', level: 82 },
+        { name: 'Making systems talk to each other', level: 85 },
+        { name: 'Upgrading legacy systems gracefully', level: 82 },
         { name: 'Database Management', level: 78 },
         { name: 'System Architecture Planning', level: 80 },
-        { name: 'Development Process Optimization', level: 88 },
+        { name: 'Making development actually enjoyable', level: 88 },
         { name: 'Quality Assurance Oversight', level: 85 },
       ],
     },
@@ -87,7 +87,7 @@ export default function SkillsPage() {
         { name: 'Business Development', level: 88 },
         { name: 'Financial Modeling', level: 80 },
         { name: 'Risk Management', level: 85 },
-        { name: 'International Market Expansion', level: 90 },
+        { name: 'Scaling products across cultures', level: 90 },
         { name: 'Competitive Analysis', level: 92 },
       ],
     },
@@ -121,9 +121,10 @@ export default function SkillsPage() {
             My Skills
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            A comprehensive toolkit built through 8+ years of product management
-            experience, leading international teams and scaling digital
-            platforms for 165M+ users
+            Eight years of learning what actually works when building products
+            that millions of people use every day. Here's what I've picked up
+            along the way—from managing global teams to shipping code that
+            traders bet their careers on.
           </p>
         </div>
       </section>

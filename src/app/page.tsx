@@ -128,11 +128,11 @@ export default function Home() {
               .replace(/13 personnel/g, '')
               .replace(/165M\+ users/g, '')}
             <span className="font-bold text-purple-600 cosmic-pulse">
-              13 personnel
+              13+ members
             </span>
-            {' to deliver products that serve '}
+            {' across 3 countries, launching B2B and B2C products reaching '}
             <span className="font-bold text-green-600 cosmic-pulse">
-              165M+ users
+              165+ million users
             </span>
             {' globally.'}
           </p>

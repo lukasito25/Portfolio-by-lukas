@@ -4,22 +4,22 @@ export const mainNavigation: NavItem[] = [
   {
     label: 'Home',
     href: '/',
-    description: 'Welcome to my portfolio',
+    description: 'Where it all begins',
   },
   {
     label: 'About',
     href: '/about',
-    description: 'Learn more about me',
+    description: 'The story so far',
   },
   {
     label: 'Skills',
     href: '/skills',
-    description: 'My expertise & capabilities',
+    description: 'What I bring to the table',
   },
   {
     label: 'Work',
     href: '/work',
-    description: 'View my projects',
+    description: 'Products that matter',
   },
   // {
   //   label: 'Blog',
@@ -35,19 +35,9 @@ export const mainNavigation: NavItem[] = [
 
 export const socialLinks = [
   {
-    label: 'GitHub',
-    href: 'https://github.com',
-    icon: 'Github',
-  },
-  {
     label: 'LinkedIn',
-    href: 'https://linkedin.com',
+    href: 'https://linkedin.com/in/hosala',
     icon: 'Linkedin',
-  },
-  {
-    label: 'Twitter',
-    href: 'https://twitter.com',
-    icon: 'Twitter',
   },
   {
     label: 'Email',

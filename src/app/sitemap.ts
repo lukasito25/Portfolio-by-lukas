@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://lukashosala.com'
+  const baseUrl = 'https://portfolio-by-lukas.vercel.app'
   const currentDate = new Date()
 
   return [

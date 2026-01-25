@@ -21,27 +21,36 @@ export const metadata: Metadata = {
       'Lukáš Hošala - Senior Product Manager | adidas Digital Sports & Fintech Expert',
   },
   description:
-    'Senior Product Manager with 8+ years of international experience leading teams at adidas Digital Sports (165M+ users) and fintech startups. Expert in digital transformation, team leadership, and product strategy from Volterra, Italy.',
+    'Product manager turning ideas into digital realities from the hills of Tuscany. Eight years of building products that millions of people actually use—from fitness tracking apps to algorithmic trading platforms. Currently orchestrating product magic across continents.',
   keywords: [
+    'Lukáš Hošala',
     'Senior Product Manager',
     'adidas Digital Sports',
     'Product Management',
     'Team Leadership',
     'Digital Transformation',
-    'International Teams',
+    'Cross-functional Teams',
+    '13+ Members',
+    '3 Countries',
     'Product Strategy',
     'Fintech',
     'StagStrat',
     'Agile Methodology',
+    'Scrum',
     'Strategic Management',
     'Runtastic',
-    'E-commerce',
-    'Global Scale',
-    'Volterra Italy',
+    'B2B Products',
+    'B2C Products',
+    '165 Million Users',
+    'Enterprise Software',
+    'API Integration',
+    'Italy EU',
     'Remote Leadership',
-    'Cross-functional Teams',
+    'MBA Graduate',
   ],
-  authors: [{ name: 'Lukáš Hošala', url: 'https://lukashosala.com' }],
+  authors: [
+    { name: 'Lukáš Hošala', url: 'https://portfolio-by-lukas.vercel.app' },
+  ],
   creator: 'Lukáš Hošala',
   publisher: 'Lukáš Hošala',
   robots: {
@@ -58,11 +67,11 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://lukashosala.com',
+    url: 'https://portfolio-by-lukas.vercel.app',
     title:
       'Lukáš Hošala - Senior Product Manager | adidas Digital Sports & Fintech Expert',
     description:
-      'Senior Product Manager with 8+ years leading international teams at adidas Digital Sports (165M+ users) and fintech startups. Based in Volterra, Italy.',
+      'Product manager turning ideas into digital realities from the hills of Tuscany. Eight years of building products that millions of people actually use—from fitness tracking apps to algorithmic trading platforms. Currently orchestrating product magic across continents.',
     siteName: 'Lukáš Hošala Portfolio',
     images: [
       {
@@ -86,7 +95,7 @@ export const metadata: Metadata = {
     google: 'your-google-verification-code',
   },
   alternates: {
-    canonical: 'https://lukashosala.com',
+    canonical: 'https://portfolio-by-lukas.vercel.app',
     languages: {
       'en-US': 'https://lukashosala.com',
     },

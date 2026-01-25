@@ -3,16 +3,20 @@ import { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Contact Lukáš Hošala - Senior Product Manager & Strategic Consultant',
   description:
-    'Get in touch with Lukáš Hošala for product management consulting, strategic advisory, team leadership, or collaboration opportunities. Based in Volterra, Italy, available for international projects.',
+    'Get in touch with Lukáš Hošala for product management consulting, strategic advisory, team leadership, or collaboration opportunities. Based in Italy, EU, available for international projects.',
   keywords: [
     'Contact Lukáš Hošala',
     'Product Management Consultant',
     'Strategic Advisory',
     'Team Leadership Consulting',
+    'Cross-functional Teams',
+    'Agile Methodology',
+    'Enterprise Software',
+    'B2B B2C Products',
     'International Collaboration',
     'Product Strategy Consulting',
     'Remote Consultation',
-    'Volterra Italy',
+    'Italy EU',
     'Business Strategy',
     'Digital Transformation Consultant',
   ],
@@ -20,10 +24,10 @@ export const metadata: Metadata = {
     title: 'Contact Lukáš Hošala - Product Management & Strategic Consulting',
     description:
       'Get in touch for product management consulting, strategic advisory, and collaboration opportunities.',
-    url: 'https://lukashosala.com/contact',
+    url: 'https://portfolio-by-lukas.vercel.app/contact',
   },
   alternates: {
-    canonical: 'https://lukashosala.com/contact',
+    canonical: 'https://portfolio-by-lukas.vercel.app/contact',
   },
 }
 
