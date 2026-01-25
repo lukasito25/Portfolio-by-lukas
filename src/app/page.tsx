@@ -29,7 +29,7 @@ import { defaultContent } from '@/lib/content-config'
 
 export default function Home() {
   const [content, setContent] = useState(defaultContent.homepage)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const loadContent = async () => {
