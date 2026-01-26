@@ -350,13 +350,14 @@ export const defaultContent: SiteContent = {
         '8+ years of international product management experience delivering digital solutions that serve millions of users globally, leading teams across three countries.',
     },
     featured: {
-      title: 'adidas Runtastic Website Redesign: Serving 165M+ Global Users',
+      title:
+        'adidas Digital Sports: Global Platform Transformation Serving 165M+ Users',
       challenge:
-        'Leading a comprehensive website redesign and technology stack migration for adidas Digital Sports while maintaining zero downtime for 165M+ active users across multiple countries and languages, coordinating across international teams.',
+        'Leading the most critical technology transformation in adidas Digital Sports history - migrating a platform serving 165+ million global users to a modern tech stack while maintaining zero downtime across multiple countries and languages. Required coordination across three international locations (Colombia, Netherlands, Germany) with diverse cultural and technical challenges while ensuring seamless user experience for millions of daily active users.',
       solution:
-        'Orchestrated cross-functional teams of 13 personnel across Austria, Netherlands, and remote locations, implementing agile methodologies and strategic project management to deliver rebranded content, new technology stack, and integrated SEO marketing strategy.',
+        'Orchestrated cross-functional teams of 10+ members using agile methodologies and strategic project management. Implemented Next.js and React technology migration with comprehensive testing and staged deployment approach. Developed integrated SEO marketing strategy while managing complex international stakeholder alignment and ensuring robust performance optimization throughout the transition.',
       impact:
-        'Successfully migrated 165M+ users to new platform with zero downtime, improved site performance by 55%, and enhanced user experience across 15+ countries while maintaining seamless business continuity.',
+        "Achieved zero-downtime migration for 165+ million users globally with remarkable 55% improvement in page load speed. Enhanced user experience across 15+ countries while maintaining seamless business continuity for one of the world's largest fitness platforms. Established new performance benchmarks and modern technical foundation for continued global expansion.",
     },
     professionalProjects: {
       title: 'Professional Projects',
@@ -365,7 +366,7 @@ export const defaultContent: SiteContent = {
         {
           title: 'adidas Runtastic Website Redesign',
           description:
-            'Led comprehensive website redesign and technology stack migration for adidas Digital Sports, serving 165M+ global users with zero downtime while coordinating across international teams.',
+            "Spearheaded a critical technology transformation for one of the world's largest fitness platforms serving 165+ million users globally. Led cross-functional teams across three countries (Colombia, Netherlands, Germany) through a complete website redesign and modern tech stack migration using Next.js and React. Implemented agile methodologies and strategic project management to deliver zero-downtime deployment while significantly improving user experience and platform performance.",
           technologies: [
             'Next.js',
             'TypeScript',
@@ -375,16 +376,16 @@ export const defaultContent: SiteContent = {
             'Docker',
           ],
           metrics: [
-            { label: 'Global Users', value: '165M+' },
-            { label: 'Team Size', value: '13' },
-            { label: 'Downtime', value: 'Zero' },
-            { label: 'Performance', value: '+55%' },
+            { label: 'Global Users Served', value: '165M+' },
+            { label: 'Page Load Speed Improvement', value: '+55%' },
+            { label: 'Cross-Country Teams', value: '3 Countries' },
+            { label: 'Platform Downtime', value: 'Zero' },
           ],
         },
         {
-          title: 'adidas Internal Admin Portal',
+          title: 'adidas Global Admin Application',
           description:
-            'Product lifecycle management for internal administration portal, streamlining operations across international teams and multiple locations.',
+            'Managed the complete product lifecycle for a mission-critical internal administration platform serving 1000+ stakeholders across adidas global organization. Streamlined operations and governance processes for international teams spanning multiple business units and geographic regions. Built robust enterprise-grade solution using Java ecosystem with high availability and scalability requirements for global deployment.',
           technologies: [
             'Angular',
             'Java',
@@ -394,27 +395,49 @@ export const defaultContent: SiteContent = {
             'Jenkins',
           ],
           metrics: [
-            { label: 'Internal Users', value: '1000+' },
-            { label: 'Efficiency Gain', value: '+45%' },
-            { label: 'Global Reach', value: '25+' },
+            { label: 'Global Stakeholders', value: '1000+' },
+            { label: 'Enterprise Deployment', value: 'Global Scale' },
+            { label: 'Business Units Served', value: 'Multiple' },
+            { label: 'Location', value: 'Salzburg, Austria' },
           ],
         },
         {
-          title: 'Social Commerce Engine (adiSCom)',
+          title: 'Enterprise Social Commerce Platform & Sprinklr Integration',
           description:
-            'Product management for in-house social commerce engine and Sprinklr integration at adidas, managing teams of 13 personnel across multiple countries.',
+            'Led product management for high-value enterprise initiatives including a 1 Million EUR annual Sprinklr license and in-house social commerce engine (adiSCom) processing 500K+ monthly interactions. Managed development teams of 13+ personnel including external freelancers, coordinating across multiple countries. Drove 30% increase in platform adoption through strategic onboarding improvements and enhanced customer care initiatives. Supported 50+ global market teams through integrated social media tool ecosystem.',
           technologies: [
             'Vue.js',
             'Node.js',
             'GraphQL',
             'MongoDB',
             'Sprinklr API',
-            'AWS',
+            'Facebook Business Manager',
+            'Instagram API',
           ],
           metrics: [
-            { label: 'Social Platforms', value: '10+' },
-            { label: 'Team Management', value: '13' },
-            { label: 'Integration Success', value: '100%' },
+            { label: 'Platform License Value', value: '1M EUR' },
+            { label: 'Monthly Interactions', value: '500K+' },
+            { label: 'Platform Adoption Increase', value: '+30%' },
+            { label: 'Global Market Teams', value: '50+' },
+          ],
+        },
+        {
+          title: 'Product Information Management (PIM) System',
+          description:
+            'Delivered enterprise-grade Product Information Management tool working with external development teams during rapid career progression from Intern to Product Owner within 18 months. Achieved remarkable 70% improvement in speed to market through streamlined product data workflows and enhanced operational efficiency. Successfully launched comprehensive PIM solution on schedule with 100% user adoption rate, managing global social media tool ecosystem supporting 50+ market teams across Facebook Business Manager, Instagram, and Sprinklr platforms.',
+          technologies: [
+            'PIM Systems',
+            'External Vendor Management',
+            'Facebook Business Manager',
+            'Instagram API',
+            'Sprinklr Platform',
+            'Enterprise Integration',
+          ],
+          metrics: [
+            { label: 'Speed to Market Improvement', value: '+70%' },
+            { label: 'User Adoption Rate', value: '100%' },
+            { label: 'Career Progression', value: '18 Months' },
+            { label: 'Location', value: 'Amsterdam, Netherlands' },
           ],
         },
       ],
@@ -426,7 +449,7 @@ export const defaultContent: SiteContent = {
         {
           title: 'StagStrat Algorithmic Trading Platform',
           description:
-            'Head of Product for fintech startup, orchestrating complete product lifecycle from concept to production launch. Revolutionary algorithmic trading platform with advanced risk management.',
+            'Leading product development for a cutting-edge fintech startup targeting institutional investors. Owned complete product lifecycle from conception to production launch, establishing market credibility through strategic product roadmap and user-centric API integrations. Implemented SEO optimization strategy that significantly boosted organic visibility while streamlining development processes for maximum efficiency.',
           technologies: [
             'React',
             'Python',
@@ -436,9 +459,10 @@ export const defaultContent: SiteContent = {
             'Docker',
           ],
           metrics: [
-            { label: 'Platform Launch', value: '100%' },
-            { label: 'Product Strategy', value: 'Full' },
-            { label: 'Time to Market', value: '12mo' },
+            { label: 'Lead Time Reduction', value: '80%' },
+            { label: 'Organic Traffic Growth', value: '+40%' },
+            { label: 'Product Lifecycle Ownership', value: 'End-to-End' },
+            { label: 'Location', value: 'Remote (Leeds, UK)' },
           ],
         },
       ],
