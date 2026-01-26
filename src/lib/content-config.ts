@@ -119,11 +119,10 @@ export interface SiteContent {
 export const defaultContent: SiteContent = {
   homepage: {
     hero: {
-      badge:
-        'Senior Product Manager • 8+ Years Experience • Based in Volterra, Italy',
+      badge: 'Senior Product Manager • 8+ Years Experience • Italy, EU',
       headline: ['Building Digital', 'Products', 'That Scale Globally'],
       subheadline:
-        'Senior Product Manager with 8+ years of international experience leading digital transformation at adidas Digital Sports and fintech startups. Currently based in Volterra, Italy, leading cross-functional teams of up to 13 personnel to deliver products that serve 165M+ users globally.',
+        'Senior Product Manager with 8+ years of international experience leading digital transformation at adidas Digital Sports and fintech startups. Expert in leading cross-functional teams of up to 13 personnel across multiple locations and time zones to deliver products that serve 165M+ users globally.',
       metrics: [
         { value: '8+', label: 'Years Experience' },
         { value: '165M+', label: 'Users Reached' },
@@ -173,7 +172,7 @@ export const defaultContent: SiteContent = {
     hero: {
       title: 'From Slovakia to Global Scale',
       description:
-        "I'm Lukáš Hošala, a Senior Product Manager with 8+ years of international experience spanning digital sports, e-commerce, and fintech. Based in Volterra, Italy, I've led cross-functional teams of up to 13 personnel across multiple locations, delivering products that serve 165M+ users globally at companies like adidas Digital Sports (Runtastic) and algorithmic trading startup StagStrat.",
+        "I'm Lukáš Hošala, a Senior Product Manager with 8+ years of international experience spanning digital sports, e-commerce, and fintech. Currently based in Italy, I've led cross-functional teams of up to 13 personnel across multiple locations and time zones, delivering products that serve 165M+ users globally at companies like adidas Digital Sports (Runtastic) and algorithmic trading startup StagStrat.",
       quickStats: [
         { label: 'Years of Experience', value: '8+' },
         { label: 'Global Users Reached', value: '165M+' },
@@ -224,7 +223,7 @@ export const defaultContent: SiteContent = {
           title: 'Head of Product',
           company: 'StagStrat | Algorithmic Trading Startup',
           period: '2025 - Present',
-          location: 'Remote (Colorado, USA)',
+          location: 'Remote (Leeds, UK)',
           description:
             'Orchestrating development and product lifecycle of algorithmic trading platform. Created comprehensive product roadmap, launched complete website, and implemented SEO optimization plan for revolutionary trading solutions in the fintech space.',
         },
@@ -256,28 +255,28 @@ export const defaultContent: SiteContent = {
     hero: {
       title: 'Insights from the Field',
       description:
-        'Real stories and lessons learned from 8+ years managing international teams at adidas Digital Sports and fintech startups. Currently based in Volterra, Italy, sharing insights from leading teams of 13 across three countries while serving 165M+ users globally.',
+        'Real stories and lessons learned from 8+ years managing international teams at adidas Digital Sports and fintech startups. Insights from leading teams of 13 across three countries while serving 165M+ users globally.',
     },
     featured: {
       title:
-        'From Volterra to Global Impact: Managing International Teams Across Three Countries',
+        'From Slovakia to Global Impact: Leading International Teams Across Three Countries',
       description:
-        'Real insights from my experience leading cross-functional teams of up to 13 personnel at adidas Digital Sports while based in Volterra, Italy. From managing external freelancers to coordinating complex website redesigns across Austria, Netherlands, Colorado, and Italy while serving 165M+ users globally.',
+        'Real insights from my experience leading cross-functional teams of up to 13 personnel at adidas Digital Sports. From managing external freelancers to coordinating complex website redesigns across Austria, Netherlands, and UK while serving 165M+ users globally.',
       keyInsights: [
         'Communication strategies across three countries and multiple time zones',
         'Managing cultural differences in distributed teams',
         'Coordinating complex technical migrations with zero downtime',
-        'Building trust and accountability from a remote Italian hilltop town',
+        'Building trust and accountability across distributed teams',
       ],
     },
     articles: [
       {
         title:
-          'From Slovakia to Volterra: My Journey in International Product Management',
+          'From Slovakia to Global Scale: My Journey in International Product Management',
         description:
-          'How I went from Sport Management graduate to leading international product teams at adidas Digital Sports serving 165M+ users, now based in medieval Tuscany.',
+          'How I went from Sport Management graduate to leading international product teams at adidas Digital Sports serving 165M+ users globally.',
         content:
-          "After leading teams across three countries from Slovakia to my current base in Volterra, Italy, I've learned that great collaboration isn't about processes—it's about people and cultural understanding. Here's how to build international teams that move fast and build together.",
+          "After leading teams across three countries, I've learned that great collaboration isn't about location—it's about people and cultural understanding. Here's how to build international teams that move fast and build together.",
         date: 'January 8, 2025',
         readTime: '6 min read',
         tags: ['Leadership', 'International Teams'],
@@ -348,16 +347,16 @@ export const defaultContent: SiteContent = {
     hero: {
       title: 'Building Products That Scale Globally',
       description:
-        '8+ years of international product management experience delivering digital solutions that serve millions of users globally, from my base in Volterra, Italy to teams across three countries.',
+        '8+ years of international product management experience delivering digital solutions that serve millions of users globally, leading teams across three countries.',
     },
     featured: {
       title: 'adidas Runtastic Website Redesign: Serving 165M+ Global Users',
       challenge:
-        'Leading a comprehensive website redesign and technology stack migration for adidas Digital Sports while maintaining zero downtime for 165M+ active users across multiple countries and languages, coordinating from Volterra, Italy.',
+        'Leading a comprehensive website redesign and technology stack migration for adidas Digital Sports while maintaining zero downtime for 165M+ active users across multiple countries and languages, coordinating across international teams.',
       solution:
         'Orchestrated cross-functional teams of 13 personnel across Austria, Netherlands, and remote locations, implementing agile methodologies and strategic project management to deliver rebranded content, new technology stack, and integrated SEO marketing strategy.',
       impact:
-        'Successfully migrated 165M+ users to new platform with zero downtime, improved site performance by 55%, and enhanced user experience across 15+ countries while maintaining business continuity from a medieval Tuscan hilltop town.',
+        'Successfully migrated 165M+ users to new platform with zero downtime, improved site performance by 55%, and enhanced user experience across 15+ countries while maintaining seamless business continuity.',
     },
     professionalProjects: {
       title: 'Professional Projects',
@@ -366,7 +365,7 @@ export const defaultContent: SiteContent = {
         {
           title: 'adidas Runtastic Website Redesign',
           description:
-            'Led comprehensive website redesign and technology stack migration for adidas Digital Sports, serving 165M+ global users with zero downtime while coordinating from Volterra, Italy.',
+            'Led comprehensive website redesign and technology stack migration for adidas Digital Sports, serving 165M+ global users with zero downtime while coordinating across international teams.',
           technologies: [
             'Next.js',
             'TypeScript',
