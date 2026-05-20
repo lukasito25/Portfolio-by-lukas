@@ -250,7 +250,7 @@ export const defaultContent: SiteContent = {
           title: 'Senior Product Manager',
           company: 'Runtastic GmbH | adidas Digital Sports',
           period: '2022 - 2025',
-          location: 'Salzburg, Austria',
+          location: 'Vienna, Austria',
           description:
             "Led the website redesign and tech stack migration for Runtastic — a fitness platform with over 165 million users. The team was spread across Colombia, Netherlands, and Germany, which meant most of my job was coordination and keeping things moving. We migrated to Next.js and React, improved page load speed by 55%, and kept the platform running throughout. Also managed the lifecycle of adidas's internal admin application, used by 1000+ people across the organisation.",
           metrics: [
@@ -472,7 +472,7 @@ export const defaultContent: SiteContent = {
             { label: 'Internal users', value: '1000+' },
             { label: 'Deployment scope', value: 'Global' },
             { label: 'Business units served', value: 'Multiple' },
-            { label: 'Based in', value: 'Salzburg, Austria' },
+            { label: 'Based in', value: 'Vienna, Austria' },
           ],
         },
         {
