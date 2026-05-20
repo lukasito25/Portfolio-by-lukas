@@ -35,6 +35,10 @@ export const metadata: Metadata = {
     'Product Strategy',
     'Fintech',
     'StagStrat',
+    'PlayerGrade',
+    'Football Scouting Platform',
+    'SaaS Founder',
+    'Sports Tech',
     'Agile Methodology',
     'Scrum',
     'Strategic Management',
@@ -109,7 +113,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

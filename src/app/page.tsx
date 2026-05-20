@@ -214,8 +214,9 @@ export default function Home() {
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               8+ years of international product management experience across
-              digital sports, e-commerce, and fintech, with expertise in agile
-              methodologies and team leadership.
+              digital sports, e-commerce, fintech, and SaaS — including founding
+              PlayerGrade, a multi-tenant football scouting platform — with
+              expertise in agile methodologies and team leadership.
             </p>
           </div>
 

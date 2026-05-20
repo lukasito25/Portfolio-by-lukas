@@ -87,6 +87,21 @@ export interface SiteContent {
       solution: string
       impact: string
     }
+    playergrade: {
+      title: string
+      tagline: string
+      description: string
+      status: string
+      url: string
+      challenge: string
+      solution: string
+      impact: string
+      technologies: string[]
+      metrics: {
+        label: string
+        value: string
+      }[]
+    }
     professionalProjects: {
       title: string
       subtitle: string
@@ -119,7 +134,8 @@ export interface SiteContent {
 export const defaultContent: SiteContent = {
   homepage: {
     hero: {
-      badge: 'Senior Product Manager • 8+ Years Experience • Italy, EU',
+      badge:
+        'Senior Product Manager & Founder • 8+ Years Experience • Italy, EU',
       headline: ['Building Digital', 'Products', 'That Scale Globally'],
       subheadline:
         'Senior Product Manager with 8+ years of international experience leading digital transformation at adidas Digital Sports and fintech startups. Expert in leading cross-functional teams of up to 13 personnel across multiple locations and time zones to deliver products that serve 165M+ users globally.',
@@ -226,6 +242,20 @@ export const defaultContent: SiteContent = {
           location: 'Remote (Leeds, UK)',
           description:
             'Orchestrating development and product lifecycle of algorithmic trading platform. Created comprehensive product roadmap, launched complete website, and implemented SEO optimization plan for revolutionary trading solutions in the fintech space.',
+        },
+        {
+          title: 'Founder & Head of Product',
+          company: 'PlayerGrade | Football Scouting SaaS',
+          period: '2026 - Present',
+          location: 'Remote',
+          description:
+            'Sole founder building a multi-tenant SaaS platform for football clubs and scouts to objectively grade and compare players using a proprietary v6 position-calibrated scoring engine. Currently in active beta with 4 club tenants across CEE, 395 players profiled, and a shared Central & Eastern European player pool.',
+          metrics: [
+            { label: 'Live Tenants', value: '4 Clubs' },
+            { label: 'Players Profiled', value: '395' },
+            { label: 'Scoring Engine', value: 'v6 Native' },
+            { label: 'Status', value: 'Beta' },
+          ],
         },
         {
           title: 'Product Manager',
@@ -358,6 +388,38 @@ export const defaultContent: SiteContent = {
         'Orchestrated cross-functional teams of 10+ members using agile methodologies and strategic project management. Implemented Next.js and React technology migration with comprehensive testing and staged deployment approach. Developed integrated SEO marketing strategy while managing complex international stakeholder alignment and ensuring robust performance optimization throughout the transition.',
       impact:
         "Achieved zero-downtime migration for 165+ million users globally with remarkable 55% improvement in page load speed. Enhanced user experience across 15+ countries while maintaining seamless business continuity for one of the world's largest fitness platforms. Established new performance benchmarks and modern technical foundation for continued global expansion.",
+    },
+    playergrade: {
+      title: 'PlayerGrade',
+      tagline: 'AI-Powered Football Scouting Platform',
+      description:
+        'Sole founder and Head of Product of PlayerGrade — a multi-tenant SaaS platform purpose-built for football clubs and scouts to objectively grade, compare, and shortlist players using a proprietary position-calibrated scoring engine. Currently in active development with 4 live club tenants across Central & Eastern Europe, 395 players profiled, and the v6 scoring engine running natively across all 9 positions.',
+      status: 'Beta',
+      url: 'https://playergrade.lovable.app/',
+      challenge:
+        'Football scouting at club level relies heavily on subjective observation and fragmented spreadsheets. Scouts lack a data-driven, position-aware way to objectively compare players across different leagues and contexts — especially in emerging markets like CEE where access to expensive tools like Wyscout is limited.',
+      solution:
+        'Built a multi-tenant SaaS platform from the ground up as sole PM and founder. Designed a proprietary v6 scoring engine with per-position calibration, a 395-player shared CEE pool, tenant isolation architecture (DB-level write locks, 8 regression tests), and a position-mapping audit layer that surfaces data confidence. The platform supports multiple model versions (Classic, Premium, v6 calibration) selectable per club.',
+      impact:
+        'Platform is technically production-ready for the anchor tenant (MFK Ružomberok) and a controlled second tenant. 4 clubs onboarded, 395 players profiled (239 private + 156 shared CEE pool), 385 score history rows, v6 scoring engine native across all 9 positions with 168/168 unit tests passing. On track for paid-tenant commercial launch.',
+      technologies: [
+        'React',
+        'TypeScript',
+        'Supabase',
+        'PostgreSQL',
+        'Tailwind CSS',
+        'Lovable',
+        'Row-Level Security',
+        'Edge Functions',
+      ],
+      metrics: [
+        { label: 'Live Club Tenants', value: '4' },
+        { label: 'Players Profiled', value: '395' },
+        { label: 'Scoring Engine', value: 'v6' },
+        { label: 'Positions Calibrated', value: '9/9' },
+        { label: 'Unit Tests Passing', value: '168/168' },
+        { label: 'CEE Shared Pool', value: '156 Players' },
+      ],
     },
     professionalProjects: {
       title: 'Professional Projects',

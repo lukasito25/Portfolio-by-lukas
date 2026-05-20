@@ -932,15 +932,10 @@ class DataService {
         }
 
         // If API returns empty content, fall back to default
-        console.log(
-          `API returned empty content for section '${section}', using default content`
-        )
         const { defaultContent } = await import('./content-config')
         return defaultContent[section as keyof typeof defaultContent] || {}
-      } catch (error) {
-        console.error('API failed, falling back to default content:', error)
-
-        // Always fall back to default content when in browser and API fails
+      } catch {
+        // API unavailable (expected in local dev) — using static default content
         const { defaultContent } = await import('./content-config')
         return defaultContent[section as keyof typeof defaultContent] || {}
       }
