@@ -188,7 +188,7 @@ export const defaultContent: SiteContent = {
     hero: {
       title: 'From Slovakia to Global Scale',
       description:
-        "I'm Lukáš Hošala, a Senior Product Manager with 8+ years of international experience spanning digital sports, e-commerce, and fintech. Currently based in Italy, I've led cross-functional teams of up to 13 personnel across multiple locations and time zones, delivering products that serve 165M+ users globally at companies like adidas Digital Sports (Runtastic) and algorithmic trading startup StagStrat.",
+        "I'm Lukáš Hošala, a Senior Product Manager with 8+ years of experience in digital product development at adidas. I've led cross-functional teams of 13+ members across 3 countries, launching B2B and B2C products reaching 165M+ users globally. MBA graduate from the University of Derby with expertise in Agile methodology, product lifecycle management, and stakeholder management. UEFA A-licensed coach with performance analysis experience in professional football — the domain knowledge behind my latest venture, PlayerGrade.",
       quickStats: [
         { label: 'Years of Experience', value: '8+' },
         { label: 'Global Users Reached', value: '165M+' },
@@ -222,34 +222,12 @@ export const defaultContent: SiteContent = {
       title: 'Professional Journey',
       positions: [
         {
-          title: 'Senior Product Manager',
-          company: 'Runtastic GmbH | adidas Digital Sports',
-          period: '2022 - 2025',
-          location: 'Salzburg, Austria',
-          description:
-            'Led comprehensive website redesign and technology stack migration for adidas Digital Sports. Managed cross-functional teams across multiple locations to deliver rebranded content, new tech stack, and integrated SEO marketing strategy serving 165M+ global users.',
-          metrics: [
-            { label: 'Global Users', value: '165M+' },
-            { label: 'Team Size', value: '13' },
-            { label: 'Project Duration', value: '18mo' },
-            { label: 'Downtime', value: 'Zero' },
-          ],
-        },
-        {
-          title: 'Head of Product',
-          company: 'StagStrat | Algorithmic Trading Startup',
-          period: '2025 - Present',
-          location: 'Remote (Leeds, UK)',
-          description:
-            'Orchestrating development and product lifecycle of algorithmic trading platform. Created comprehensive product roadmap, launched complete website, and implemented SEO optimization plan for revolutionary trading solutions in the fintech space.',
-        },
-        {
           title: 'Founder & Head of Product',
           company: 'PlayerGrade | Football Scouting SaaS',
           period: '2026 - Present',
           location: 'Remote',
           description:
-            'Sole founder building a multi-tenant SaaS platform for football clubs and scouts to objectively grade and compare players using a proprietary v6 position-calibrated scoring engine. Currently in active beta with 4 club tenants across CEE, 395 players profiled, and a shared Central & Eastern European player pool.',
+            'Sole founder building a multi-tenant SaaS platform for football clubs and scouts to objectively grade and compare players using a proprietary v6 position-calibrated scoring engine. Currently in active beta with 4 club tenants across CEE, 395 players profiled, and a shared Central & Eastern European player pool. UEFA A licence background directly informs the product design and domain credibility.',
           metrics: [
             { label: 'Live Tenants', value: '4 Clubs' },
             { label: 'Players Profiled', value: '395' },
@@ -258,24 +236,57 @@ export const defaultContent: SiteContent = {
           ],
         },
         {
+          title: 'Senior Product Manager',
+          company: 'StagStrat | Algorithmic Trading Startup',
+          period: '2025 - Present',
+          location: 'Remote (Leeds, UK)',
+          description:
+            'Own end-to-end product development lifecycle for an algorithmic trading platform targeting institutional investors. Reduced feature lead time by 80%. Launched brand website with SEO optimisation strategy, achieving 40% increase in organic traffic. Created product roadmap aligned with business objectives, prioritising API integrations based on user research and market analysis.',
+          metrics: [
+            { label: 'Lead Time Reduction', value: '80%' },
+            { label: 'Organic Traffic Growth', value: '+40%' },
+          ],
+        },
+        {
+          title: 'Senior Product Manager',
+          company: 'Runtastic GmbH | adidas Digital Sports',
+          period: '2022 - 2025',
+          location: 'Salzburg, Austria',
+          description:
+            'Led cross-functional development teams of 10+ members across 3 locations (Colombia, Netherlands, Germany), managing product backlog and sprint planning using Agile methodology. Orchestrated complete website redesign on new tech stack (Next.js, React), delivering 55% improvement in page load speed. Managed product lifecycle for adidas international admin application serving 1000+ internal stakeholders globally.',
+          metrics: [
+            { label: 'Global Users', value: '165M+' },
+            { label: 'Team Size', value: '10+' },
+            { label: 'Page Load Improvement', value: '+55%' },
+            { label: 'Downtime', value: 'Zero' },
+          ],
+        },
+        {
           title: 'Product Manager',
           company: 'adidas International Marketing B.V.',
           period: '2019 - 2022',
           location: 'Amsterdam, Netherlands',
           description:
-            'Led development teams of up to 13 personnel including external freelancers. Managed multiple products including third-party tool Sprinklr and in-house developed social commerce engine (adiSCom) for global e-commerce operations.',
+            'Managed development team of 13 personnel, including external freelancers, overseeing product delivery and stakeholder communication. Managed enterprise tool Sprinklr (1 Million EUR annual licence) and in-house social commerce engine (adiSCom), processing 500K+ monthly interactions. Drove 30% increase in platform adoption through new onboarding and customer-care initiatives.',
+          metrics: [
+            { label: 'Team Size', value: '13' },
+            { label: 'Monthly Interactions', value: '500K+' },
+            { label: 'Platform Adoption', value: '+30%' },
+            { label: 'Sprinklr Licence', value: '1M EUR' },
+          ],
         },
         {
-          title: 'Education & Foundations',
-          company: 'Strategic Management & Sport Management',
-          period: '2015 - 2019',
-          location: 'Multiple Locations',
+          title: 'Product Owner',
+          company: 'adidas International Marketing B.V.',
+          period: '2016 - 2019',
+          location: 'Amsterdam, Netherlands',
           description:
-            "MBA-level strategic management education with Level 7 Diploma in Strategic Management and Leadership. Bachelor's degree in Sport Management, building the foundation for digital sports and product management expertise.",
+            'Progressed from Intern to Product Owner within 18 months, demonstrating rapid career growth. Delivered Product Information Management (PIM) tool with an external development team, improving speed to market by 70%. Managed global social media tool ecosystem (Sprinklr, Facebook Business Manager, Instagram) supporting 50+ market teams. Launched PIM tool on schedule with 100% user adoption rate.',
           metrics: [
-            { label: 'MBA Level', value: 'L7' },
-            { label: 'Strategic Mgmt', value: 'Diploma' },
-            { label: 'Sport Mgmt', value: 'Bachelor' },
+            { label: 'Speed to Market', value: '+70%' },
+            { label: 'User Adoption', value: '100%' },
+            { label: 'Career Progression', value: '18 months' },
+            { label: 'Markets Supported', value: '50+' },
           ],
         },
       ],
@@ -385,7 +396,7 @@ export const defaultContent: SiteContent = {
       challenge:
         'Leading the most critical technology transformation in adidas Digital Sports history - migrating a platform serving 165+ million global users to a modern tech stack while maintaining zero downtime across multiple countries and languages. Required coordination across three international locations (Colombia, Netherlands, Germany) with diverse cultural and technical challenges while ensuring seamless user experience for millions of daily active users.',
       solution:
-        'Orchestrated cross-functional teams of 10+ members using agile methodologies and strategic project management. Implemented Next.js and React technology migration with comprehensive testing and staged deployment approach. Developed integrated SEO marketing strategy while managing complex international stakeholder alignment and ensuring robust performance optimization throughout the transition.',
+        'Orchestrated cross-functional teams of 10+ members across 3 locations (Colombia, Netherlands, Germany) using Agile methodology. Implemented Next.js and React technology migration with comprehensive testing and staged deployment. Developed integrated SEO strategy while managing complex international stakeholder alignment and maintaining performance throughout the transition.',
       impact:
         "Achieved zero-downtime migration for 165+ million users globally with remarkable 55% improvement in page load speed. Enhanced user experience across 15+ countries while maintaining seamless business continuity for one of the world's largest fitness platforms. Established new performance benchmarks and modern technical foundation for continued global expansion.",
     },
@@ -428,7 +439,7 @@ export const defaultContent: SiteContent = {
         {
           title: 'adidas Runtastic Website Redesign',
           description:
-            "Spearheaded a critical technology transformation for one of the world's largest fitness platforms serving 165+ million users globally. Led cross-functional teams across three countries (Colombia, Netherlands, Germany) through a complete website redesign and modern tech stack migration using Next.js and React. Implemented agile methodologies and strategic project management to deliver zero-downtime deployment while significantly improving user experience and platform performance.",
+            "Spearheaded a critical technology transformation for one of the world's largest fitness platforms serving 165M+ users globally. Led cross-functional development teams of 10+ members across 3 locations (Colombia, Netherlands, Germany) through a complete website redesign and modern tech stack migration using Next.js and React. Managed product backlog and sprint planning using Agile methodology to deliver zero-downtime deployment while significantly improving platform performance.",
           technologies: [
             'Next.js',
             'TypeScript',

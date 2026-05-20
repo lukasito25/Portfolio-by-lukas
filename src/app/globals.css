@@ -81,7 +81,12 @@
 
   /* Dark theme gradients */
   --gradient-cosmic: linear-gradient(135deg, #4c1d95 0%, #581c87 100%);
-  --gradient-aurora: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  --gradient-aurora: linear-gradient(
+    135deg,
+    #6366f1 0%,
+    #8b5cf6 50%,
+    #ec4899 100%
+  );
   --gradient-subtle: linear-gradient(135deg, #1f2937 0%, #374151 100%);
 }
 
@@ -233,15 +238,30 @@ body {
 
 /* Dark theme hero section */
 .dark .bg-gradient-to-br {
-  background: linear-gradient(to bottom right, #0f172a, #1e293b, #334155) !important;
+  background: linear-gradient(
+    to bottom right,
+    #0f172a,
+    #1e293b,
+    #334155
+  ) !important;
 }
 
-.dark .bg-\[radial-gradient\(circle_at_30\%_20\%\,rgba\(139\,92\,246\,0\.1\)\,transparent\)\] {
-  background: radial-gradient(circle at 30% 20%, rgba(139, 92, 246, 0.2), transparent) !important;
+.dark
+  .bg-\[radial-gradient\(circle_at_30\%_20\%\,rgba\(139\,92\,246\,0\.1\)\,transparent\)\] {
+  background: radial-gradient(
+    circle at 30% 20%,
+    rgba(139, 92, 246, 0.2),
+    transparent
+  ) !important;
 }
 
-.dark .bg-\[radial-gradient\(circle_at_70\%_80\%\,rgba\(99\,102\,241\,0\.1\)\,transparent\)\] {
-  background: radial-gradient(circle at 70% 80%, rgba(99, 102, 241, 0.2), transparent) !important;
+.dark
+  .bg-\[radial-gradient\(circle_at_70\%_80\%\,rgba\(99\,102\,241\,0\.1\)\,transparent\)\] {
+  background: radial-gradient(
+    circle at 70% 80%,
+    rgba(99, 102, 241, 0.2),
+    transparent
+  ) !important;
 }
 
 .dark .bg-white\/70 {
@@ -297,7 +317,9 @@ body {
 }
 
 .dark .shadow-xl {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.3),
+    0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
 }
 
 .dark .shadow-2xl {
@@ -314,7 +336,11 @@ body {
 
 /* Dark theme image improvements */
 .dark .bg-gradient-to-br.from-purple-500\/20.to-blue-500\/20 {
-  background: linear-gradient(to bottom right, rgba(139, 92, 246, 0.15), rgba(99, 102, 241, 0.15)) !important;
+  background: linear-gradient(
+    to bottom right,
+    rgba(139, 92, 246, 0.15),
+    rgba(99, 102, 241, 0.15)
+  ) !important;
 }
 
 .dark img {
@@ -327,7 +353,7 @@ body {
 }
 
 /* Fallback for images that fail to load */
-.dark img[src=""] {
+.dark img[src=''] {
   background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
   display: block;
 }
@@ -335,6 +361,90 @@ body {
 /* Image loading state */
 .dark img:not([src]) {
   background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+}
+
+/* =============================================
+   LIGHT MODE — explicit overrides for good UX
+   ============================================= */
+
+/* Light mode hero section — give it a solid, readable background */
+:root:not(.dark) .from-purple-50 {
+  --tw-gradient-from: #ede9fe !important;
+}
+:root:not(.dark) .via-blue-50 {
+  --tw-gradient-via: #dbeafe !important;
+}
+:root:not(.dark) .to-indigo-100 {
+  --tw-gradient-to: #c7d2fe !important;
+}
+
+/* Light mode — ensure hero headline last line is visibly dark */
+:root:not(.dark) .text-gray-900 {
+  color: #111827 !important;
+}
+
+/* Light mode navigation — ensure white bg and clear border */
+:root:not(.dark) header {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+}
+
+/* Light mode glass cards — white with clear border */
+:root:not(.dark) .glass-card {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(139, 92, 246, 0.15) !important;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.08) !important;
+}
+
+/* Light mode — bg-white/70 cards on hero should be genuinely white */
+:root:not(.dark) .bg-white\/70 {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(139, 92, 246, 0.12) !important;
+}
+
+/* Light mode — metric cards on hero look solid */
+:root:not(.dark) .glass-card .text-gray-900 {
+  color: #1e1b2e !important;
+}
+:root:not(.dark) .glass-card .text-gray-600 {
+  color: #4b5563 !important;
+}
+
+/* Light mode badge (hero badge) */
+:root:not(.dark) .bg-white\/70.backdrop-blur-sm {
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Light mode — CTA outline button fix */
+:root:not(.dark) .border-purple-200 {
+  border-color: #a78bfa !important;
+}
+:root:not(.dark) .text-purple-700 {
+  color: #6d28d9 !important;
+}
+:root:not(.dark) .hover\:bg-purple-50:hover {
+  background: #f5f3ff !important;
+}
+
+/* Light mode — competency cards clear, not washed out */
+:root:not(.dark) .bg-white\/70.backdrop-blur-sm.border-0 {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.06) !important;
+}
+
+/* Light mode — card text contrast */
+:root:not(.dark) .text-gray-600 {
+  color: #4b5563 !important;
+}
+:root:not(.dark) .text-gray-700 {
+  color: #374151 !important;
+}
+
+/* Light mode — cosmic button stays purple, not light */
+:root:not(.dark) .cosmic-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: #ffffff !important;
 }
 
 /* Dark theme responsive adjustments */

@@ -140,7 +140,7 @@ export default function WorkPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Target className="h-5 w-5 text-green-600" />
-                    <span className="font-medium">13-Person Team</span>
+                    <span className="font-medium">10+ Person Team</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Globe className="h-5 w-5 text-blue-600" />

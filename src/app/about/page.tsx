@@ -10,7 +10,14 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { Briefcase, Users, TrendingUp, Brain, Target, Loader2 } from 'lucide-react'
+import {
+  Briefcase,
+  Users,
+  TrendingUp,
+  Brain,
+  Target,
+  Loader2,
+} from 'lucide-react'
 import { dataService } from '@/lib/data-service'
 import { defaultContent } from '@/lib/content-config'
 
@@ -95,7 +102,9 @@ export default function AboutPage() {
         {/* Leadership Philosophy */}
         <section className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">{content.philosophy?.title || ''}</h2>
+            <h2 className="text-3xl font-bold mb-4">
+              {content.philosophy?.title || ''}
+            </h2>
             <p className="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
               {content.philosophy?.description || ''}
             </p>
@@ -103,9 +112,21 @@ export default function AboutPage() {
           <div className="grid md:grid-cols-3 gap-8">
             {(content.philosophy?.cards || []).map((card, index) => {
               const iconConfig = [
-                { icon: Users, bgColor: "bg-blue-100 dark:bg-blue-900", textColor: "text-blue-600 dark:text-blue-400" },
-                { icon: Brain, bgColor: "bg-green-100 dark:bg-green-900", textColor: "text-green-600 dark:text-green-400" },
-                { icon: Target, bgColor: "bg-purple-100 dark:bg-purple-900", textColor: "text-purple-600 dark:text-purple-400" }
+                {
+                  icon: Users,
+                  bgColor: 'bg-blue-100 dark:bg-blue-900',
+                  textColor: 'text-blue-600 dark:text-blue-400',
+                },
+                {
+                  icon: Brain,
+                  bgColor: 'bg-green-100 dark:bg-green-900',
+                  textColor: 'text-green-600 dark:text-green-400',
+                },
+                {
+                  icon: Target,
+                  bgColor: 'bg-purple-100 dark:bg-purple-900',
+                  textColor: 'text-purple-600 dark:text-purple-400',
+                },
               ]
               const config = iconConfig[index % iconConfig.length]
               const IconComponent = config.icon
@@ -113,8 +134,12 @@ export default function AboutPage() {
               return (
                 <Card key={index}>
                   <CardHeader>
-                    <div className={`w-12 h-12 ${config.bgColor} rounded-lg flex items-center justify-center mb-4`}>
-                      <IconComponent className={`h-6 w-6 ${config.textColor}`} />
+                    <div
+                      className={`w-12 h-12 ${config.bgColor} rounded-lg flex items-center justify-center mb-4`}
+                    >
+                      <IconComponent
+                        className={`h-6 w-6 ${config.textColor}`}
+                      />
                     </div>
                     <CardTitle>{card?.title || ''}</CardTitle>
                   </CardHeader>
@@ -137,9 +162,21 @@ export default function AboutPage() {
           <div className="space-y-8">
             {(content.journey?.positions || []).map((position, index) => {
               const iconConfig = [
-                { icon: Briefcase, bgColor: "bg-blue-100 dark:bg-blue-900", textColor: "text-blue-600 dark:text-blue-400" },
-                { icon: TrendingUp, bgColor: "bg-green-100 dark:bg-green-900", textColor: "text-green-600 dark:text-green-400" },
-                { icon: Briefcase, bgColor: "bg-purple-100 dark:bg-purple-900", textColor: "text-purple-600 dark:text-purple-400" }
+                {
+                  icon: Briefcase,
+                  bgColor: 'bg-blue-100 dark:bg-blue-900',
+                  textColor: 'text-blue-600 dark:text-blue-400',
+                },
+                {
+                  icon: TrendingUp,
+                  bgColor: 'bg-green-100 dark:bg-green-900',
+                  textColor: 'text-green-600 dark:text-green-400',
+                },
+                {
+                  icon: Briefcase,
+                  bgColor: 'bg-purple-100 dark:bg-purple-900',
+                  textColor: 'text-purple-600 dark:text-purple-400',
+                },
               ]
               const config = iconConfig[index % iconConfig.length]
               const IconComponent = config.icon
@@ -148,15 +185,20 @@ export default function AboutPage() {
                 <Card key={index}>
                   <CardHeader>
                     <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 ${config.bgColor} rounded-lg flex items-center justify-center`}>
-                        <IconComponent className={`h-6 w-6 ${config.textColor}`} />
+                      <div
+                        className={`w-12 h-12 ${config.bgColor} rounded-lg flex items-center justify-center`}
+                      >
+                        <IconComponent
+                          className={`h-6 w-6 ${config.textColor}`}
+                        />
                       </div>
                       <div className="flex-1">
                         <CardTitle className="text-xl">
                           {position?.title || ''}
                         </CardTitle>
                         <CardDescription className="text-base">
-                          {position?.company || ''} • {position?.period || ''} • {position?.location || ''}
+                          {position?.company || ''} • {position?.period || ''} •{' '}
+                          {position?.location || ''}
                         </CardDescription>
                       </div>
                     </div>
@@ -169,14 +211,16 @@ export default function AboutPage() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {(position.metrics || []).map((metric, metricIndex) => {
                           const colors = [
-                            "text-blue-600 dark:text-blue-400",
-                            "text-green-600 dark:text-green-400",
-                            "text-purple-600 dark:text-purple-400",
-                            "text-orange-600 dark:text-orange-400"
+                            'text-blue-600 dark:text-blue-400',
+                            'text-green-600 dark:text-green-400',
+                            'text-purple-600 dark:text-purple-400',
+                            'text-orange-600 dark:text-orange-400',
                           ]
                           return (
                             <div key={metricIndex} className="text-center">
-                              <div className={`font-semibold text-lg ${colors[metricIndex % colors.length]}`}>
+                              <div
+                                className={`font-semibold text-lg ${colors[metricIndex % colors.length]}`}
+                              >
                                 {metric?.value || ''}
                               </div>
                               <div className="text-sm text-slate-600 dark:text-slate-400">
@@ -281,20 +325,39 @@ export default function AboutPage() {
               <p>
                 When I'm not leading cross-functional teams or architecting
                 product roadmaps, you'll find me exploring the medieval streets
-                of Volterra, Italy, where I'm currently based. From my Tuscan
-                hillside home, I develop personal projects like fitness apps and
-                productivity tools, bridging the gap between strategic product
-                thinking and hands-on development.
+                of Volterra, Italy, where I'm currently based. A UEFA A-licensed
+                coach with professional football performance analysis
+                experience, I bring genuine domain depth to everything
+                sports-tech — including PlayerGrade, my football scouting SaaS
+                built for clubs across Central & Eastern Europe.
               </p>
               <p>
-                My journey from Slovakia to international product leadership has
-                taught me that the best insights come from diverse perspectives
-                and real user experiences. I'm passionate about building mental
-                health platforms like VetWell, combining my product expertise
-                with social impact initiatives. Whether it's algorithmic trading
-                at StagStrat or wellness technology, I believe in creating
-                products that genuinely improve people's lives.
+                My journey from Slovakia through the Netherlands and Austria to
+                Italy has taught me that the best products come from diverse
+                perspectives and deep domain knowledge. I speak Slovak natively,
+                English at C2 level, and Italian professionally (B2). Whether
+                building at enterprise scale at adidas or shipping as a solo
+                founder, I believe in creating products that genuinely solve
+                real problems.
               </p>
+            </div>
+            {/* Credentials */}
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <span className="px-4 py-2 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                MBA Global — University of Derby
+              </span>
+              <span className="px-4 py-2 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                CMI Level 7 Strategic Management
+              </span>
+              <span className="px-4 py-2 rounded-full text-sm font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
+                Agile Product Owner Certified
+              </span>
+              <span className="px-4 py-2 rounded-full text-sm font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
+                UEFA A Licence
+              </span>
+              <span className="px-4 py-2 rounded-full text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                BSc Sport Management — University of Derby
+              </span>
             </div>
           </div>
         </section>

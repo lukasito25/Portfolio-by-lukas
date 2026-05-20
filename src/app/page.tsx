@@ -114,7 +114,7 @@ export default function Home() {
                   className={
                     index < (content.hero.headline || []).length - 1
                       ? 'gradient-text cosmic-glow'
-                      : 'text-gray-900 dark:text-gray-100'
+                      : 'text-gray-900 dark:text-gray-100 [color:#111827] dark:[color:#f1f5f9]'
                   }
                 >
                   {line}

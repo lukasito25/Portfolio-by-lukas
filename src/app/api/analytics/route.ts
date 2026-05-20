@@ -105,12 +105,9 @@ export async function POST(request: NextRequest) {
         id: analyticsEntry.id,
       })
     }
-  } catch (error) {
-    console.error('Analytics tracking error:', error)
-    return NextResponse.json(
-      { error: 'Failed to track analytics' },
-      { status: 500 }
-    )
+  } catch {
+    // Analytics tracking is non-critical — silently succeed
+    return NextResponse.json({ success: true })
   }
 }
 

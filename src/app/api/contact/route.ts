@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 import { sendContactEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
@@ -29,73 +28,47 @@ export async function POST(request: NextRequest) {
     const realIp = request.headers.get('x-real-ip')
     const ipAddress = forwarded ? forwarded.split(',')[0] : realIp || 'unknown'
 
-    // Create contact submission
-    const contactSubmission = await prisma.contactSubmission.create({
-      data: {
-        name: body.name,
-        email: body.email,
-        subject: body.subject || 'New Contact Form Submission',
-        message: body.message,
-        phone: body.phone || '',
-        company: body.company || '',
-        projectType: body.projectType || '',
-        budgetRange: body.budgetRange || '',
-        source: body.source || 'contact-form',
-        ipAddress,
-        userAgent,
-        status: 'NEW',
-      },
-    })
-
-    // Send email notification
-    try {
-      await sendContactEmail({
-        name: body.name,
-        email: body.email,
-        subject: body.subject || 'New Contact Form Submission',
-        message: body.message,
-        phone: body.phone,
-        company: body.company,
-      })
-      console.log('Contact email sent successfully')
-    } catch (emailError) {
-      console.error('Failed to send contact email:', emailError)
-      // Continue execution even if email fails
-    }
-
-    console.log('New contact submission:', {
-      id: contactSubmission.id,
+    // Send email notification — this is the primary goal
+    await sendContactEmail({
       name: body.name,
       email: body.email,
+      subject: body.subject || 'New Contact Form Submission',
+      message: body.message,
+      phone: body.phone,
       company: body.company,
-      projectType: body.projectType,
     })
+
+    // Try to persist to DB as secondary — never block the response if it fails
+    try {
+      const { prisma } = await import('@/lib/prisma')
+      await prisma.contactSubmission.create({
+        data: {
+          name: body.name,
+          email: body.email,
+          subject: body.subject || 'New Contact Form Submission',
+          message: body.message,
+          phone: body.phone || '',
+          company: body.company || '',
+          projectType: body.projectType || '',
+          budgetRange: body.budgetRange || '',
+          source: body.source || 'contact-form',
+          ipAddress,
+          userAgent,
+          status: 'NEW',
+        },
+      })
+    } catch {
+      // DB unavailable in this environment — email was already sent, continue
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Contact submission received successfully',
-      submissionId: contactSubmission.id,
     })
   } catch (error) {
     console.error('Contact submission error:', error)
-
-    // Provide more specific error details
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error'
-    const errorDetails = error instanceof Error ? error.stack : String(error)
-
-    console.error('Error details:', {
-      message: errorMessage,
-      stack: errorDetails,
-      timestamp: new Date().toISOString(),
-    })
-
     return NextResponse.json(
-      {
-        error: 'Failed to submit contact form',
-        details:
-          process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      },
+      { error: 'Failed to submit contact form' },
       { status: 500 }
     )
   }
