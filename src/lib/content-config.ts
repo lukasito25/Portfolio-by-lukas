@@ -134,92 +134,91 @@ export interface SiteContent {
 export const defaultContent: SiteContent = {
   homepage: {
     hero: {
-      badge:
-        'Senior Product Manager & Founder • 8+ Years Experience • Italy, EU',
-      headline: ['Building Digital', 'Products', 'That Scale Globally'],
+      badge: 'Senior Product Manager & Founder • 8+ Years • Italy, EU',
+      headline: ['Product Manager.', 'Team Builder.', 'Occasional Founder.'],
       subheadline:
-        'Senior Product Manager with 8+ years of international experience leading digital transformation at adidas Digital Sports and fintech startups. Expert in leading cross-functional teams of up to 13 personnel across multiple locations and time zones to deliver products that serve 165M+ users globally.',
+        "I've spent 8+ years at adidas helping teams ship digital products that actually work. Led teams of up to 13 people across three countries, managed products used by over 165 million people, and recently started building my own things on the side.",
       metrics: [
-        { value: '8+', label: 'Years Experience' },
-        { value: '165M+', label: 'Users Reached' },
-        { value: '13', label: 'Max Team Size' },
-        { value: '3', label: 'Countries' },
+        { value: '8+', label: 'Years in product' },
+        { value: '165M+', label: 'Users on products I owned' },
+        { value: '13', label: 'Largest team I managed' },
+        { value: '3', label: 'Countries worked in' },
       ],
     },
     competencies: [
       {
-        title: 'Team Leadership & Management',
+        title: 'Working with teams across time zones',
         description:
-          'Leading cross-functional teams of up to 13 personnel including external freelancers across multiple locations and time zones.',
+          "Managed teams spread across Colombia, Netherlands, Germany and the UK. Most of what I've learned about good product work came from making that collaboration actually function.",
       },
       {
-        title: 'Digital Product Development',
+        title: 'Taking products from idea to live',
         description:
-          'Full product lifecycle management from conception to launch, including website redesigns, admin portals, and mobile applications.',
+          "From the first backlog item to launch day — I've run the full cycle on website redesigns, internal tools, social commerce platforms, and trading software.",
       },
       {
-        title: 'Agile Methodology',
+        title: 'Agile without the religion',
         description:
-          'Expert in agile development processes, sprint planning, and iterative product delivery across international teams.',
+          "I use Agile because it works, not because it's required. Sprint planning, backlog management, and iterative delivery — applied practically, adapted to the team.",
       },
       {
-        title: 'Strategic Management',
+        title: 'Strategy grounded in real decisions',
         description:
-          'MBA-level strategic thinking with Level 7 Diploma in Strategic Management and Leadership, driving business outcomes.',
+          'MBA from University of Derby and a CMI Level 7 diploma. Useful when it matters — helps me think through tradeoffs and communicate clearly with leadership.',
       },
       {
-        title: 'SEO & Marketing Integration',
+        title: 'SEO as part of product, not an afterthought',
         description:
-          'Creating product roadmaps with integrated SEO optimization and marketing strategies for maximum reach and engagement.',
+          "Built SEO planning into product roadmaps at adidas and at StagStrat. It's much easier when it's baked in from the start rather than bolted on at the end.",
       },
       {
-        title: 'Tech Stack Modernization',
+        title: 'Tech migrations without the drama',
         description:
-          'Managing complex website redesigns on new technology stacks, rebranding initiatives, and technical migration projects.',
+          'Ran a full Next.js/React migration on a platform with 165M users. Zero downtime. The key was planning, clear ownership, and not trying to do too much at once.',
       },
     ],
     cta: {
-      title: 'Ready to Build Something Amazing?',
+      title: 'Want to work together?',
       description:
-        "Let's discuss how we can transform your product vision into reality. From strategy to execution, I bring the expertise to drive meaningful results.",
+        "I'm open to senior PM roles, advisory work, and interesting product conversations. If you've got something worth building, I'd like to hear about it.",
     },
   },
   about: {
     hero: {
-      title: 'From Slovakia to Global Scale',
+      title: 'Eight years at adidas. Now building my own things.',
       description:
-        "I'm Lukáš Hošala, a Senior Product Manager with 8+ years of experience in digital product development at adidas. I've led cross-functional teams of 13+ members across 3 countries, launching B2B and B2C products reaching 165M+ users globally. MBA graduate from the University of Derby with expertise in Agile methodology, product lifecycle management, and stakeholder management. UEFA A-licensed coach with performance analysis experience in professional football — the domain knowledge behind my latest venture, PlayerGrade.",
+        "I'm Lukáš — a product manager based in Volterra, Italy. Most of my career has been at adidas, where I worked across digital sports, social commerce, and internal tools. I managed teams of up to 13 people across three countries and worked on products that reached over 165 million users. I hold an MBA from the University of Derby and a UEFA A coaching licence, which led me to building PlayerGrade — a scouting platform for football clubs. I care about clear thinking, honest communication, and shipping things that actually solve problems.",
       quickStats: [
-        { label: 'Years of Experience', value: '8+' },
-        { label: 'Global Users Reached', value: '165M+' },
-        { label: 'Max Team Size', value: '13' },
-        { label: 'Countries Worked', value: '3' },
+        { label: 'Years in product', value: '8+' },
+        { label: 'Users on products I owned', value: '165M+' },
+        { label: 'Largest team managed', value: '13' },
+        { label: 'Countries worked in', value: '3' },
       ],
     },
     philosophy: {
-      title: 'Leadership Philosophy',
+      title: 'How I think about product work',
       description:
-        "From managing teams of 13 across multiple countries to serving 165M+ users globally, I've learned that great products come from empowered teams with clear vision. My approach combines agile methodology with strategic thinking and international perspective.",
+        "I don't have a philosophy I can fit on a slide. But after eight years of working with teams in different countries, here are the things I keep coming back to.",
       cards: [
         {
-          title: 'International Team Leadership',
+          title: 'Clear beats clever',
           description:
-            'Leading cross-functional teams of up to 13 personnel across multiple locations and time zones. I focus on clear communication, cultural awareness, and agile methodologies to deliver world-class products.',
+            "Most product problems aren't solved by clever frameworks — they're solved by making sure everyone understands what we're doing and why. I spend a lot of time on alignment before I spend time on execution.",
         },
         {
-          title: 'Strategic Product Thinking',
+          title: 'Strategy only works when it connects to the work',
           description:
-            'MBA-level strategic management combined with hands-on product experience. I create comprehensive product roadmaps with integrated SEO optimization and marketing strategies for maximum business impact.',
+            "An MBA helps me think at the right level when talking to leadership. But I've seen plenty of strategy decks that never touched the actual product. I try to keep the two connected.",
         },
         {
-          title: 'Global Scale Execution',
+          title: 'Scale comes from boring foundations',
           description:
-            'From startup to enterprise scale - delivering products that serve 165M+ users globally while managing complex technical migrations and maintaining zero downtime for critical business operations.',
+            "Running a zero-downtime migration for 165M users wasn't exciting — it was a lot of careful planning, staged rollouts, and clear ownership. The exciting part was that nothing broke.",
         },
       ],
     },
     journey: {
-      title: 'Professional Journey',
+      title: 'Work history',
       positions: [
         {
           title: 'Founder & Head of Product',
@@ -227,11 +226,11 @@ export const defaultContent: SiteContent = {
           period: '2026 - Present',
           location: 'Remote',
           description:
-            'Sole founder building a multi-tenant SaaS platform for football clubs and scouts to objectively grade and compare players using a proprietary v6 position-calibrated scoring engine. Currently in active beta with 4 club tenants across CEE, 395 players profiled, and a shared Central & Eastern European player pool. UEFA A licence background directly informs the product design and domain credibility.',
+            "Built and launched PlayerGrade as sole founder — a scouting platform for football clubs that scores and compares players using a position-calibrated engine. Currently in beta with 4 clubs across Central & Eastern Europe, 395 players profiled. My UEFA A coaching licence made this feel like a natural project: I know what scouts actually need because I've done the work.",
           metrics: [
-            { label: 'Live Tenants', value: '4 Clubs' },
-            { label: 'Players Profiled', value: '395' },
-            { label: 'Scoring Engine', value: 'v6 Native' },
+            { label: 'Live club tenants', value: '4' },
+            { label: 'Players profiled', value: '395' },
+            { label: 'Scoring engine version', value: 'v6' },
             { label: 'Status', value: 'Beta' },
           ],
         },
@@ -241,10 +240,10 @@ export const defaultContent: SiteContent = {
           period: '2025 - Present',
           location: 'Remote (Leeds, UK)',
           description:
-            'Own end-to-end product development lifecycle for an algorithmic trading platform targeting institutional investors. Reduced feature lead time by 80%. Launched brand website with SEO optimisation strategy, achieving 40% increase in organic traffic. Created product roadmap aligned with business objectives, prioritising API integrations based on user research and market analysis.',
+            'Running product for an algorithmic trading platform aimed at institutional investors. Owns the full product lifecycle — roadmap, backlog, release planning. Built and launched the company website with an SEO strategy that brought in 40% more organic traffic. Cut feature lead time by 80% by simplifying how we prioritise and scope work.',
           metrics: [
-            { label: 'Lead Time Reduction', value: '80%' },
-            { label: 'Organic Traffic Growth', value: '+40%' },
+            { label: 'Feature lead time reduction', value: '80%' },
+            { label: 'Organic traffic growth', value: '+40%' },
           ],
         },
         {
@@ -253,12 +252,12 @@ export const defaultContent: SiteContent = {
           period: '2022 - 2025',
           location: 'Salzburg, Austria',
           description:
-            'Led cross-functional development teams of 10+ members across 3 locations (Colombia, Netherlands, Germany), managing product backlog and sprint planning using Agile methodology. Orchestrated complete website redesign on new tech stack (Next.js, React), delivering 55% improvement in page load speed. Managed product lifecycle for adidas international admin application serving 1000+ internal stakeholders globally.',
+            "Led the website redesign and tech stack migration for Runtastic — a fitness platform with over 165 million users. The team was spread across Colombia, Netherlands, and Germany, which meant most of my job was coordination and keeping things moving. We migrated to Next.js and React, improved page load speed by 55%, and kept the platform running throughout. Also managed the lifecycle of adidas's internal admin application, used by 1000+ people across the organisation.",
           metrics: [
-            { label: 'Global Users', value: '165M+' },
-            { label: 'Team Size', value: '10+' },
-            { label: 'Page Load Improvement', value: '+55%' },
-            { label: 'Downtime', value: 'Zero' },
+            { label: 'Global users', value: '165M+' },
+            { label: 'Team size', value: '10+' },
+            { label: 'Page load improvement', value: '+55%' },
+            { label: 'Downtime during migration', value: 'Zero' },
           ],
         },
         {
@@ -267,12 +266,12 @@ export const defaultContent: SiteContent = {
           period: '2019 - 2022',
           location: 'Amsterdam, Netherlands',
           description:
-            'Managed development team of 13 personnel, including external freelancers, overseeing product delivery and stakeholder communication. Managed enterprise tool Sprinklr (1 Million EUR annual licence) and in-house social commerce engine (adiSCom), processing 500K+ monthly interactions. Drove 30% increase in platform adoption through new onboarding and customer-care initiatives.',
+            'Managed a team of 13, including external freelancers, across product delivery and stakeholder work. Responsible for Sprinklr (a €1M annual licence) and the in-house social commerce platform (adiSCom), which processed over 500K monthly interactions. Improved platform adoption by 30% by reworking the onboarding flow and customer support model.',
           metrics: [
-            { label: 'Team Size', value: '13' },
-            { label: 'Monthly Interactions', value: '500K+' },
-            { label: 'Platform Adoption', value: '+30%' },
-            { label: 'Sprinklr Licence', value: '1M EUR' },
+            { label: 'Team size', value: '13' },
+            { label: 'Monthly interactions', value: '500K+' },
+            { label: 'Platform adoption increase', value: '+30%' },
+            { label: 'Sprinklr licence value', value: '€1M/yr' },
           ],
         },
         {
@@ -281,12 +280,12 @@ export const defaultContent: SiteContent = {
           period: '2016 - 2019',
           location: 'Amsterdam, Netherlands',
           description:
-            'Progressed from Intern to Product Owner within 18 months, demonstrating rapid career growth. Delivered Product Information Management (PIM) tool with an external development team, improving speed to market by 70%. Managed global social media tool ecosystem (Sprinklr, Facebook Business Manager, Instagram) supporting 50+ market teams. Launched PIM tool on schedule with 100% user adoption rate.',
+            'Started as an intern and became Product Owner within 18 months. Delivered a Product Information Management (PIM) tool with an external dev team — on schedule, with 100% adoption on day one. Also managed the social media tool ecosystem (Sprinklr, Facebook Business Manager, Instagram) for 50+ market teams globally.',
           metrics: [
-            { label: 'Speed to Market', value: '+70%' },
-            { label: 'User Adoption', value: '100%' },
-            { label: 'Career Progression', value: '18 months' },
-            { label: 'Markets Supported', value: '50+' },
+            { label: 'Speed to market improvement', value: '+70%' },
+            { label: 'PIM adoption at launch', value: '100%' },
+            { label: 'Time from intern to PO', value: '18 months' },
+            { label: 'Market teams supported', value: '50+' },
           ],
         },
       ],
@@ -294,125 +293,126 @@ export const defaultContent: SiteContent = {
   },
   blog: {
     hero: {
-      title: 'Insights from the Field',
+      title: "Things I've written down",
       description:
-        'Real stories and lessons learned from 8+ years managing international teams at adidas Digital Sports and fintech startups. Insights from leading teams of 13 across three countries while serving 165M+ users globally.',
+        "Notes on product management, leading distributed teams, and building things from scratch. Mostly things I wish I'd read earlier in my career.",
     },
     featured: {
       title:
-        'From Slovakia to Global Impact: Leading International Teams Across Three Countries',
+        'What working across three countries actually taught me about remote teams',
       description:
-        'Real insights from my experience leading cross-functional teams of up to 13 personnel at adidas Digital Sports. From managing external freelancers to coordinating complex website redesigns across Austria, Netherlands, and UK while serving 165M+ users globally.',
+        "Leading teams in Colombia, Netherlands, and Germany at the same time sounds complicated — and it is. Here's what I actually learned, rather than what looks good on a slide.",
       keyInsights: [
-        'Communication strategies across three countries and multiple time zones',
-        'Managing cultural differences in distributed teams',
-        'Coordinating complex technical migrations with zero downtime',
-        'Building trust and accountability across distributed teams',
+        'Time zone gaps force you to write things down better',
+        'Cultural differences in how people give feedback are real and matter',
+        'Trust comes from delivery, not from meetings',
+        'Over-communication early saves you from under-communication when it matters',
       ],
     },
     articles: [
       {
         title:
-          'From Slovakia to Global Scale: My Journey in International Product Management',
+          'From sport management graduate to senior PM at adidas — how it actually happened',
         description:
-          'How I went from Sport Management graduate to leading international product teams at adidas Digital Sports serving 165M+ users globally.',
+          "I didn't plan any of this. Here's the honest version of how I ended up running products for one of the world's biggest fitness platforms.",
         content:
-          "After leading teams across three countries, I've learned that great collaboration isn't about location—it's about people and cultural understanding. Here's how to build international teams that move fast and build together.",
+          "The path from studying sport management to leading product teams across three countries wasn't linear. Here's what I actually learned along the way.",
         date: 'January 8, 2025',
         readTime: '6 min read',
-        tags: ['Leadership', 'International Teams'],
+        tags: ['Career', 'Product management'],
       },
       {
         title:
-          'Building StagStrat: From Concept to Algorithmic Trading Platform',
+          "Building StagStrat: what it's actually like to run product for a startup after working at a big company",
         description:
-          'The journey of creating a fintech startup from scratch as Head of Product, including roadmap development and go-to-market strategy.',
+          'After six years at adidas, the pace and ambiguity of a startup felt very different. Some things are better. Some are harder.',
         content:
-          "As Head of Product at StagStrat, I orchestrated the complete product lifecycle of an algorithmic trading platform. From initial concept to production launch, here's how we built a revolutionary trading solution.",
+          "Moving from a structured enterprise environment to a two-person startup changes how you work in ways you don't expect.",
         date: 'December 1, 2024',
         readTime: '10 min read',
-        tags: ['FinTech', 'Startup'],
+        tags: ['Startup', 'Fintech'],
       },
       {
-        title: 'Zero Downtime Migration: Lessons from adidas Digital Sports',
+        title: 'How we migrated a platform with 165M users and nothing broke',
         description:
-          'How we migrated a platform serving 165M+ users to a new tech stack without a single minute of downtime.',
+          'A zero-downtime migration sounds impressive. The reality was mostly very careful planning and a lot of staged rollouts.',
         content:
-          "Leading the technical migration of the Runtastic website while serving 165M+ global users taught me that successful migrations aren't about the technology—they're about risk management and team coordination.",
+          "The technical migration of the Runtastic platform taught me more about risk management than any course or certification I've taken.",
         date: 'November 24, 2024',
         readTime: '6 min read',
-        tags: ['Tech Migration', 'Risk Management'],
+        tags: ['Tech migration', 'Risk management'],
       },
       {
-        title: 'Managing External Teams: Insights from Leading 13 Personnel',
+        title: 'Managing freelancers and full-timers in the same team',
         description:
-          'Real strategies for coordinating external freelancers and internal teams across multiple locations and time zones.',
+          'At adidas Amsterdam I managed 13 people, some employed, some contracted. Getting them to work as one team took more effort than I expected.',
         content:
-          "At adidas, I managed teams of up to 13 personnel including external freelancers across multiple locations. Here's what I learned about building trust, maintaining quality, and delivering complex projects with distributed teams.",
+          "The challenges of managing mixed teams aren't about the tools or processes — they're about expectation-setting and building shared context quickly.",
         date: 'November 17, 2024',
         readTime: '9 min read',
-        tags: ['Team Management', 'Remote Work'],
+        tags: ['Team management', 'Remote work'],
       },
     ],
     expertise: {
-      title: 'Areas of Expertise',
+      title: 'What I write about',
       areas: [
         {
-          title: 'International Team Leadership',
-          description: 'Leading 13+ personnel across multiple countries',
+          title: 'Managing distributed teams',
+          description: 'Three countries, one team, real lessons',
         },
         {
-          title: 'Digital Sports & E-commerce',
-          description: '8+ years at adidas Digital Sports',
+          title: 'Product work at adidas',
+          description: '8+ years across digital sports and e-commerce',
         },
         {
-          title: 'FinTech & Algorithmic Trading',
-          description: 'Head of Product at StagStrat startup',
+          title: 'Building a fintech startup',
+          description: 'What changes when you go from PM to founder',
         },
         {
-          title: 'Tech Stack Migration',
-          description: 'Zero downtime migrations for 165M+ users',
+          title: 'Tech migrations done right',
+          description: 'Zero downtime on 165M users — how we planned it',
         },
         {
-          title: 'SEO & Marketing Integration',
-          description: 'Product roadmaps with marketing strategy',
+          title: 'SEO as a product discipline',
+          description: 'Building search strategy into the roadmap from day one',
         },
         {
-          title: 'Agile & Strategic Management',
-          description: 'MBA + Level 7 Strategic Management',
+          title: 'Agile in practice',
+          description: 'What actually works vs. what looks good in a workshop',
         },
       ],
     },
   },
   work: {
     hero: {
-      title: 'Building Products That Scale Globally',
+      title: "Things I've built and shipped",
       description:
-        '8+ years of international product management experience delivering digital solutions that serve millions of users globally, leading teams across three countries.',
+        'Eight years of product work, mostly at adidas, plus two ventures I started myself. Some of it was at scale, some of it was figuring things out from scratch.',
     },
     featured: {
       title:
-        'adidas Digital Sports: Global Platform Transformation Serving 165M+ Users',
+        'Runtastic website redesign — migrating a platform used by 165M people',
       challenge:
-        'Leading the most critical technology transformation in adidas Digital Sports history - migrating a platform serving 165+ million global users to a modern tech stack while maintaining zero downtime across multiple countries and languages. Required coordination across three international locations (Colombia, Netherlands, Germany) with diverse cultural and technical challenges while ensuring seamless user experience for millions of daily active users.',
+        "Runtastic needed a full redesign and a new tech stack. The platform had over 165 million registered users and teams contributing from Colombia, Netherlands, and Germany. The constraint was simple: we couldn't break anything for existing users while rebuilding almost everything underneath them.",
       solution:
-        'Orchestrated cross-functional teams of 10+ members across 3 locations (Colombia, Netherlands, Germany) using Agile methodology. Implemented Next.js and React technology migration with comprehensive testing and staged deployment. Developed integrated SEO strategy while managing complex international stakeholder alignment and maintaining performance throughout the transition.',
+        'Led a cross-functional team of 10+ people using Agile, with product backlogs and sprint planning coordinated across three time zones. We migrated to Next.js and React in stages, with testing and rollback plans at every step. Stakeholder alignment across three countries was more work than the technical side.',
       impact:
-        "Achieved zero-downtime migration for 165+ million users globally with remarkable 55% improvement in page load speed. Enhanced user experience across 15+ countries while maintaining seamless business continuity for one of the world's largest fitness platforms. Established new performance benchmarks and modern technical foundation for continued global expansion.",
+        'Migration completed with zero downtime. Page load speed improved by 55%. The platform kept running without interruption for users across 15+ countries throughout the entire process.',
     },
     playergrade: {
       title: 'PlayerGrade',
-      tagline: 'AI-Powered Football Scouting Platform',
+      tagline:
+        'Football scouting platform for clubs in Central & Eastern Europe',
       description:
-        'Sole founder and Head of Product of PlayerGrade — a multi-tenant SaaS platform purpose-built for football clubs and scouts to objectively grade, compare, and shortlist players using a proprietary position-calibrated scoring engine. Currently in active development with 4 live club tenants across Central & Eastern Europe, 395 players profiled, and the v6 scoring engine running natively across all 9 positions.',
+        'I built PlayerGrade because I hold a UEFA A coaching licence and spent time doing performance analysis at club level — and I knew how broken the scouting workflow was for smaller clubs. Most teams were using spreadsheets and gut feel. PlayerGrade gives scouts a structured way to grade, compare, and shortlist players using a position-calibrated scoring engine. Currently in beta with 4 clubs across CEE.',
       status: 'Beta',
       url: 'https://playergrade.lovable.app/',
       challenge:
-        'Football scouting at club level relies heavily on subjective observation and fragmented spreadsheets. Scouts lack a data-driven, position-aware way to objectively compare players across different leagues and contexts — especially in emerging markets like CEE where access to expensive tools like Wyscout is limited.',
+        "Smaller football clubs in CEE don't have the budget for tools like Wyscout. Their scouts rely on notebooks, spreadsheets, and memory. There was no lightweight, position-aware tool that could give them a consistent scoring framework without requiring expensive data subscriptions.",
       solution:
-        'Built a multi-tenant SaaS platform from the ground up as sole PM and founder. Designed a proprietary v6 scoring engine with per-position calibration, a 395-player shared CEE pool, tenant isolation architecture (DB-level write locks, 8 regression tests), and a position-mapping audit layer that surfaces data confidence. The platform supports multiple model versions (Classic, Premium, v6 calibration) selectable per club.',
+        "Built the platform from scratch as sole founder and PM. Designed a scoring engine (now on v6) that calibrates differently per position rather than using a one-size-fits-all model. Built multi-tenant architecture with DB-level isolation so clubs can't see each other's data. Added a shared Central & Eastern European player pool so clubs benefit from data they didn't have to collect themselves.",
       impact:
-        'Platform is technically production-ready for the anchor tenant (MFK Ružomberok) and a controlled second tenant. 4 clubs onboarded, 395 players profiled (239 private + 156 shared CEE pool), 385 score history rows, v6 scoring engine native across all 9 positions with 168/168 unit tests passing. On track for paid-tenant commercial launch.',
+        '4 clubs onboarded in beta. 395 players profiled across the platform (239 private per club, 156 in the shared CEE pool). Scoring engine running natively across all 9 positions with 168 unit tests passing. The anchor tenant (MFK Ružomberok) is using it in their real scouting workflow.',
       technologies: [
         'React',
         'TypeScript',
@@ -424,22 +424,23 @@ export const defaultContent: SiteContent = {
         'Edge Functions',
       ],
       metrics: [
-        { label: 'Live Club Tenants', value: '4' },
-        { label: 'Players Profiled', value: '395' },
-        { label: 'Scoring Engine', value: 'v6' },
-        { label: 'Positions Calibrated', value: '9/9' },
-        { label: 'Unit Tests Passing', value: '168/168' },
-        { label: 'CEE Shared Pool', value: '156 Players' },
+        { label: 'Live club tenants', value: '4' },
+        { label: 'Players profiled', value: '395' },
+        { label: 'Scoring engine version', value: 'v6' },
+        { label: 'Positions calibrated', value: '9/9' },
+        { label: 'Unit tests passing', value: '168/168' },
+        { label: 'Shared CEE player pool', value: '156' },
       ],
     },
     professionalProjects: {
-      title: 'Professional Projects',
-      subtitle: 'Enterprise-scale products serving millions of users globally',
+      title: 'Professional work',
+      subtitle:
+        'Products I managed at adidas across digital sports, e-commerce, and internal tools',
       projects: [
         {
-          title: 'adidas Runtastic Website Redesign',
+          title: 'Runtastic website redesign',
           description:
-            "Spearheaded a critical technology transformation for one of the world's largest fitness platforms serving 165M+ users globally. Led cross-functional development teams of 10+ members across 3 locations (Colombia, Netherlands, Germany) through a complete website redesign and modern tech stack migration using Next.js and React. Managed product backlog and sprint planning using Agile methodology to deliver zero-downtime deployment while significantly improving platform performance.",
+            'Led the full redesign and tech stack migration of the Runtastic platform, a fitness app with 165M+ registered users. Teams were based in Colombia, Netherlands, and Germany. We moved to Next.js and React, ran the migration in stages, and kept everything live throughout. Managed the product backlog and sprint planning using Agile across three time zones.',
           technologies: [
             'Next.js',
             'TypeScript',
@@ -449,16 +450,16 @@ export const defaultContent: SiteContent = {
             'Docker',
           ],
           metrics: [
-            { label: 'Global Users Served', value: '165M+' },
-            { label: 'Page Load Speed Improvement', value: '+55%' },
-            { label: 'Cross-Country Teams', value: '3 Countries' },
-            { label: 'Platform Downtime', value: 'Zero' },
+            { label: 'Users on the platform', value: '165M+' },
+            { label: 'Page load improvement', value: '+55%' },
+            { label: 'Team locations', value: '3 countries' },
+            { label: 'Downtime during migration', value: 'Zero' },
           ],
         },
         {
-          title: 'adidas Global Admin Application',
+          title: 'adidas internal admin application',
           description:
-            'Managed the complete product lifecycle for a mission-critical internal administration platform serving 1000+ stakeholders across adidas global organization. Streamlined operations and governance processes for international teams spanning multiple business units and geographic regions. Built robust enterprise-grade solution using Java ecosystem with high availability and scalability requirements for global deployment.',
+            'Managed the product lifecycle for the internal admin tool used by 1000+ people across the global adidas organisation. This was a less glamorous but important project — the kind of internal tooling that everyone relies on and nobody talks about until it breaks. Kept it stable, improved it incrementally, and managed the stakeholder communication across multiple business units.',
           technologies: [
             'Angular',
             'Java',
@@ -468,16 +469,16 @@ export const defaultContent: SiteContent = {
             'Jenkins',
           ],
           metrics: [
-            { label: 'Global Stakeholders', value: '1000+' },
-            { label: 'Enterprise Deployment', value: 'Global Scale' },
-            { label: 'Business Units Served', value: 'Multiple' },
-            { label: 'Location', value: 'Salzburg, Austria' },
+            { label: 'Internal users', value: '1000+' },
+            { label: 'Deployment scope', value: 'Global' },
+            { label: 'Business units served', value: 'Multiple' },
+            { label: 'Based in', value: 'Salzburg, Austria' },
           ],
         },
         {
-          title: 'Enterprise Social Commerce Platform & Sprinklr Integration',
+          title: 'Sprinklr & adiSCom social commerce platform',
           description:
-            'Led product management for high-value enterprise initiatives including a 1 Million EUR annual Sprinklr license and in-house social commerce engine (adiSCom) processing 500K+ monthly interactions. Managed development teams of 13+ personnel including external freelancers, coordinating across multiple countries. Drove 30% increase in platform adoption through strategic onboarding improvements and enhanced customer care initiatives. Supported 50+ global market teams through integrated social media tool ecosystem.',
+            'Managed two products in parallel: Sprinklr (a €1M/year social media management licence) and adiSCom, an in-house social commerce engine we built internally. Led a team of 13, including external freelancers in different countries. The main challenge was getting adoption — we improved it by 30% by redesigning onboarding and rebuilding the customer support model from scratch.',
           technologies: [
             'Vue.js',
             'Node.js',
@@ -488,41 +489,41 @@ export const defaultContent: SiteContent = {
             'Instagram API',
           ],
           metrics: [
-            { label: 'Platform License Value', value: '1M EUR' },
-            { label: 'Monthly Interactions', value: '500K+' },
-            { label: 'Platform Adoption Increase', value: '+30%' },
-            { label: 'Global Market Teams', value: '50+' },
+            { label: 'Sprinklr licence value', value: '€1M/yr' },
+            { label: 'Monthly interactions', value: '500K+' },
+            { label: 'Adoption increase', value: '+30%' },
+            { label: 'Global market teams supported', value: '50+' },
           ],
         },
         {
-          title: 'Product Information Management (PIM) System',
+          title: 'Product Information Management (PIM) tool',
           description:
-            'Delivered enterprise-grade Product Information Management tool working with external development teams during rapid career progression from Intern to Product Owner within 18 months. Achieved remarkable 70% improvement in speed to market through streamlined product data workflows and enhanced operational efficiency. Successfully launched comprehensive PIM solution on schedule with 100% user adoption rate, managing global social media tool ecosystem supporting 50+ market teams across Facebook Business Manager, Instagram, and Sprinklr platforms.',
+            "Delivered a PIM tool with an external development team — my first major product as a Product Owner. We launched on schedule with 100% adoption on day one, which I'm still proud of. Also managed the broader social media tool ecosystem (Sprinklr, Facebook Business Manager, Instagram) for 50+ market teams. I went from intern to Product Owner in 18 months, which set the tone for everything that followed.",
           technologies: [
-            'PIM Systems',
-            'External Vendor Management',
+            'PIM systems',
+            'Vendor management',
             'Facebook Business Manager',
             'Instagram API',
-            'Sprinklr Platform',
-            'Enterprise Integration',
+            'Sprinklr',
+            'Enterprise integrations',
           ],
           metrics: [
-            { label: 'Speed to Market Improvement', value: '+70%' },
-            { label: 'User Adoption Rate', value: '100%' },
-            { label: 'Career Progression', value: '18 Months' },
-            { label: 'Location', value: 'Amsterdam, Netherlands' },
+            { label: 'Speed to market improvement', value: '+70%' },
+            { label: 'Adoption at launch', value: '100%' },
+            { label: 'Time from intern to PO', value: '18 months' },
+            { label: 'Based in', value: 'Amsterdam, Netherlands' },
           ],
         },
       ],
     },
     personalProjects: {
-      title: 'Entrepreneurial Ventures',
-      subtitle: 'Fintech startups and algorithmic trading solutions',
+      title: 'Side ventures',
+      subtitle: 'Things I built outside of my day job',
       projects: [
         {
-          title: 'StagStrat Algorithmic Trading Platform',
+          title: 'StagStrat — algorithmic trading platform',
           description:
-            'Leading product development for a cutting-edge fintech startup targeting institutional investors. Owned complete product lifecycle from conception to production launch, establishing market credibility through strategic product roadmap and user-centric API integrations. Implemented SEO optimization strategy that significantly boosted organic visibility while streamlining development processes for maximum efficiency.',
+            'Running product for an algorithmic trading startup targeting institutional investors. Built the roadmap from scratch, launched the website, and cut feature lead time by 80% by tightening how we scope and prioritise work. Also ran the SEO strategy for the site, which grew organic traffic by 40%.',
           technologies: [
             'React',
             'Python',
@@ -532,10 +533,10 @@ export const defaultContent: SiteContent = {
             'Docker',
           ],
           metrics: [
-            { label: 'Lead Time Reduction', value: '80%' },
-            { label: 'Organic Traffic Growth', value: '+40%' },
-            { label: 'Product Lifecycle Ownership', value: 'End-to-End' },
-            { label: 'Location', value: 'Remote (Leeds, UK)' },
+            { label: 'Feature lead time reduction', value: '80%' },
+            { label: 'Organic traffic growth', value: '+40%' },
+            { label: 'Ownership scope', value: 'Full product lifecycle' },
+            { label: 'Based', value: 'Remote (Leeds, UK)' },
           ],
         },
       ],

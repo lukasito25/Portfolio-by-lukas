@@ -485,13 +485,10 @@ export default function WorkPage() {
         <section className="mb-16">
           <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-8 lg:p-12">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">
-                My Product Development Process
-              </h2>
+              <h2 className="text-3xl font-bold mb-4">How I work</h2>
               <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                A systematic approach that combines user research, data
-                analysis, and technical expertise to build products that users
-                love and businesses rely on.
+                Not a methodology — just the pattern I've noticed in the work
+                that actually went well.
               </p>
             </div>
             <div className="grid md:grid-cols-4 gap-8">
@@ -499,40 +496,46 @@ export default function WorkPage() {
                 <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Users className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Discovery</h3>
+                <h3 className="font-semibold text-lg mb-2">Understand first</h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Deep user research, market analysis, and problem validation
-                  through interviews and data analysis.
+                  Talk to users, read the data, understand the constraint. I try
+                  not to start building until the problem is clear.
                 </p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Target className="h-8 w-8 text-green-600 dark:text-green-400" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Strategy</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  Be clear on the goal
+                </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Define clear objectives, success metrics, and roadmap
-                  priorities based on business goals and user needs.
+                  Write down what success looks like before starting. Saves a
+                  lot of arguments about scope later.
                 </p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Zap className="h-8 w-8 text-purple-600 dark:text-purple-400" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Execution</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  Ship incrementally
+                </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Iterative development with continuous testing, feedback loops,
-                  and cross-functional collaboration.
+                  Small, frequent releases over big-bang launches. Easier to
+                  catch problems, easier to course-correct.
                 </p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center mx-auto mb-4">
                   <BarChart3 className="h-8 w-8 text-orange-600 dark:text-orange-400" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Optimization</h3>
+                <h3 className="font-semibold text-lg mb-2">
+                  Learn from what shipped
+                </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Data-driven iteration, A/B testing, and continuous improvement
-                  based on user behavior and business metrics.
+                  Look at the numbers, talk to users again, adjust. The first
+                  version is rarely the right one.
                 </p>
               </div>
             </div>
@@ -543,17 +546,19 @@ export default function WorkPage() {
         <section className="text-center">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-3xl font-bold mb-6">
-              Let's Build Your Next Success Story
+              Got something interesting to work on?
             </h2>
             <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">
-              Ready to transform your product vision into measurable business
-              impact? I'd love to discuss how my strategic approach and
-              technical expertise can help your team succeed.
+              I'm open to senior PM roles, consulting work, and advisory
+              conversations. If you're building something and think my
+              background might be useful, I'd like to hear about it.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg">Schedule a Strategy Call</Button>
+              <Button size="lg" asChild>
+                <Link href="/contact">Get in touch</Link>
+              </Button>
               <Button variant="outline" size="lg" asChild>
-                <Link href="/about">Learn About My Process</Link>
+                <Link href="/about">More about me</Link>
               </Button>
             </div>
           </div>

@@ -69,12 +69,14 @@ export default function AboutPage() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 mb-6">
+                <Badge variant="secondary">Product Management</Badge>
                 <Badge variant="secondary">Team Leadership</Badge>
-                <Badge variant="secondary">Digital Product Management</Badge>
-                <Badge variant="secondary">Agile Methodology</Badge>
-                <Badge variant="secondary">Strategic Management</Badge>
+                <Badge variant="secondary">Agile / Scrum</Badge>
+                <Badge variant="secondary">Stakeholder Management</Badge>
                 <Badge variant="secondary">SEO & Marketing</Badge>
-                <Badge variant="secondary">Tech Stack Migration</Badge>
+                <Badge variant="secondary">Tech Migrations</Badge>
+                <Badge variant="secondary">SaaS Founder</Badge>
+                <Badge variant="secondary">UEFA A Licence</Badge>
               </div>
             </div>
             <div className="lg:w-1/3">
@@ -241,7 +243,7 @@ export default function AboutPage() {
         {/* Core Skills */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold mb-12 text-center">
-            Core Competencies
+            What I'm good at
           </h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div>

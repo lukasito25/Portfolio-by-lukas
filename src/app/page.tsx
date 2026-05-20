@@ -125,17 +125,7 @@ export default function Home() {
 
           {/* Subheadline */}
           <p className="text-xl md:text-2xl text-gray-700 mb-12 max-w-4xl mx-auto leading-relaxed">
-            {(content.hero?.subheadline || '')
-              .replace(/13 personnel/g, '')
-              .replace(/165M\+ users/g, '')}
-            <span className="font-bold text-purple-600 cosmic-pulse">
-              13+ members
-            </span>
-            {' across 3 countries, launching B2B and B2C products reaching '}
-            <span className="font-bold text-green-600 cosmic-pulse">
-              165+ million users
-            </span>
-            {' globally.'}
+            {content.hero?.subheadline || ''}
           </p>
 
           {/* CTA Buttons */}
@@ -213,10 +203,9 @@ export default function Home() {
               Core <span className="gradient-text">Competencies</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              8+ years of international product management experience across
-              digital sports, e-commerce, fintech, and SaaS — including founding
-              PlayerGrade, a multi-tenant football scouting platform — with
-              expertise in agile methodologies and team leadership.
+              Eight years across digital sports, e-commerce, fintech, and SaaS —
+              including building PlayerGrade from scratch as sole founder.
+              Here's what I've picked up.
             </p>
           </div>
 

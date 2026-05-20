@@ -141,12 +141,12 @@ export default function ContactPage() {
       <section className="relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-6">
-            Let&apos;s Connect
+            Get in touch
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Ready to scale your product, build world-class teams, or expand into
-            new markets? Let&apos;s discuss how my experience building products
-            that millions trust products can help accelerate your growth.
+            Whether you&apos;re hiring for a senior PM role, looking for
+            advisory help on a product, or just want to talk shop — drop me a
+            message and I&apos;ll get back to you within 24 hours.
           </p>
         </div>
       </section>
