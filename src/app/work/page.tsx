@@ -442,36 +442,29 @@ export default function WorkPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-slate-600 dark:text-slate-400 mb-6">
-                        {project?.description || ''}
-                      </p>
-                      <div className="grid grid-cols-2 gap-4 mb-6">
-                        {(project.metrics || [])
-                          .slice(0, 2)
-                          .map((metric, metricIndex) => (
+                      <div className="grid grid-cols-2 gap-3 mb-6">
+                        {(project.metrics || []).map((metric, metricIndex) => (
+                          <div
+                            key={metricIndex}
+                            className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg"
+                          >
                             <div
-                              key={metricIndex}
-                              className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg"
+                              className={`font-semibold text-lg ${professionalProjectIconColors[index % professionalProjectIconColors.length]}`}
                             >
-                              <div
-                                className={`font-semibold text-lg ${professionalProjectIconColors[index % professionalProjectIconColors.length]}`}
-                              >
-                                {metric?.value || ''}
-                              </div>
-                              <div className="text-sm text-slate-600 dark:text-slate-400">
-                                {metric?.label || ''}
-                              </div>
+                              {metric?.value || ''}
                             </div>
-                          ))}
+                            <div className="text-sm text-slate-600 dark:text-slate-400">
+                              {metric?.label || ''}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {(project.technologies || [])
-                          .slice(0, 3)
-                          .map((tech, techIndex) => (
-                            <Badge key={techIndex} variant="outline">
-                              {tech}
-                            </Badge>
-                          ))}
+                        {(project.technologies || []).map((tech, techIndex) => (
+                          <Badge key={techIndex} variant="outline">
+                            {tech}
+                          </Badge>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>
