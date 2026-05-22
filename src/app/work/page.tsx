@@ -227,10 +227,7 @@ export default function WorkPage() {
                   </p>
                 </div>
                 <a
-                  href={
-                    content.playergrade?.url ||
-                    'https://playergrade.lovable.app/'
-                  }
+                  href={content.playergrade?.url || 'https://playergrade.app/'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm transition-all duration-200 hover:-translate-y-0.5 shadow-lg shadow-purple-900/40"

@@ -406,7 +406,7 @@ export const defaultContent: SiteContent = {
       description:
         'I built PlayerGrade because I hold a UEFA A coaching licence and spent time doing performance analysis at club level — and I knew how broken the scouting workflow was for smaller clubs. Most teams were using spreadsheets and gut feel. PlayerGrade gives scouts a structured way to grade, compare, and shortlist players using a position-calibrated scoring engine. Currently in beta with 4 clubs across CEE.',
       status: 'Beta',
-      url: 'https://playergrade.lovable.app/',
+      url: 'https://playergrade.app/',
       challenge:
         "Smaller football clubs in CEE don't have the budget for tools like Wyscout. Their scouts rely on notebooks, spreadsheets, and memory. There was no lightweight, position-aware tool that could give them a consistent scoring framework without requiring expensive data subscriptions.",
       solution:
