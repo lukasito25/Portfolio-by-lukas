@@ -1,335 +1,261 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Badge } from '@/components/ui/badge'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import {
-  Briefcase,
-  Users,
-  TrendingUp,
-  Brain,
-  Target,
-  Loader2,
-} from 'lucide-react'
 import { dataService } from '@/lib/data-service'
 import { defaultContent } from '@/lib/content-config'
+import { Reveal } from '@/components/motion/reveal'
+import { CountUp } from '@/components/motion/count-up'
+
+const heroBadges = [
+  'Product Management',
+  'Team Leadership',
+  'Agile / Scrum',
+  'Stakeholder Management',
+  'SEO & Marketing',
+  'Tech Migrations',
+  'SaaS Founder',
+  'UEFA A Licence',
+]
+
+const credentials = [
+  'MBA Global — University of Derby',
+  'CMI Level 7 Strategic Management',
+  'Agile Product Owner Certified',
+  'UEFA A Licence',
+  'BSc Sport Management — University of Derby',
+]
+
+const coreSkills = {
+  'Product & Strategy': [
+    { name: 'Strategic Management & Planning', label: 'Expert' },
+    { name: 'Team Leadership (13+ personnel)', label: 'Expert' },
+    { name: 'Product Roadmap & Lifecycle', label: 'Expert' },
+    { name: 'International Market Expansion', label: 'Advanced' },
+  ],
+  'Technical & Digital': [
+    { name: 'SEO Strategy & Implementation', label: 'Expert' },
+    { name: 'Tech Stack Modernization', label: 'Advanced' },
+    { name: 'Agile/Scrum Methodology', label: 'Expert' },
+    { name: 'Digital Marketing Integration', label: 'Advanced' },
+  ],
+}
 
 export default function AboutPage() {
   const [content, setContent] = useState(defaultContent.about)
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        setIsLoading(true)
+        if (process.env.NEXT_PUBLIC_USE_API !== 'true') return
         const aboutContent = await dataService.getContentSection('about')
         setContent(aboutContent || defaultContent.about)
       } catch (error) {
         console.error('Failed to fetch about content:', error)
-        // Fallback to default content
         setContent(defaultContent.about)
-      } finally {
-        setIsLoading(false)
       }
     }
 
     fetchContent()
   }, [])
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Hero Section */}
-        <section className="mb-16">
-          <div className="flex flex-col lg:flex-row gap-12 items-start">
-            <div className="lg:w-2/3">
-              <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-                {content.hero?.title || ''}
-              </h1>
-              <div className="prose prose-lg dark:prose-invert mb-8">
-                <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed">
-                  {content.hero?.description || ''}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2 mb-6">
-                <Badge variant="secondary">Product Management</Badge>
-                <Badge variant="secondary">Team Leadership</Badge>
-                <Badge variant="secondary">Agile / Scrum</Badge>
-                <Badge variant="secondary">Stakeholder Management</Badge>
-                <Badge variant="secondary">SEO & Marketing</Badge>
-                <Badge variant="secondary">Tech Migrations</Badge>
-                <Badge variant="secondary">SaaS Founder</Badge>
-                <Badge variant="secondary">UEFA A Licence</Badge>
-              </div>
-            </div>
-            <div className="lg:w-1/3">
-              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950 border-blue-200 dark:border-blue-800">
-                <CardHeader>
-                  <CardTitle className="text-blue-800 dark:text-blue-200">
-                    Quick Stats
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {(content.hero?.quickStats || []).map((stat, index) => (
-                    <div key={index} className="flex justify-between">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">
-                        {stat?.label || ''}
-                      </span>
-                      <span className="font-semibold">{stat?.value || ''}</span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Leadership Philosophy */}
-        <section className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              {content.philosophy?.title || ''}
-            </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
-              {content.philosophy?.description || ''}
+    <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8 md:py-28">
+      {/* Hero */}
+      <section className="mb-24">
+        <div className="flex flex-col gap-12 lg:flex-row lg:items-start">
+          <Reveal className="lg:w-2/3">
+            <p className="section-label mb-4">About</p>
+            <h1 className="font-display mb-6 text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+              {content.hero?.title || ''}
+            </h1>
+            <p className="mb-8 text-lg leading-relaxed text-secondary-fg md:text-xl">
+              {content.hero?.description || ''}
             </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {(content.philosophy?.cards || []).map((card, index) => {
-              const iconConfig = [
-                {
-                  icon: Users,
-                  bgColor: 'bg-blue-100 dark:bg-blue-900',
-                  textColor: 'text-blue-600 dark:text-blue-400',
-                },
-                {
-                  icon: Brain,
-                  bgColor: 'bg-green-100 dark:bg-green-900',
-                  textColor: 'text-green-600 dark:text-green-400',
-                },
-                {
-                  icon: Target,
-                  bgColor: 'bg-purple-100 dark:bg-purple-900',
-                  textColor: 'text-purple-600 dark:text-purple-400',
-                },
-              ]
-              const config = iconConfig[index % iconConfig.length]
-              const IconComponent = config.icon
+            <div className="flex flex-wrap gap-2">
+              {heroBadges.map(badge => (
+                <span key={badge} className="chip text-xs">
+                  {badge}
+                </span>
+              ))}
+            </div>
+          </Reveal>
+          <Reveal delay={0.15} className="lg:w-1/3">
+            <div className="panel p-7">
+              <p className="section-label mb-6 !text-[0.6875rem]">
+                Quick stats
+              </p>
+              <div className="space-y-5">
+                {(content.hero?.quickStats || []).map((stat, index) => (
+                  <div
+                    key={index}
+                    className="flex items-baseline justify-between gap-4 border-b border-line pb-4 last:border-0 last:pb-0"
+                  >
+                    <span className="text-sm text-secondary-fg">
+                      {stat?.label || ''}
+                    </span>
+                    <span className="font-display text-2xl font-bold text-foreground">
+                      <CountUp value={stat?.value || ''} />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
 
-              return (
-                <Card key={index}>
-                  <CardHeader>
-                    <div
-                      className={`w-12 h-12 ${config.bgColor} rounded-lg flex items-center justify-center mb-4`}
-                    >
-                      <IconComponent
-                        className={`h-6 w-6 ${config.textColor}`}
-                      />
-                    </div>
-                    <CardTitle>{card?.title || ''}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-600 dark:text-slate-400">
-                      {card?.description || ''}
-                    </p>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        </section>
+      {/* Philosophy */}
+      <section className="mb-24">
+        <Reveal className="mb-12 max-w-2xl">
+          <p className="section-label mb-4">Principles</p>
+          <h2 className="font-display mb-4 text-3xl font-bold tracking-tight md:text-4xl">
+            {content.philosophy?.title || ''}
+          </h2>
+          <p className="text-lg leading-relaxed text-secondary-fg">
+            {content.philosophy?.description || ''}
+          </p>
+        </Reveal>
+        <Reveal stagger={0.08} className="grid gap-5 md:grid-cols-3">
+          {(content.philosophy?.cards || []).map((card, index) => (
+            <div
+              key={index}
+              data-reveal-child
+              className="panel panel-hover p-7"
+            >
+              <div className="font-display mb-6 text-sm font-medium text-tertiary-fg">
+                {String(index + 1).padStart(2, '0')}
+              </div>
+              <h3 className="font-display mb-3 text-xl font-semibold leading-snug">
+                {card?.title || ''}
+              </h3>
+              <p className="text-sm leading-relaxed text-secondary-fg">
+                {card?.description || ''}
+              </p>
+            </div>
+          ))}
+        </Reveal>
+      </section>
 
-        {/* Professional Journey */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-12 text-center">
+      {/* Journey — timeline */}
+      <section className="mb-24">
+        <Reveal className="mb-14 max-w-2xl">
+          <p className="section-label mb-4">Career</p>
+          <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
             {content.journey?.title || ''}
           </h2>
-          <div className="space-y-8">
-            {(content.journey?.positions || []).map((position, index) => {
-              const iconConfig = [
-                {
-                  icon: Briefcase,
-                  bgColor: 'bg-blue-100 dark:bg-blue-900',
-                  textColor: 'text-blue-600 dark:text-blue-400',
-                },
-                {
-                  icon: TrendingUp,
-                  bgColor: 'bg-green-100 dark:bg-green-900',
-                  textColor: 'text-green-600 dark:text-green-400',
-                },
-                {
-                  icon: Briefcase,
-                  bgColor: 'bg-purple-100 dark:bg-purple-900',
-                  textColor: 'text-purple-600 dark:text-purple-400',
-                },
-              ]
-              const config = iconConfig[index % iconConfig.length]
-              const IconComponent = config.icon
+        </Reveal>
 
-              return (
-                <Card key={index}>
-                  <CardHeader>
-                    <div className="flex items-start gap-4">
-                      <div
-                        className={`w-12 h-12 ${config.bgColor} rounded-lg flex items-center justify-center`}
-                      >
-                        <IconComponent
-                          className={`h-6 w-6 ${config.textColor}`}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-xl">
-                          {position?.title || ''}
-                        </CardTitle>
-                        <CardDescription className="text-base">
-                          {position?.company || ''} • {position?.period || ''} •{' '}
-                          {position?.location || ''}
-                        </CardDescription>
-                      </div>
+        <div className="relative">
+          {/* Spine */}
+          <div className="timeline-spine absolute left-[7px] top-2 bottom-2 hidden w-px md:block" />
+
+          <div className="space-y-6 md:space-y-10">
+            {(content.journey?.positions || []).map((position, index) => (
+              <Reveal key={index} className="relative md:pl-12">
+                {/* Node */}
+                <span className="absolute left-0 top-2 hidden h-[15px] w-[15px] rounded-full border-2 border-(--accent) bg-background md:block" />
+
+                <div className="panel panel-hover p-7 md:p-8">
+                  <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+                    <div>
+                      <h3 className="font-display text-xl font-semibold">
+                        {position?.title || ''}
+                      </h3>
+                      <p className="mt-1 text-sm font-medium text-(--accent)">
+                        {position?.company || ''}
+                      </p>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="mb-4 text-slate-600 dark:text-slate-400">
-                      {position?.description || ''}
-                    </p>
-                    {position.metrics && position.metrics.length > 0 && (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {(position.metrics || []).map((metric, metricIndex) => {
-                          const colors = [
-                            'text-blue-600 dark:text-blue-400',
-                            'text-green-600 dark:text-green-400',
-                            'text-purple-600 dark:text-purple-400',
-                            'text-orange-600 dark:text-orange-400',
-                          ]
-                          return (
-                            <div key={metricIndex} className="text-center">
-                              <div
-                                className={`font-semibold text-lg ${colors[metricIndex % colors.length]}`}
-                              >
-                                {metric?.value || ''}
-                              </div>
-                              <div className="text-sm text-slate-600 dark:text-slate-400">
-                                {metric?.label || ''}
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )
-            })}
+                    <div className="text-right text-sm text-tertiary-fg">
+                      <div className="font-mono">{position?.period || ''}</div>
+                      <div>{position?.location || ''}</div>
+                    </div>
+                  </div>
+                  <p className="mb-6 text-sm leading-relaxed text-secondary-fg md:text-base">
+                    {position?.description || ''}
+                  </p>
+                  {position.metrics && position.metrics.length > 0 && (
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                      {(position.metrics || []).map((metric, metricIndex) => (
+                        <div
+                          key={metricIndex}
+                          className="rounded-xl border border-line bg-(--surface) p-3 text-center"
+                        >
+                          <div className="font-display text-lg font-bold text-foreground">
+                            {metric?.value || ''}
+                          </div>
+                          <div className="text-xs text-tertiary-fg">
+                            {metric?.label || ''}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Reveal>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Core Skills */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold mb-12 text-center">
-            What I'm good at
+      {/* Core skills */}
+      <section className="mb-24">
+        <Reveal className="mb-12 max-w-2xl">
+          <p className="section-label mb-4">Strengths</p>
+          <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
+            What I&apos;m good at
           </h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-xl font-semibold mb-6">Product & Strategy</h3>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>Strategic Management & Planning</span>
-                    <span className="text-sm text-slate-500">Expert</span>
-                  </div>
-                  <Progress value={95} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>Team Leadership (13+ personnel)</span>
-                    <span className="text-sm text-slate-500">Expert</span>
-                  </div>
-                  <Progress value={95} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>Product Roadmap & Lifecycle</span>
-                    <span className="text-sm text-slate-500">Expert</span>
-                  </div>
-                  <Progress value={92} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>International Market Expansion</span>
-                    <span className="text-sm text-slate-500">Advanced</span>
-                  </div>
-                  <Progress value={88} className="h-2" />
-                </div>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-6">
-                Technical & Digital
+        </Reveal>
+        <Reveal stagger={0.1} className="grid gap-6 md:grid-cols-2">
+          {Object.entries(coreSkills).map(([category, skills]) => (
+            <div key={category} data-reveal-child className="panel p-7">
+              <h3 className="font-display mb-6 text-lg font-semibold">
+                {category}
               </h3>
               <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>SEO Strategy & Implementation</span>
-                    <span className="text-sm text-slate-500">Expert</span>
+                {skills.map(skill => (
+                  <div
+                    key={skill.name}
+                    className="flex items-center justify-between gap-4 border-b border-line pb-4 last:border-0 last:pb-0"
+                  >
+                    <span className="text-sm text-secondary-fg">
+                      {skill.name}
+                    </span>
+                    <span
+                      className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
+                        skill.label === 'Expert'
+                          ? 'bg-accent-soft text-(--accent)'
+                          : 'border border-line text-tertiary-fg'
+                      }`}
+                    >
+                      {skill.label}
+                    </span>
                   </div>
-                  <Progress value={90} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>Tech Stack Modernization</span>
-                    <span className="text-sm text-slate-500">Advanced</span>
-                  </div>
-                  <Progress value={85} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>Agile/Scrum Methodology</span>
-                    <span className="text-sm text-slate-500">Expert</span>
-                  </div>
-                  <Progress value={95} className="h-2" />
-                </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>Digital Marketing Integration</span>
-                    <span className="text-sm text-slate-500">Advanced</span>
-                  </div>
-                  <Progress value={88} className="h-2" />
-                </div>
+                ))}
               </div>
             </div>
-          </div>
-        </section>
+          ))}
+        </Reveal>
+      </section>
 
-        {/* Personal Side */}
-        <section className="mb-16">
-          <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-8">
-            <h2 className="text-3xl font-bold mb-6 text-center">
+      {/* Personal side */}
+      <Reveal as="section">
+        <div className="panel relative overflow-hidden p-8 md:p-12">
+          <div
+            className="absolute inset-0"
+            style={{ background: 'var(--hero-vignette)' }}
+          />
+          <div className="relative mx-auto max-w-3xl text-center">
+            <p className="section-label mb-4">Off the clock</p>
+            <h2 className="font-display mb-8 text-3xl font-bold tracking-tight md:text-4xl">
               Beyond the Spreadsheets
             </h2>
-            <div className="prose prose-lg dark:prose-invert mx-auto text-center">
+            <div className="space-y-5 text-left leading-relaxed text-secondary-fg md:text-center">
               <p>
-                When I'm not leading cross-functional teams or architecting
-                product roadmaps, you'll find me exploring the medieval streets
-                of Volterra, Italy, where I'm currently based. A UEFA A-licensed
-                coach with professional football performance analysis
-                experience, I bring genuine domain depth to everything
+                When I&apos;m not leading cross-functional teams or architecting
+                product roadmaps, you&apos;ll find me exploring the medieval
+                streets of Volterra, Italy, where I&apos;m currently based. A
+                UEFA A-licensed coach with professional football performance
+                analysis experience, I bring genuine domain depth to everything
                 sports-tech — including PlayerGrade, my football scouting SaaS
                 built for clubs across Central & Eastern Europe.
               </p>
@@ -343,27 +269,16 @@ export default function AboutPage() {
                 real problems.
               </p>
             </div>
-            {/* Credentials */}
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <span className="px-4 py-2 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
-                MBA Global — University of Derby
-              </span>
-              <span className="px-4 py-2 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-                CMI Level 7 Strategic Management
-              </span>
-              <span className="px-4 py-2 rounded-full text-sm font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
-                Agile Product Owner Certified
-              </span>
-              <span className="px-4 py-2 rounded-full text-sm font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
-                UEFA A Licence
-              </span>
-              <span className="px-4 py-2 rounded-full text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                BSc Sport Management — University of Derby
-              </span>
+            <div className="mt-10 flex flex-wrap justify-center gap-2">
+              {credentials.map(credential => (
+                <span key={credential} className="chip text-xs">
+                  {credential}
+                </span>
+              ))}
             </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </Reveal>
     </div>
   )
 }

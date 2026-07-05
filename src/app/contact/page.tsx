@@ -1,24 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { Metadata } from 'next'
-
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
 import { trackFormSubmission } from '@/lib/analytics'
+import { Reveal } from '@/components/motion/reveal'
 import {
   Send,
   MapPin,
   Mail,
   Phone,
-  MessageSquare,
   CheckCircle,
   AlertCircle,
   RefreshCw,
+  Clock,
+  Linkedin,
 } from 'lucide-react'
 
 interface ContactFormData {
@@ -32,24 +26,25 @@ interface ContactFormData {
   budgetRange?: string
 }
 
-const projectTypes = [
-  'Product Strategy Consulting',
-  'Team Leadership & Management',
-  'Growth Strategy Development',
-  'International Market Expansion',
-  'Product Management Advisory',
-  'Strategic Planning',
-  'Other',
+const inquiryTypes = [
+  'Hiring for a senior PM role',
+  'Advisory / consulting project',
+  'Product conversation / something else',
 ]
 
-const budgetRanges = [
-  'Under $10K',
-  '$10K - $25K',
-  '$25K - $50K',
-  '$50K - $100K',
-  '$100K+',
-  'Prefer to discuss',
+const expertiseAreas = [
+  'Product Strategy',
+  'Team Leadership',
+  'International Expansion',
+  'Growth Strategy',
+  'Scale Operations',
+  'Strategic Advisory',
 ]
+
+const fieldClass =
+  'w-full rounded-xl border border-line bg-(--surface) px-4 py-3 text-sm text-foreground placeholder:text-tertiary-fg transition-colors focus:border-(--accent) focus:outline-none focus:ring-2 focus:ring-(--accent-soft)'
+
+const labelClass = 'mb-2 block text-sm font-medium text-secondary-fg'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState<ContactFormData>({
@@ -106,7 +101,6 @@ export default function ContactPage() {
           "Thank you for your message! I'll get back to you within 24 hours."
         )
 
-        // Track successful form submission
         trackFormSubmission('contact_form', true)
 
         setFormData({
@@ -122,13 +116,12 @@ export default function ContactPage() {
       } else {
         throw new Error('Failed to send message')
       }
-    } catch (error) {
+    } catch {
       setSubmitStatus('error')
       setSubmitMessage(
         'Failed to send message. Please try again or email me directly.'
       )
 
-      // Track failed form submission
       trackFormSubmission('contact_form', false)
     } finally {
       setIsSubmitting(false)
@@ -136,254 +129,238 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-6">
-            Get in touch
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Whether you&apos;re hiring for a senior PM role, looking for
-            advisory help on a product, or just want to talk shop — drop me a
-            message and I&apos;ll get back to you within 24 hours.
-          </p>
-        </div>
-      </section>
+    <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8 md:py-28">
+      {/* Hero */}
+      <Reveal as="section" className="mb-16 max-w-3xl">
+        <p className="section-label mb-4">Contact</p>
+        <h1 className="font-display mb-6 text-4xl font-bold tracking-tight md:text-6xl">
+          Get in touch
+        </h1>
+        <p className="text-lg leading-relaxed text-secondary-fg md:text-xl">
+          Whether you&apos;re hiring for a senior PM role, looking for advisory
+          help on a product, or just want to talk shop — drop me a message and
+          I&apos;ll get back to you within 24 hours.
+        </p>
+      </Reveal>
 
-      {/* Contact Content */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Contact Info */}
-            <div className="lg:col-span-1">
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageSquare className="w-5 h-5" />
-                      Get In Touch
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-3 text-sm">
-                      <Mail className="w-4 h-4 text-blue-600" />
-                      <span>lukas.hosala@icloud.com</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <Phone className="w-4 h-4 text-green-600" />
-                      <span>+39 379 3110473</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <MapPin className="w-4 h-4 text-red-600" />
-                      <span>Italy, EU</span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Expertise Areas</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">Product Strategy</Badge>
-                      <Badge variant="secondary">Team Leadership</Badge>
-                      <Badge variant="secondary">International Expansion</Badge>
-                      <Badge variant="secondary">Growth Strategy</Badge>
-                      <Badge variant="secondary">Scale Operations</Badge>
-                      <Badge variant="secondary">Strategic Advisory</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Response Time</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      I typically respond to inquiries within 24 hours. For
-                      urgent matters, please mention it in your message subject
-                      line.
-                    </p>
-                  </CardContent>
-                </Card>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Contact info */}
+        <div className="space-y-6 lg:col-span-1">
+          <Reveal>
+            <div className="panel p-7">
+              <p className="section-label mb-6 !text-[0.6875rem]">
+                Direct lines
+              </p>
+              <div className="space-y-4">
+                <a
+                  href="mailto:lukas.hosala@icloud.com"
+                  className="flex items-center gap-3 text-sm text-secondary-fg transition-colors hover:text-foreground"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-soft">
+                    <Mail className="h-4 w-4 text-(--accent)" />
+                  </span>
+                  lukas.hosala@icloud.com
+                </a>
+                <a
+                  href="tel:+393793110473"
+                  className="flex items-center gap-3 text-sm text-secondary-fg transition-colors hover:text-foreground"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-soft">
+                    <Phone className="h-4 w-4 text-(--accent)" />
+                  </span>
+                  +39 379 3110473
+                </a>
+                <a
+                  href="https://linkedin.com/in/hosala"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 text-sm text-secondary-fg transition-colors hover:text-foreground"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-soft">
+                    <Linkedin className="h-4 w-4 text-(--accent)" />
+                  </span>
+                  linkedin.com/in/hosala
+                </a>
+                <div className="flex items-center gap-3 text-sm text-secondary-fg">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-soft">
+                    <MapPin className="h-4 w-4 text-(--accent)" />
+                  </span>
+                  Italy, EU
+                </div>
               </div>
             </div>
+          </Reveal>
 
-            {/* Contact Form */}
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Send Me a Message</CardTitle>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Tell me about your project or opportunity. I&apos;d love to
-                    learn how I can help.
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  {submitStatus === 'success' && (
-                    <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                      <p className="text-green-800">{submitMessage}</p>
-                    </div>
-                  )}
-
-                  {submitStatus === 'error' && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-                      <AlertCircle className="w-5 h-5 text-red-600" />
-                      <p className="text-red-800">{submitMessage}</p>
-                    </div>
-                  )}
-
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="name">Name *</Label>
-                        <Input
-                          id="name"
-                          type="text"
-                          value={formData.name}
-                          onChange={e =>
-                            handleInputChange('name', e.target.value)
-                          }
-                          placeholder="Your full name"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="email">Email *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={e =>
-                            handleInputChange('email', e.target.value)
-                          }
-                          placeholder="your.email@company.com"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="company">Company</Label>
-                        <Input
-                          id="company"
-                          type="text"
-                          value={formData.company}
-                          onChange={e =>
-                            handleInputChange('company', e.target.value)
-                          }
-                          placeholder="Your company name"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="phone">Phone</Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={e =>
-                            handleInputChange('phone', e.target.value)
-                          }
-                          placeholder="+1 (555) 123-4567"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="subject">Subject</Label>
-                      <Input
-                        id="subject"
-                        type="text"
-                        value={formData.subject}
-                        onChange={e =>
-                          handleInputChange('subject', e.target.value)
-                        }
-                        placeholder="Brief subject line"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="projectType">Project Type</Label>
-                        <select
-                          id="projectType"
-                          value={formData.projectType}
-                          onChange={e =>
-                            handleInputChange('projectType', e.target.value)
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Select project type</option>
-                          {projectTypes.map(type => (
-                            <option key={type} value={type}>
-                              {type}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <Label htmlFor="budgetRange">Budget Range</Label>
-                        <select
-                          id="budgetRange"
-                          value={formData.budgetRange}
-                          onChange={e =>
-                            handleInputChange('budgetRange', e.target.value)
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Select budget range</option>
-                          {budgetRanges.map(range => (
-                            <option key={range} value={range}>
-                              {range}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="message">Message *</Label>
-                      <Textarea
-                        id="message"
-                        value={formData.message}
-                        onChange={e =>
-                          handleInputChange('message', e.target.value)
-                        }
-                        placeholder="Tell me about your project, challenges, goals, or how I can help..."
-                        rows={6}
-                        required
-                      />
-                    </div>
-
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                          Sending Message...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          Send Message
-                        </>
-                      )}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
+          <Reveal delay={0.1}>
+            <div className="panel p-7">
+              <p className="section-label mb-6 !text-[0.6875rem]">
+                Expertise areas
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {expertiseAreas.map(area => (
+                  <span key={area} className="chip text-xs">
+                    {area}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          </Reveal>
+
+          <Reveal delay={0.2}>
+            <div className="panel p-7">
+              <div className="mb-3 flex items-center gap-2">
+                <Clock className="h-4 w-4 text-(--accent)" />
+                <p className="section-label !text-[0.6875rem]">Response time</p>
+              </div>
+              <p className="text-sm leading-relaxed text-secondary-fg">
+                I typically respond to inquiries within 24 hours. For urgent
+                matters, please mention it in your message subject line.
+              </p>
+            </div>
+          </Reveal>
         </div>
-      </section>
+
+        {/* Contact form */}
+        <Reveal delay={0.1} className="lg:col-span-2">
+          <div className="panel p-7 md:p-10">
+            <h2 className="font-display mb-2 text-2xl font-semibold">
+              Send me a message
+            </h2>
+            <p className="mb-8 text-sm text-secondary-fg">
+              Tell me about your project or opportunity. I&apos;d love to learn
+              how I can help.
+            </p>
+
+            {submitStatus === 'success' && (
+              <div className="mb-6 flex items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+                <CheckCircle className="h-5 w-5 shrink-0 text-emerald-500" />
+                <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                  {submitMessage}
+                </p>
+              </div>
+            )}
+
+            {submitStatus === 'error' && (
+              <div className="mb-6 flex items-center gap-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4">
+                <AlertCircle className="h-5 w-5 shrink-0 text-rose-500" />
+                <p className="text-sm text-rose-600 dark:text-rose-400">
+                  {submitMessage}
+                </p>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div>
+                  <label htmlFor="name" className={labelClass}>
+                    Name *
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={formData.name}
+                    onChange={e => handleInputChange('name', e.target.value)}
+                    placeholder="Your full name"
+                    required
+                    className={fieldClass}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="email" className={labelClass}>
+                    Email *
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={e => handleInputChange('email', e.target.value)}
+                    placeholder="your.email@company.com"
+                    required
+                    className={fieldClass}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div>
+                  <label htmlFor="company" className={labelClass}>
+                    Company
+                  </label>
+                  <input
+                    id="company"
+                    type="text"
+                    value={formData.company}
+                    onChange={e => handleInputChange('company', e.target.value)}
+                    placeholder="Your company name"
+                    className={fieldClass}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="projectType" className={labelClass}>
+                    I&apos;m reaching out about
+                  </label>
+                  <select
+                    id="projectType"
+                    value={formData.projectType}
+                    onChange={e =>
+                      handleInputChange('projectType', e.target.value)
+                    }
+                    className={fieldClass}
+                  >
+                    <option value="">Select one (optional)</option>
+                    {inquiryTypes.map(type => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="message" className={labelClass}>
+                  Message *
+                </label>
+                <textarea
+                  id="message"
+                  value={formData.message}
+                  onChange={e => handleInputChange('message', e.target.value)}
+                  placeholder="Tell me about your project, challenges, goals, or how I can help..."
+                  rows={6}
+                  required
+                  className={fieldClass}
+                />
+              </div>
+
+              <p className="text-xs leading-relaxed text-tertiary-fg">
+                Your details are used only to reply to your message. See the{' '}
+                <a href="/privacy" className="underline hover:text-foreground">
+                  privacy policy
+                </a>{' '}
+                for how data is handled.
+              </p>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="btn-accent w-full disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Sending message...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    Send message
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </Reveal>
+      </div>
     </div>
   )
 }

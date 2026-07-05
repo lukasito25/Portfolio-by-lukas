@@ -1,9 +1,9 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Skills & Expertise - Product Management, Team Leadership & Strategy',
+  title: 'Skills',
   description:
-    'Eight years of product management across international teams, agile methodologies that actually work, and enterprise-scale platforms. From million-euro software licenses at adidas to building fintech platforms from scratch.',
+    'What eight years of product work actually teaches you: leading international teams, agile in practice, SEO as a product discipline, tech migrations, and shipping at enterprise scale.',
   keywords: [
     'Product Management Skills',
     'Cross-functional Team Leadership',

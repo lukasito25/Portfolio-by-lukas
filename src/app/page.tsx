@@ -1,120 +1,124 @@
 'use client'
 
-import { Metadata } from 'next'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { ProjectCarousel } from '@/components/ui/project-carousel'
+import { useEffect, useRef, useState } from 'react'
 import {
   ArrowRight,
-  TrendingUp,
-  Users,
-  Brain,
-  Target,
-  BarChart3,
-  Lightbulb,
-  Sparkles,
-  Rocket,
-  Star,
-  Zap,
+  ArrowUpRight,
+  ChevronDown,
+  ExternalLink,
+  Linkedin,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { dataService } from '@/lib/data-service'
 import { defaultContent } from '@/lib/content-config'
+import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap'
+import { HeroCanvas } from '@/components/motion/hero-canvas'
+import { Reveal } from '@/components/motion/reveal'
+import { CountUp } from '@/components/motion/count-up'
+import { Marquee } from '@/components/motion/marquee'
+import { Magnetic } from '@/components/motion/magnetic'
+
+const marqueeItems = [
+  'adidas',
+  'Runtastic',
+  'StagStrat',
+  'PlayerGrade',
+  '165M+ users',
+  'Teams across 3 countries',
+  'MBA · University of Derby',
+  'UEFA A Licence',
+]
 
 export default function Home() {
   const [content, setContent] = useState(defaultContent.homepage)
-  const [isLoading, setIsLoading] = useState(false)
+  const heroRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const loadContent = async () => {
-      // Set loading to false immediately to prevent hanging
-      setIsLoading(false)
-
       try {
-        // Only try to load from API if we're using API mode
         if (process.env.NEXT_PUBLIC_USE_API === 'true') {
-          console.log('Attempting to load content from API...')
           const homepageContent =
             await dataService.getContentSection('homepage')
-          console.log('API response:', homepageContent)
-
-          // Only use API content if it has competencies data
           if (
             homepageContent &&
             Object.keys(homepageContent).length > 0 &&
             homepageContent.competencies &&
             homepageContent.competencies.length > 0
           ) {
-            console.log('Using API content')
             setContent(homepageContent)
-          } else {
-            console.log('API content incomplete, using default content')
-            setContent(defaultContent.homepage)
           }
-        } else {
-          console.log('API disabled, using default content')
-          setContent(defaultContent.homepage)
         }
       } catch (error) {
         console.error(
           'Failed to load homepage content, using default content:',
           error
         )
-        // Ensure we always have content to display
-        setContent(defaultContent.homepage)
       }
     }
 
     loadContent()
   }, [])
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading content...</p>
-        </div>
-      </div>
-    )
-  }
+  // Hero entrance timeline
+  useGSAP(
+    () => {
+      const el = heroRef.current
+      if (!el) return
+      const targets = el.querySelectorAll('[data-hero]')
+      if (prefersReducedMotion()) {
+        gsap.set(targets, { opacity: 1, y: 0 })
+        return
+      }
+      gsap.fromTo(
+        targets,
+        { opacity: 0, y: 36 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1.1,
+          ease: 'power3.out',
+          stagger: 0.12,
+          delay: 0.15,
+        }
+      )
+    },
+    { scope: heroRef }
+  )
+
+  const featured = defaultContent.work.featured
+  const playergrade = defaultContent.work.playergrade
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section with Cosmic Background */}
-      <section className="relative py-32 overflow-hidden">
-        {/* Cosmic Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(139,92,246,0.1),transparent)] cosmic-pulse"></div>
+      {/* ============ HERO ============ */}
+      <section
+        ref={heroRef}
+        className="grain relative flex min-h-[92svh] flex-col justify-center overflow-hidden"
+      >
         <div
-          className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(99,102,241,0.1),transparent)] cosmic-pulse"
-          style={{ animationDelay: '1s' }}
-        ></div>
+          className="absolute inset-0"
+          style={{ background: 'var(--hero-vignette)' }}
+        />
+        <HeroCanvas />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Badge */}
-          <div className="mb-8 cosmic-float">
-            <span className="inline-flex items-center px-6 py-3 bg-white/70 backdrop-blur-sm border border-purple-200 text-purple-800 text-sm font-medium rounded-full shadow-lg">
-              <Sparkles className="w-4 h-4 mr-2" />
+        <div className="relative mx-auto w-full max-w-6xl px-4 pt-24 pb-16 sm:px-6 lg:px-8">
+          {/* Availability badge */}
+          <div data-hero className="mb-8 flex justify-center">
+            <span className="chip">
+              <span className="pulse-dot h-2 w-2 rounded-full bg-emerald-400" />
               {content.hero?.badge || ''}
             </span>
           </div>
 
-          {/* Main Headline */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-8 leading-[1.1] tracking-tight">
+          {/* Headline */}
+          <h1 className="font-display mb-8 text-center text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
             {(content.hero.headline || []).map((line, index) => (
-              <span key={index} className="block mb-2">
+              <span key={index} data-hero className="block">
                 <span
                   className={
-                    index < (content.hero.headline || []).length - 1
-                      ? 'gradient-text cosmic-glow'
-                      : 'text-gray-900 dark:text-gray-100 [color:#111827] dark:[color:#f1f5f9]'
+                    index === (content.hero.headline || []).length - 1
+                      ? 'text-gradient'
+                      : 'text-foreground'
                   }
                 >
                   {line}
@@ -124,168 +128,274 @@ export default function Home() {
           </h1>
 
           {/* Subheadline */}
-          <p className="text-xl md:text-2xl text-gray-700 mb-12 max-w-4xl mx-auto leading-relaxed">
+          <p
+            data-hero
+            className="mx-auto mb-12 max-w-2xl text-center text-lg leading-relaxed text-secondary-fg md:text-xl"
+          >
             {content.hero?.subheadline || ''}
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
-            <Button
-              asChild
-              size="lg"
-              className="cosmic-button text-white border-0 px-8 py-4 text-lg"
-            >
-              <Link href="/work">
-                <Rocket className="mr-2 h-5 w-5" />
-                View Case Studies
+          {/* CTAs */}
+          <div
+            data-hero
+            className="mb-20 flex flex-col items-center justify-center gap-4 sm:flex-row"
+          >
+            <Magnetic>
+              <Link href="/work" className="btn-accent">
+                View my work
+                <ArrowRight className="h-4 w-4" />
               </Link>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              asChild
-              className="px-8 py-4 text-lg border-purple-200 text-purple-700 hover:bg-purple-50"
-            >
-              <Link href="/contact">
-                <Zap className="mr-2 h-5 w-5" />
-                Let&apos;s Build Together
+            </Magnetic>
+            <Magnetic>
+              <Link href="/contact" className="btn-ghost">
+                Get in touch
               </Link>
-            </Button>
+            </Magnetic>
+            <Magnetic>
+              <a
+                href="https://linkedin.com/in/hosala"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-ghost"
+              >
+                <Linkedin className="h-4 w-4" />
+                LinkedIn
+              </a>
+            </Magnetic>
           </div>
 
-          {/* Impact Metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            {(content.hero.metrics || []).map((metric, index) => {
-              const icons = [
-                <Rocket key={`rocket-${index}`} className="w-6 h-6" />,
-                <Users key={`users-${index}`} className="w-6 h-6" />,
-                <Target key={`target-${index}`} className="w-6 h-6" />,
-                <Star key={`star-${index}`} className="w-6 h-6" />,
-              ]
-              const colors = [
-                'text-blue-600',
-                'text-purple-600',
-                'text-green-600',
-                'text-orange-600',
-              ]
-              return (
-                <div
-                  key={index}
-                  className="glass-card p-6 rounded-2xl cosmic-float"
-                  style={{ animationDelay: `${index * 0.2}s` }}
-                >
-                  <div className={`flex justify-center mb-3 ${colors[index]}`}>
-                    {icons[index]}
-                  </div>
-                  <div className="text-3xl font-bold text-gray-900 mb-2">
-                    {metric?.value || ''}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    {metric?.label || ''}
-                  </div>
+          {/* Metrics */}
+          <div
+            data-hero
+            className="mx-auto grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-4"
+          >
+            {(content.hero.metrics || []).map((metric, index) => (
+              <div
+                key={index}
+                className="bg-background/80 px-4 py-6 text-center backdrop-blur-sm"
+              >
+                <div className="font-display mb-1 text-3xl font-bold text-foreground md:text-4xl">
+                  <CountUp value={metric?.value || ''} />
                 </div>
-              )
-            })}
+                <div className="text-xs text-tertiary-fg md:text-sm">
+                  {metric?.label || ''}
+                </div>
+              </div>
+            ))}
           </div>
+        </div>
+
+        {/* Scroll hint */}
+        <div className="pointer-events-none absolute bottom-6 left-1/2 hidden -translate-x-1/2 md:block">
+          <ChevronDown className="scroll-hint h-5 w-5 text-tertiary-fg" />
         </div>
       </section>
 
-      {/* Project Carousel Section - Temporarily Disabled */}
-      {/* <section className="py-24 bg-gray-50">
-        <ProjectCarousel />
-      </section> */}
+      {/* ============ MARQUEE ============ */}
+      <section className="border-y border-line py-6">
+        <Marquee
+          items={marqueeItems.map(item => (
+            <span
+              key={item}
+              className="font-display text-lg font-medium text-tertiary-fg md:text-xl"
+            >
+              {item}
+            </span>
+          ))}
+        />
+      </section>
 
-      {/* Core Competencies */}
-      <section className="py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Core <span className="gradient-text">Competencies</span>
+      {/* ============ COMPETENCIES ============ */}
+      <section className="py-24 md:py-32">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <Reveal className="mb-16 max-w-2xl">
+            <p className="section-label mb-4">What I do</p>
+            <h2 className="font-display mb-5 text-4xl font-bold tracking-tight md:text-5xl">
+              Core competencies
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg leading-relaxed text-secondary-fg">
               Eight years across digital sports, e-commerce, fintech, and SaaS —
               including building PlayerGrade from scratch as sole founder.
-              Here's what I've picked up.
+              Here&apos;s what I&apos;ve picked up.
             </p>
-          </div>
+          </Reveal>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <Reveal
+            stagger={0.08}
+            className="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
+          >
             {(
               content.competencies ||
               defaultContent.homepage.competencies ||
               []
-            ).map((competency, index) => {
-              const icons = [
-                <Users key={`users-comp-${index}`} className="w-8 h-8" />,
-                <BarChart3 key={`chart-${index}`} className="w-8 h-8" />,
-                <Target key={`target-comp-${index}`} className="w-8 h-8" />,
-                <Brain key={`brain-${index}`} className="w-8 h-8" />,
-                <TrendingUp key={`trending-${index}`} className="w-8 h-8" />,
-                <Lightbulb key={`lightbulb-${index}`} className="w-8 h-8" />,
-              ]
-              const colors = [
-                'from-purple-500 to-blue-500',
-                'from-blue-500 to-teal-500',
-                'from-teal-500 to-green-500',
-                'from-green-500 to-yellow-500',
-                'from-yellow-500 to-orange-500',
-                'from-orange-500 to-red-500',
-              ]
-              return (
-                <Card
-                  key={index}
-                  className="group hover:shadow-2xl transition-all duration-300 cosmic-float border-0 bg-white/70 backdrop-blur-sm"
-                >
-                  <CardHeader className="pb-4">
-                    <div
-                      className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${colors[index]} flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-300`}
-                    >
-                      {icons[index]}
+            ).map((competency, index) => (
+              <div
+                key={index}
+                data-reveal-child
+                className="panel panel-hover group p-7"
+              >
+                <div className="font-display mb-6 text-sm font-medium text-tertiary-fg transition-colors group-hover:text-(--accent)">
+                  {String(index + 1).padStart(2, '0')}
+                </div>
+                <h3 className="font-display mb-3 text-xl font-semibold leading-snug text-foreground">
+                  {competency?.title || ''}
+                </h3>
+                <p className="text-sm leading-relaxed text-secondary-fg">
+                  {competency?.description || ''}
+                </p>
+              </div>
+            ))}
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ============ SELECTED WORK ============ */}
+      <section className="border-t border-line py-24 md:py-32">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <Reveal className="mb-16 flex flex-wrap items-end justify-between gap-6">
+            <div className="max-w-2xl">
+              <p className="section-label mb-4">Selected work</p>
+              <h2 className="font-display text-4xl font-bold tracking-tight md:text-5xl">
+                Two things worth showing first
+              </h2>
+            </div>
+            <Link
+              href="/work"
+              className="link-sweep inline-flex items-center gap-1.5 text-sm font-medium text-secondary-fg hover:text-foreground"
+            >
+              All work
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </Reveal>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Runtastic case study */}
+            <Reveal>
+              <Link
+                href="/work"
+                className="panel panel-hover group block h-full p-8 md:p-10"
+              >
+                <div className="mb-6 flex items-center justify-between">
+                  <span className="chip text-xs">
+                    adidas · Runtastic — Featured case study
+                  </span>
+                  <ArrowUpRight className="h-5 w-5 text-tertiary-fg transition-all group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-(--accent)" />
+                </div>
+                <h3 className="font-display mb-4 text-2xl font-semibold leading-snug md:text-3xl">
+                  {featured.title}
+                </h3>
+                <p className="mb-8 text-sm leading-relaxed text-secondary-fg md:text-base">
+                  {featured.impact}
+                </p>
+                <div className="grid grid-cols-3 gap-4 border-t border-line pt-6">
+                  <div>
+                    <div className="font-display text-2xl font-bold text-foreground">
+                      <CountUp value="165M+" />
                     </div>
-                    <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
-                      {competency?.title || ''}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardDescription className="text-gray-600 leading-relaxed px-6 pb-6">
-                    {competency?.description || ''}
-                  </CardDescription>
-                </Card>
-              )
-            })}
+                    <div className="text-xs text-tertiary-fg">Global users</div>
+                  </div>
+                  <div>
+                    <div className="font-display text-2xl font-bold text-foreground">
+                      <CountUp value="+55%" />
+                    </div>
+                    <div className="text-xs text-tertiary-fg">
+                      Page load improvement
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-display text-2xl font-bold text-foreground">
+                      Zero
+                    </div>
+                    <div className="text-xs text-tertiary-fg">Downtime</div>
+                  </div>
+                </div>
+              </Link>
+            </Reveal>
+
+            {/* PlayerGrade */}
+            <Reveal delay={0.1}>
+              <a
+                href={playergrade.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="panel panel-hover group block h-full p-8 md:p-10"
+              >
+                <div className="mb-6 flex items-center justify-between">
+                  <span className="chip text-xs">
+                    <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-amber-400" />
+                    Founder project — {playergrade.status}
+                  </span>
+                  <ExternalLink className="h-5 w-5 text-tertiary-fg transition-all group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-(--accent)" />
+                </div>
+                <h3 className="font-display mb-4 text-2xl font-semibold leading-snug md:text-3xl">
+                  {playergrade.title} — {playergrade.tagline}
+                </h3>
+                <p className="mb-8 text-sm leading-relaxed text-secondary-fg md:text-base">
+                  Built solo, end to end: a position-calibrated scoring engine
+                  that gives club scouts a consistent way to grade, compare, and
+                  shortlist players.
+                </p>
+                <div className="grid grid-cols-3 gap-4 border-t border-line pt-6">
+                  <div>
+                    <div className="font-display text-2xl font-bold text-foreground">
+                      <CountUp value="4" />
+                    </div>
+                    <div className="text-xs text-tertiary-fg">
+                      Live club tenants
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-display text-2xl font-bold text-foreground">
+                      <CountUp value="395" />
+                    </div>
+                    <div className="text-xs text-tertiary-fg">
+                      Players profiled
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-display text-2xl font-bold text-foreground">
+                      v6
+                    </div>
+                    <div className="text-xs text-tertiary-fg">
+                      Scoring engine
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </Reveal>
           </div>
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-24 bg-gradient-to-r from-purple-600 via-blue-600 to-teal-600 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            {content.cta?.title || ''}
-          </h2>
-          <p className="text-xl text-white/90 mb-10 leading-relaxed">
-            {content.cta?.description || ''}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Button
-              size="lg"
-              className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
-            >
-              <Link href="/contact" className="flex items-center">
-                <ArrowRight className="mr-2 h-5 w-5" />
-                Start a Conversation
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-white text-white hover:bg-white/10 px-8 py-4 text-lg"
-            >
-              <Link href="/about" className="flex items-center">
-                Learn More About Me
-              </Link>
-            </Button>
-          </div>
+      {/* ============ CTA ============ */}
+      <section className="relative overflow-hidden border-t border-line py-28 md:py-40">
+        <div
+          className="absolute inset-0"
+          style={{ background: 'var(--hero-vignette)' }}
+        />
+        <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+          <Reveal>
+            <p className="section-label mb-6">Next step</p>
+            <h2 className="font-display mb-6 text-4xl font-bold tracking-tight md:text-6xl">
+              {content.cta?.title || ''}
+            </h2>
+            <p className="mx-auto mb-12 max-w-2xl text-lg leading-relaxed text-secondary-fg">
+              {content.cta?.description || ''}
+            </p>
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Magnetic>
+                <Link href="/contact" className="btn-accent">
+                  Start a conversation
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Magnetic>
+              <Magnetic>
+                <Link href="/about" className="btn-ghost">
+                  More about me
+                </Link>
+              </Magnetic>
+            </div>
+          </Reveal>
         </div>
       </section>
     </div>

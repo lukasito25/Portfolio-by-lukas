@@ -1,20 +1,9 @@
 'use client'
 
-import { Metadata } from 'next'
 import { useState, useEffect } from 'react'
-
 import Link from 'next/link'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
-  ArrowUpRight,
+  ArrowRight,
   TrendingUp,
   Users,
   Target,
@@ -31,39 +20,46 @@ import {
 } from 'lucide-react'
 import { dataService } from '@/lib/data-service'
 import { defaultContent } from '@/lib/content-config'
-
-const personalProjectColors = [
-  'from-blue-500 to-purple-600',
-  'from-green-500 to-teal-600',
-  'from-indigo-500 to-blue-600',
-]
-
-const personalProjectIcons = [Target, BarChart3, Users]
-
-const professionalProjectColors = [
-  'bg-green-100 dark:bg-green-900',
-  'bg-purple-100 dark:bg-purple-900',
-  'bg-blue-100 dark:bg-blue-900',
-  'bg-red-100 dark:bg-red-900',
-]
-
-const professionalProjectIconColors = [
-  'text-green-600 dark:text-green-400',
-  'text-purple-600 dark:text-purple-400',
-  'text-blue-600 dark:text-blue-400',
-  'text-red-600 dark:text-red-400',
-]
+import { Reveal } from '@/components/motion/reveal'
+import { CountUp } from '@/components/motion/count-up'
+import { Magnetic } from '@/components/motion/magnetic'
 
 const professionalProjectIcons = [TrendingUp, Building2, Brain, Globe]
 
+const processSteps = [
+  {
+    icon: Users,
+    title: 'Understand first',
+    description:
+      'Talk to users, read the data, understand the constraint. I try not to start building until the problem is clear.',
+  },
+  {
+    icon: Target,
+    title: 'Be clear on the goal',
+    description:
+      'Write down what success looks like before starting. Saves a lot of arguments about scope later.',
+  },
+  {
+    icon: Zap,
+    title: 'Ship incrementally',
+    description:
+      'Small, frequent releases over big-bang launches. Easier to catch problems, easier to course-correct.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Learn from what shipped',
+    description:
+      'Look at the numbers, talk to users again, adjust. The first version is rarely the right one.',
+  },
+]
+
 export default function WorkPage() {
   const [content, setContent] = useState(defaultContent.work)
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        setIsLoading(true)
+        if (process.env.NEXT_PUBLIC_USE_API !== 'true') return
         const workContent = await dataService.getContentSection('work')
         if (workContent) {
           setContent(workContent)
@@ -73,487 +69,362 @@ export default function WorkPage() {
           'Failed to fetch work content, using fallback:',
           fetchError
         )
-        // Keep default content as fallback
-      } finally {
-        setIsLoading(false)
       }
     }
 
     fetchContent()
   }, [])
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-center min-h-screen">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-slate-600 dark:text-slate-400">
-                Loading work content...
-              </p>
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8 md:py-28">
+      {/* Hero */}
+      <Reveal as="section" className="mb-20 max-w-3xl">
+        <p className="section-label mb-4">Work</p>
+        <h1 className="font-display mb-6 text-4xl font-bold tracking-tight md:text-6xl">
+          {content.hero?.title || ''}
+        </h1>
+        <p className="mb-8 text-lg leading-relaxed text-secondary-fg md:text-xl">
+          {content.hero?.description || ''}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {[
+            'Digital Sports',
+            'FinTech',
+            'Website Redesigns',
+            'Team Leadership',
+            'International Teams',
+          ].map(tag => (
+            <span key={tag} className="chip text-xs">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </Reveal>
+
+      {/* Featured Case Study */}
+      <Reveal as="section" className="mb-16">
+        <div className="panel relative overflow-hidden p-8 md:p-12">
+          <div
+            className="absolute inset-0"
+            style={{ background: 'var(--hero-vignette)' }}
+          />
+          <div className="relative">
+            <span className="chip mb-6 text-xs">Featured case study</span>
+            <h2 className="font-display mb-8 max-w-3xl text-3xl font-bold leading-tight tracking-tight md:text-4xl">
+              {content.featured?.title || ''}
+            </h2>
+
+            <div className="mb-10 grid gap-5 md:grid-cols-3">
+              <div className="rounded-2xl border border-line bg-(--surface) p-6">
+                <div className="mb-3 flex items-center gap-2">
+                  <Target className="h-4 w-4 text-rose-400" />
+                  <span className="section-label !text-[0.6875rem] !text-tertiary-fg">
+                    Challenge
+                  </span>
+                </div>
+                <p className="text-sm leading-relaxed text-secondary-fg">
+                  {content.featured?.challenge || ''}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-line bg-(--surface) p-6">
+                <div className="mb-3 flex items-center gap-2">
+                  <Cpu className="h-4 w-4 text-sky-400" />
+                  <span className="section-label !text-[0.6875rem] !text-tertiary-fg">
+                    Solution
+                  </span>
+                </div>
+                <p className="text-sm leading-relaxed text-secondary-fg">
+                  {content.featured?.solution || ''}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-line bg-(--surface) p-6">
+                <div className="mb-3 flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-emerald-400" />
+                  <span className="section-label !text-[0.6875rem] !text-tertiary-fg">
+                    Impact
+                  </span>
+                </div>
+                <p className="text-sm leading-relaxed text-secondary-fg">
+                  {content.featured?.impact || ''}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+              <div className="flex items-center gap-2 text-sm text-secondary-fg">
+                <Users className="h-4 w-4 text-(--accent)" />
+                <span className="font-medium">165M+ Global Users</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-secondary-fg">
+                <Target className="h-4 w-4 text-(--accent)" />
+                <span className="font-medium">10+ Person Team</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-secondary-fg">
+                <Globe className="h-4 w-4 text-(--accent)" />
+                <span className="font-medium">Multiple Locations</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )
-  }
+      </Reveal>
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Hero Section */}
-        <section className="text-center mb-16">
-          <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-            {content.hero?.title || ''}
-          </h1>
-          <p className="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto mb-8">
-            {content.hero?.description || ''}
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            <Badge variant="secondary">Digital Sports</Badge>
-            <Badge variant="secondary">FinTech</Badge>
-            <Badge variant="secondary">Website Redesigns</Badge>
-            <Badge variant="secondary">Team Leadership</Badge>
-            <Badge variant="secondary">International Teams</Badge>
-          </div>
-        </section>
-
-        {/* Featured Case Study */}
-        <section className="mb-20">
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-950 rounded-3xl p-8 lg:p-12">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+      {/* PlayerGrade — Founder Project */}
+      <Reveal as="section" className="mb-24">
+        <div className="panel relative overflow-hidden p-8 md:p-12">
+          {/* dot grid pattern */}
+          <div
+            className="absolute inset-0 opacity-[0.07]"
+            style={{
+              backgroundImage:
+                'radial-gradient(circle, var(--accent) 1px, transparent 1px)',
+              backgroundSize: '26px 26px',
+            }}
+          />
+          <div className="relative">
+            {/* Header */}
+            <div className="mb-8 flex flex-wrap items-start justify-between gap-6">
               <div>
-                <Badge className="mb-4 bg-blue-600 hover:bg-blue-700 text-white">
-                  Featured Case Study
-                </Badge>
-                <h2 className="text-3xl lg:text-4xl font-bold mb-6">
-                  {content.featured?.title || ''}
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                  <span className="chip text-xs">Founder project</span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-500 dark:text-amber-400">
+                    <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-amber-400" />
+                    Active Beta
+                  </span>
+                </div>
+                <h2 className="font-display mb-2 text-3xl font-bold tracking-tight md:text-4xl">
+                  {content.playergrade?.title || 'PlayerGrade'}
                 </h2>
-                <p className="text-lg text-slate-600 dark:text-slate-300 mb-6">
-                  {content.featured?.challenge || ''}
+                <p className="text-lg font-medium text-(--accent)">
+                  {content.playergrade?.tagline || ''}
                 </p>
-                <div className="flex flex-wrap gap-4 mb-8">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-purple-600" />
-                    <span className="font-medium">165M+ Global Users</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-green-600" />
-                    <span className="font-medium">10+ Person Team</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-5 w-5 text-blue-600" />
-                    <span className="font-medium">Multiple Locations</span>
-                  </div>
-                </div>
-                <Button size="lg" className="group">
-                  View Full Case Study
-                  <ArrowUpRight className="ml-2 h-4 w-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                </Button>
               </div>
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      Challenge
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm">
-                      {content.featured?.challenge || ''}
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      Solution
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm">
-                      {content.featured?.solution || ''}
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      Impact
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm">{content.featured?.impact || ''}</p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* PlayerGrade — Founder Project */}
-        <section className="mb-20">
-          <div className="relative rounded-3xl overflow-hidden border border-purple-500/20 bg-gradient-to-br from-slate-900 via-purple-950/40 to-slate-900 dark:from-slate-900 dark:via-purple-950/40 dark:to-slate-900">
-            {/* Subtle grid pattern overlay */}
-            <div
-              className="absolute inset-0 opacity-5"
-              style={{
-                backgroundImage:
-                  'radial-gradient(circle, #a78bfa 1px, transparent 1px)',
-                backgroundSize: '28px 28px',
-              }}
-            />
-
-            <div className="relative p-8 lg:p-12">
-              {/* Header */}
-              <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
-                <div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <Badge className="bg-purple-600/80 hover:bg-purple-600 text-white border-0">
-                      Founder Project
-                    </Badge>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                      Active Beta
-                    </span>
-                  </div>
-                  <h2 className="text-3xl lg:text-4xl font-bold text-white mb-2">
-                    {content.playergrade?.title || 'PlayerGrade'}
-                  </h2>
-                  <p className="text-purple-300 text-lg font-medium">
-                    {content.playergrade?.tagline ||
-                      'AI-Powered Football Scouting Platform'}
-                  </p>
-                </div>
+              <Magnetic>
                 <a
                   href={content.playergrade?.url || 'https://playergrade.app/'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-medium text-sm transition-all duration-200 hover:-translate-y-0.5 shadow-lg shadow-purple-900/40"
+                  className="btn-accent !px-5 !py-2.5 text-sm"
                 >
-                  View Live App
-                  <ExternalLink className="w-4 h-4" />
+                  View live app
+                  <ExternalLink className="h-4 w-4" />
                 </a>
-              </div>
+              </Magnetic>
+            </div>
 
-              {/* Description */}
-              <p className="text-slate-300 text-base leading-relaxed mb-10 max-w-3xl">
-                {content.playergrade?.description || ''}
-              </p>
+            <p className="mb-10 max-w-3xl leading-relaxed text-secondary-fg">
+              {content.playergrade?.description || ''}
+            </p>
 
-              {/* Three-column challenge / solution / impact */}
-              <div className="grid md:grid-cols-3 gap-5 mb-10">
-                <div className="rounded-2xl bg-white/5 border border-white/8 p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 rounded-lg bg-red-500/20 flex items-center justify-center">
-                      <Target className="w-4 h-4 text-red-400" />
-                    </div>
-                    <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-                      Challenge
+            {/* Challenge / Solution / Impact */}
+            <div className="mb-10 grid gap-5 md:grid-cols-3">
+              {[
+                {
+                  icon: Target,
+                  color: 'text-rose-400',
+                  label: 'Challenge',
+                  text: content.playergrade?.challenge,
+                },
+                {
+                  icon: Cpu,
+                  color: 'text-sky-400',
+                  label: 'Solution',
+                  text: content.playergrade?.solution,
+                },
+                {
+                  icon: TrendingUp,
+                  color: 'text-emerald-400',
+                  label: 'Impact',
+                  text: content.playergrade?.impact,
+                },
+              ].map(({ icon: Icon, color, label, text }) => (
+                <div
+                  key={label}
+                  className="rounded-2xl border border-line bg-(--surface) p-6"
+                >
+                  <div className="mb-3 flex items-center gap-2">
+                    <Icon className={`h-4 w-4 ${color}`} />
+                    <span className="section-label !text-[0.6875rem] !text-tertiary-fg">
+                      {label}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-300 leading-relaxed">
-                    {content.playergrade?.challenge || ''}
+                  <p className="text-sm leading-relaxed text-secondary-fg">
+                    {text || ''}
                   </p>
                 </div>
-                <div className="rounded-2xl bg-white/5 border border-white/8 p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                      <Cpu className="w-4 h-4 text-blue-400" />
-                    </div>
-                    <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-                      Solution
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-300 leading-relaxed">
-                    {content.playergrade?.solution || ''}
-                  </p>
-                </div>
-                <div className="rounded-2xl bg-white/5 border border-white/8 p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 rounded-lg bg-green-500/20 flex items-center justify-center">
-                      <TrendingUp className="w-4 h-4 text-green-400" />
-                    </div>
-                    <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-                      Impact
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-300 leading-relaxed">
-                    {content.playergrade?.impact || ''}
-                  </p>
-                </div>
-              </div>
+              ))}
+            </div>
 
-              {/* Metrics grid */}
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-10">
-                {(content.playergrade?.metrics || []).map((metric, i) => (
-                  <div
-                    key={i}
-                    className="text-center rounded-xl bg-white/5 border border-white/8 py-4 px-2"
-                  >
-                    <div className="text-xl font-bold text-purple-300 mb-1">
-                      {metric.value}
-                    </div>
-                    <div className="text-xs text-slate-400 leading-tight">
-                      {metric.label}
-                    </div>
+            {/* Metrics */}
+            <div className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              {(content.playergrade?.metrics || []).map((metric, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border border-line bg-(--surface) px-2 py-4 text-center"
+                >
+                  <div className="font-display mb-1 text-xl font-bold text-(--accent)">
+                    <CountUp value={metric.value} />
                   </div>
+                  <div className="text-xs leading-tight text-tertiary-fg">
+                    {metric.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tech + trust signals */}
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-wrap gap-2">
+                {(content.playergrade?.technologies || []).map((tech, i) => (
+                  <span key={i} className="chip text-xs">
+                    {tech}
+                  </span>
                 ))}
               </div>
-
-              {/* Tech stack + trust signals */}
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex flex-wrap gap-2">
-                  {(content.playergrade?.technologies || []).map((tech, i) => (
-                    <Badge
-                      key={i}
-                      variant="outline"
-                      className="border-purple-500/30 text-purple-300 bg-purple-500/10 hover:bg-purple-500/20"
-                    >
-                      {tech}
-                    </Badge>
-                  ))}
-                </div>
-                <div className="flex items-center gap-4 text-xs text-slate-500">
-                  <span className="flex items-center gap-1.5">
-                    <Shield className="w-3.5 h-3.5 text-green-500" />
-                    Tenant isolation verified
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <FlaskConical className="w-3.5 h-3.5 text-blue-400" />
-                    168/168 tests passing
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Database className="w-3.5 h-3.5 text-purple-400" />
-                    CEE player pool
-                  </span>
-                </div>
+              <div className="flex flex-wrap items-center gap-4 text-xs text-tertiary-fg">
+                <span className="flex items-center gap-1.5">
+                  <Shield className="h-3.5 w-3.5 text-emerald-500" />
+                  Tenant isolation verified
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <FlaskConical className="h-3.5 w-3.5 text-sky-400" />
+                  168/168 tests passing
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Database className="h-3.5 w-3.5 text-(--accent)" />
+                  CEE player pool
+                </span>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </Reveal>
 
-        {/* Personal Projects Section - Temporarily Hidden */}
-        {/* <section className="mb-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">{content.personalProjects?.title || 'Entrepreneurial Ventures'}</h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              {content.personalProjects?.subtitle || 'Side projects showcasing full-stack development and business innovation.'}
-            </p>
-          </div>
+      {/* Professional Projects */}
+      <section className="mb-24">
+        <Reveal className="mb-12 max-w-2xl">
+          <p className="section-label mb-4">Track record</p>
+          <h2 className="font-display mb-4 text-3xl font-bold tracking-tight md:text-4xl">
+            {content.professionalProjects?.title || 'Professional work'}
+          </h2>
+          <p className="text-lg text-secondary-fg">
+            {content.professionalProjects?.subtitle || ''}
+          </p>
+        </Reveal>
 
-          <div className="grid lg:grid-cols-3 gap-8 mb-16">
-            {(content.personalProjects?.projects || []).map((project, index) => {
-              const Icon = personalProjectIcons[index % personalProjectIcons.length]
-
+        <Reveal stagger={0.08} className="grid gap-6 lg:grid-cols-2">
+          {(content.professionalProjects?.projects || []).map(
+            (project, index) => {
+              const Icon =
+                professionalProjectIcons[
+                  index % professionalProjectIcons.length
+                ]
               return (
-                <Card key={index} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
-                  <div className={`relative h-48 bg-gradient-to-br ${personalProjectColors[index % personalProjectColors.length]} overflow-hidden`}>
-                    <div className="absolute inset-0 bg-black/20"></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-white text-center">
-                        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Icon className="h-8 w-8 text-white" />
-                        </div>
-                        <h3 className="text-lg font-bold">{project?.title || ''}</h3>
-                        <p className="text-sm opacity-90">{project.description}</p>
-                      </div>
-                    </div>
+                <div
+                  key={index}
+                  data-reveal-child
+                  className="panel panel-hover group flex h-full flex-col p-8"
+                >
+                  <div className="mb-6 flex h-11 w-11 items-center justify-center rounded-xl bg-accent-soft">
+                    <Icon className="h-5 w-5 text-(--accent)" />
                   </div>
-                  <CardHeader>
-                    <CardTitle className="text-xl">{project?.title || ''}</CardTitle>
-                    <CardDescription>
-                      {project?.description || ''}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-slate-600 dark:text-slate-400 mb-4">
-                      {project?.description || ''}
-                    </p>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      {(project.metrics || []).slice(0, 2).map((metric, metricIndex) => (
-                        <div key={metricIndex} className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                          <div className="font-semibold text-lg text-blue-600 dark:text-blue-400">
+                  <h3 className="font-display mb-3 text-xl font-semibold leading-snug">
+                    {project?.title || ''}
+                  </h3>
+                  <p className="mb-6 text-sm leading-relaxed text-secondary-fg">
+                    {project?.description || ''}
+                  </p>
+                  <div className="mt-auto">
+                    <div className="mb-5 grid grid-cols-2 gap-3">
+                      {(project.metrics || []).map((metric, metricIndex) => (
+                        <div
+                          key={metricIndex}
+                          className="rounded-xl border border-line bg-(--surface) p-3 text-center"
+                        >
+                          <div className="font-display text-lg font-bold text-foreground">
                             {metric?.value || ''}
                           </div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">
+                          <div className="text-xs text-tertiary-fg">
                             {metric?.label || ''}
                           </div>
                         </div>
                       ))}
                     </div>
-                    <div className="flex flex-wrap gap-2 mb-4">
+                    <div className="flex flex-wrap gap-2">
                       {(project.technologies || []).map((tech, techIndex) => (
-                        <Badge key={techIndex} variant="outline">{tech}</Badge>
+                        <span key={techIndex} className="chip !py-1 text-xs">
+                          {tech}
+                        </span>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               )
-            })}
-          </div>
-        </section> */}
+            }
+          )}
+        </Reveal>
+      </section>
 
-        {/* Professional Projects Grid */}
-        <section className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              {content.professionalProjects?.title || 'Professional Projects'}
+      {/* Process */}
+      <Reveal as="section" className="mb-24">
+        <div className="panel p-8 md:p-12">
+          <div className="mb-12 max-w-2xl">
+            <p className="section-label mb-4">Process</p>
+            <h2 className="font-display mb-4 text-3xl font-bold tracking-tight md:text-4xl">
+              How I work
             </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              {content.professionalProjects?.subtitle ||
-                'Enterprise projects from my experience at adidas and international product management roles.'}
+            <p className="text-lg text-secondary-fg">
+              Not a methodology — just the pattern I&apos;ve noticed in the work
+              that actually went well.
             </p>
           </div>
-
-          <div className="grid lg:grid-cols-2 gap-8">
-            {(content.professionalProjects?.projects || []).map(
-              (project, index) => {
-                const Icon =
-                  professionalProjectIcons[
-                    index % professionalProjectIcons.length
-                  ]
-
-                return (
-                  <Card
-                    key={index}
-                    className="group hover:shadow-lg transition-shadow"
-                  >
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div
-                          className={`w-12 h-12 ${professionalProjectColors[index % professionalProjectColors.length]} rounded-lg flex items-center justify-center mb-4`}
-                        >
-                          <Icon
-                            className={`h-6 w-6 ${professionalProjectIconColors[index % professionalProjectIconColors.length]}`}
-                          />
-                        </div>
-                        <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
-                      </div>
-                      <CardTitle className="text-xl">
-                        {project?.title || ''}
-                      </CardTitle>
-                      <CardDescription className="text-base">
-                        {project?.description || ''}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-3 mb-6">
-                        {(project.metrics || []).map((metric, metricIndex) => (
-                          <div
-                            key={metricIndex}
-                            className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg"
-                          >
-                            <div
-                              className={`font-semibold text-lg ${professionalProjectIconColors[index % professionalProjectIconColors.length]}`}
-                            >
-                              {metric?.value || ''}
-                            </div>
-                            <div className="text-sm text-slate-600 dark:text-slate-400">
-                              {metric?.label || ''}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {(project.technologies || []).map((tech, techIndex) => (
-                          <Badge key={techIndex} variant="outline">
-                            {tech}
-                          </Badge>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              }
-            )}
-          </div>
-        </section>
-
-        {/* Process Section */}
-        <section className="mb-16">
-          <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-8 lg:p-12">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4">How I work</h2>
-              <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                Not a methodology — just the pattern I've noticed in the work
-                that actually went well.
-              </p>
-            </div>
-            <div className="grid md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {processSteps.map((step, index) => (
+              <div key={step.title}>
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="font-display text-sm font-medium text-tertiary-fg">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span className="h-px flex-1 bg-(--border)" />
+                  <step.icon className="h-4 w-4 text-(--accent)" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Understand first</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Talk to users, read the data, understand the constraint. I try
-                  not to start building until the problem is clear.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Target className="h-8 w-8 text-green-600 dark:text-green-400" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">
-                  Be clear on the goal
+                <h3 className="font-display mb-2 text-lg font-semibold">
+                  {step.title}
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Write down what success looks like before starting. Saves a
-                  lot of arguments about scope later.
+                <p className="text-sm leading-relaxed text-secondary-fg">
+                  {step.description}
                 </p>
               </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Zap className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">
-                  Ship incrementally
-                </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Small, frequent releases over big-bang launches. Easier to
-                  catch problems, easier to course-correct.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <BarChart3 className="h-8 w-8 text-orange-600 dark:text-orange-400" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">
-                  Learn from what shipped
-                </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Look at the numbers, talk to users again, adjust. The first
-                  version is rarely the right one.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
-        </section>
+        </div>
+      </Reveal>
 
-        {/* CTA Section */}
-        <section className="text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold mb-6">
-              Got something interesting to work on?
-            </h2>
-            <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">
-              I'm open to senior PM roles, consulting work, and advisory
-              conversations. If you're building something and think my
-              background might be useful, I'd like to hear about it.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild>
-                <Link href="/contact">Get in touch</Link>
-              </Button>
-              <Button variant="outline" size="lg" asChild>
-                <Link href="/about">More about me</Link>
-              </Button>
-            </div>
+      {/* CTA */}
+      <Reveal as="section" className="text-center">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="font-display mb-6 text-3xl font-bold tracking-tight md:text-4xl">
+            Got something interesting to work on?
+          </h2>
+          <p className="mb-10 text-lg leading-relaxed text-secondary-fg">
+            I&apos;m open to senior PM roles, consulting work, and advisory
+            conversations. If you&apos;re building something and think my
+            background might be useful, I&apos;d like to hear about it.
+          </p>
+          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <Magnetic>
+              <Link href="/contact" className="btn-accent">
+                Get in touch
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Magnetic>
+            <Magnetic>
+              <Link href="/about" className="btn-ghost">
+                More about me
+              </Link>
+            </Magnetic>
           </div>
-        </section>
-      </div>
+        </div>
+      </Reveal>
     </div>
   )
 }

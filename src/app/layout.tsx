@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import { Navigation } from '@/components/ui/navigation'
 import { Footer } from '@/components/ui/footer'
@@ -14,14 +14,18 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-display',
+  subsets: ['latin'],
+})
+
 export const metadata: Metadata = {
   title: {
-    template: '%s | Lukáš Hošala - Senior Product Manager',
-    default:
-      'Lukáš Hošala - Senior Product Manager | adidas Digital Sports & Fintech Expert',
+    template: '%s | Lukáš Hošala — Senior Product Manager',
+    default: 'Lukáš Hošala — Senior Product Manager',
   },
   description:
-    'Product manager turning ideas into digital realities from the hills of Tuscany. Eight years of building products that millions of people actually use—from fitness tracking apps to algorithmic trading platforms. Currently orchestrating product magic across continents.',
+    'Senior product manager with 8+ years at adidas. Led teams of up to 13 people across three countries, managed products used by over 165 million people, and founded PlayerGrade, a football scouting platform. Based in Italy, open to senior PM roles and advisory work.',
   keywords: [
     'Lukáš Hošala',
     'Senior Product Manager',
@@ -72,10 +76,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://portfolio-by-lukas.vercel.app',
-    title:
-      'Lukáš Hošala - Senior Product Manager | adidas Digital Sports & Fintech Expert',
+    title: 'Lukáš Hošala — Senior Product Manager',
     description:
-      'Product manager turning ideas into digital realities from the hills of Tuscany. Eight years of building products that millions of people actually use—from fitness tracking apps to algorithmic trading platforms. Currently orchestrating product magic across continents.',
+      'Senior product manager with 8+ years at adidas. Led teams of up to 13 people across three countries, managed products used by over 165 million people, and founded PlayerGrade. Based in Italy, open to senior PM roles and advisory work.',
     siteName: 'Lukáš Hošala Portfolio',
     images: [
       {
@@ -88,10 +91,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title:
-      'Lukáš Hošala - Senior Product Manager | adidas Digital Sports Expert',
+    title: 'Lukáš Hošala — Senior Product Manager',
     description:
-      'Senior Product Manager with 8+ years leading international teams. Expert in digital transformation and product strategy.',
+      'Senior product manager. 8+ years at adidas, teams of up to 13 across three countries, products used by 165M+ people. Founder of PlayerGrade.',
     images: ['/twitter-image.jpg'],
     creator: '@lukashosala',
   },
@@ -114,8 +116,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.classList.add('js');try{var t=localStorage.getItem('portfolio-theme');if(t==='light'){document.documentElement.classList.remove('dark')}}catch(e){}`,
+          }}
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased`}
       >
         <div className="flex min-h-screen flex-col">
           <Navigation />

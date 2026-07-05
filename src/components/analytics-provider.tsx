@@ -72,11 +72,11 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
 
     resetIdleTimer()
 
-    // Track copy events (for contact info)
-    const handleCopy = (e: ClipboardEvent) => {
+    // Track copy events (for contact info) — event only, never the copied text
+    const handleCopy = () => {
       const selection = window.getSelection()?.toString()
       if (selection && selection.includes('@')) {
-        analytics.trackInteraction('copy', 'email', selection)
+        analytics.trackInteraction('copy', 'email', 'contact_copied')
       }
     }
 

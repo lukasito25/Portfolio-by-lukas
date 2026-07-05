@@ -1,10 +1,9 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title:
-    'Professional Work - adidas Digital Sports & Product Management Projects',
+  title: 'Work',
   description:
-    "Explore Lukáš Hošala's professional portfolio including adidas Runtastic website redesign (55% page load speed improvement), Sprinklr enterprise management (1 Million EUR license), and StagStrat algorithmic trading platform (80% feature lead time reduction).",
+    'Things I built and shipped: the Runtastic website redesign and zero-downtime migration for 165M+ users, social commerce products at adidas, StagStrat, and PlayerGrade — a football scouting platform built solo.',
   keywords: [
     'adidas Runtastic Project',
     'Product Management Portfolio',
@@ -21,9 +20,9 @@ export const metadata: Metadata = {
     'Professional Experience',
   ],
   openGraph: {
-    title: 'Professional Work - adidas Digital Sports & Enterprise Projects',
+    title: 'Work — Lukáš Hošala',
     description:
-      'Explore real enterprise-scale projects including adidas Runtastic redesign, social commerce engine, and PIM system.',
+      'Case studies from adidas (Runtastic redesign, 165M+ users, zero downtime), StagStrat, and PlayerGrade.',
     url: 'https://portfolio-by-lukas.vercel.app/work',
   },
   alternates: {

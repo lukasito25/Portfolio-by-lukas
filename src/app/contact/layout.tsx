@@ -1,9 +1,9 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Contact Lukáš Hošala - Senior Product Manager & Strategic Consultant',
+  title: 'Contact',
   description:
-    'Get in touch with Lukáš Hošala for product management consulting, strategic advisory, team leadership, or collaboration opportunities. Based in Italy, EU, available for international projects.',
+    'Hiring for a senior PM role, looking for product advisory help, or just want to talk shop? Get in touch — I reply within 24 hours. Based in Italy, EU.',
   keywords: [
     'Contact Lukáš Hošala',
     'Product Management Consultant',
@@ -21,9 +21,9 @@ export const metadata: Metadata = {
     'Digital Transformation Consultant',
   ],
   openGraph: {
-    title: 'Contact Lukáš Hošala - Product Management & Strategic Consulting',
+    title: 'Contact Lukáš Hošala — Senior Product Manager',
     description:
-      'Get in touch for product management consulting, strategic advisory, and collaboration opportunities.',
+      'Hiring for a senior PM role or looking for product advisory help? Get in touch — I reply within 24 hours.',
     url: 'https://portfolio-by-lukas.vercel.app/contact',
   },
   alternates: {

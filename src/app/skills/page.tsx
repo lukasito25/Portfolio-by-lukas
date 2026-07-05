@@ -1,204 +1,191 @@
-import { Metadata } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Skills & Expertise - Product Management, Team Leadership & Strategy',
-  description:
-    'Eight years of building products that actually work, leading international teams, and making complex technology feel simple. From scaling platforms for millions of users to launching fintech startups that traders trust.',
-  keywords: [
-    'Product Management Skills',
-    'Team Leadership',
-    'Digital Strategy',
-    'Agile Methodology',
-    'Strategic Management',
-    'Cross-functional Teams',
-    'Product Strategy',
-    'International Teams',
-    'Fintech Experience',
-    'E-commerce',
-    'Product Analytics',
-    'Stakeholder Management',
-  ],
-  openGraph: {
-    title: 'Skills & Expertise - Product Management & Team Leadership',
-    description:
-      '8+ years of product management expertise including team leadership, digital transformation, and strategic management.',
-    url: 'https://lukashosala.com/skills',
+import {
+  Target,
+  Users,
+  Settings,
+  TrendingUp,
+  Briefcase,
+  RefreshCw,
+} from 'lucide-react'
+import { Reveal } from '@/components/motion/reveal'
+import { CountUp } from '@/components/motion/count-up'
+
+type SkillTier = 'Expert' | 'Advanced'
+
+const skillCategories: {
+  title: string
+  icon: typeof Target
+  skills: { name: string; tier: SkillTier }[]
+}[] = [
+  {
+    title: 'Product Management',
+    icon: Target,
+    skills: [
+      { name: 'Product Strategy', tier: 'Expert' },
+      { name: 'Feature Prioritization', tier: 'Expert' },
+      { name: 'Roadmap Planning', tier: 'Expert' },
+      { name: 'Market Analysis', tier: 'Expert' },
+    ],
   },
-  alternates: {
-    canonical: 'https://lukashosala.com/skills',
+  {
+    title: 'Leadership & Management',
+    icon: Users,
+    skills: [
+      { name: 'Leading diverse international teams', tier: 'Expert' },
+      { name: 'Cross-functional Collaboration', tier: 'Expert' },
+      { name: 'Stakeholder Management', tier: 'Expert' },
+      {
+        name: 'Coordinating across time zones & cultures',
+        tier: 'Advanced',
+      },
+    ],
   },
+  {
+    title: 'Technical & Development',
+    icon: Settings,
+    skills: [
+      { name: 'Making systems talk to each other', tier: 'Advanced' },
+      { name: 'Upgrading legacy systems gracefully', tier: 'Advanced' },
+      { name: 'Quality Assurance Oversight', tier: 'Advanced' },
+    ],
+  },
+  {
+    title: 'Digital Marketing & SEO',
+    icon: TrendingUp,
+    skills: [
+      { name: 'SEO Strategy & Implementation', tier: 'Expert' },
+      { name: 'Analytics & Reporting', tier: 'Expert' },
+      { name: 'Digital Campaign Management', tier: 'Advanced' },
+    ],
+  },
+  {
+    title: 'Business & Strategy',
+    icon: Briefcase,
+    skills: [
+      { name: 'Strategic Planning', tier: 'Expert' },
+      { name: 'Competitive Analysis', tier: 'Expert' },
+      { name: 'Scaling products across cultures', tier: 'Expert' },
+    ],
+  },
+  {
+    title: 'Frameworks & Methodologies',
+    icon: RefreshCw,
+    skills: [
+      { name: 'Agile/Scrum', tier: 'Expert' },
+      { name: 'Strategic Management', tier: 'Expert' },
+      { name: 'OKRs & KPI Management', tier: 'Expert' },
+      { name: 'Design Thinking', tier: 'Advanced' },
+    ],
+  },
+]
+
+const highlights = [
+  { value: '8+', label: 'Years Experience' },
+  { value: '165M+', label: 'Users Served' },
+  { value: '13', label: 'Max Team Size' },
+]
+
+function TierTag({ tier }: { tier: SkillTier }) {
+  return (
+    <span
+      className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
+        tier === 'Expert'
+          ? 'bg-accent-soft text-(--accent)'
+          : 'border border-line text-tertiary-fg'
+      }`}
+    >
+      {tier}
+    </span>
+  )
 }
 
 export default function SkillsPage() {
-  const skillCategories = [
-    {
-      title: 'Product Management',
-      icon: '🎯',
-      skills: [
-        { name: 'Product Strategy', level: 95 },
-        { name: 'Roadmap Planning', level: 92 },
-        { name: 'User Research & Analytics', level: 88 },
-        { name: 'A/B Testing & Optimization', level: 85 },
-        { name: 'Market Analysis', level: 90 },
-        { name: 'Feature Prioritization', level: 95 },
-      ],
-    },
-    {
-      title: 'Leadership & Management',
-      icon: '👥',
-      skills: [
-        { name: 'Leading diverse international teams', level: 95 },
-        { name: 'Cross-functional Collaboration', level: 92 },
-        { name: 'Stakeholder Management', level: 90 },
-        { name: 'Coordinating across time zones & cultures', level: 88 },
-        { name: 'Integrating external talent seamlessly', level: 85 },
-        { name: 'Performance Management', level: 90 },
-      ],
-    },
-    {
-      title: 'Technical & Development',
-      icon: '⚙️',
-      skills: [
-        { name: 'Making systems talk to each other', level: 85 },
-        { name: 'Upgrading legacy systems gracefully', level: 82 },
-        { name: 'Database Management', level: 78 },
-        { name: 'System Architecture Planning', level: 80 },
-        { name: 'Making development actually enjoyable', level: 88 },
-        { name: 'Quality Assurance Oversight', level: 85 },
-      ],
-    },
-    {
-      title: 'Digital Marketing & SEO',
-      icon: '📈',
-      skills: [
-        { name: 'SEO Strategy & Implementation', level: 90 },
-        { name: 'Content Strategy', level: 85 },
-        { name: 'Digital Campaign Management', level: 88 },
-        { name: 'Analytics & Reporting', level: 92 },
-        { name: 'Social Commerce Integration', level: 85 },
-        { name: 'Performance Marketing', level: 82 },
-      ],
-    },
-    {
-      title: 'Business & Strategy',
-      icon: '💼',
-      skills: [
-        { name: 'Strategic Planning', level: 95 },
-        { name: 'Business Development', level: 88 },
-        { name: 'Financial Modeling', level: 80 },
-        { name: 'Risk Management', level: 85 },
-        { name: 'Scaling products across cultures', level: 90 },
-        { name: 'Competitive Analysis', level: 92 },
-      ],
-    },
-    {
-      title: 'Frameworks & Methodologies',
-      icon: '🔄',
-      skills: [
-        { name: 'Agile/Scrum', level: 95 },
-        { name: 'Design Thinking', level: 88 },
-        { name: 'Lean Startup', level: 85 },
-        { name: 'OKRs & KPI Management', level: 92 },
-        { name: 'GDPR Compliance', level: 85 },
-        { name: 'Strategic Management', level: 95 },
-      ],
-    },
-  ]
-
-  const getSkillColor = (level: number) => {
-    if (level >= 90) return 'from-green-500 to-emerald-600'
-    if (level >= 80) return 'from-blue-500 to-indigo-600'
-    if (level >= 70) return 'from-purple-500 to-violet-600'
-    return 'from-orange-500 to-red-600'
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-6">
-            My Skills
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Eight years of learning what actually works when building products
-            that millions of people use every day. Here's what I've picked up
-            along the way—from managing global teams to shipping code that
-            traders bet their careers on.
-          </p>
-        </div>
+    <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:px-8 md:py-28">
+      {/* Hero */}
+      <Reveal as="section" className="mb-20 max-w-3xl">
+        <p className="section-label mb-4">Skills</p>
+        <h1 className="font-display mb-6 text-4xl font-bold tracking-tight md:text-6xl">
+          What I bring to the table
+        </h1>
+        <p className="text-lg leading-relaxed text-secondary-fg md:text-xl">
+          Eight years of learning what actually works when building products
+          that millions of people use every day. Here&apos;s what I&apos;ve
+          picked up along the way—from managing global teams to shipping code
+          that traders bet their careers on.
+        </p>
+      </Reveal>
+
+      {/* Skills grid */}
+      <section className="mb-24">
+        <Reveal
+          stagger={0.06}
+          className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3"
+        >
+          {skillCategories.map(category => (
+            <div
+              key={category.title}
+              data-reveal-child
+              className="panel panel-hover p-7"
+            >
+              <div className="mb-6 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-soft">
+                  <category.icon className="h-5 w-5 text-(--accent)" />
+                </div>
+                <h3 className="font-display text-lg font-semibold">
+                  {category.title}
+                </h3>
+              </div>
+
+              <div className="space-y-3">
+                {category.skills.map(skill => (
+                  <div
+                    key={skill.name}
+                    className="flex items-center justify-between gap-3 border-b border-line pb-3 last:border-0 last:pb-0"
+                  >
+                    <span className="text-sm text-secondary-fg">
+                      {skill.name}
+                    </span>
+                    <TierTag tier={skill.tier} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </Reveal>
       </section>
 
-      {/* Skills Grid */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {skillCategories.map((category, index) => (
-              <div
-                key={index}
-                className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700"
-              >
-                <div className="flex items-center mb-6">
-                  <span className="text-3xl mr-3">{category.icon}</span>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    {category.title}
-                  </h3>
+      {/* Experience highlights */}
+      <Reveal as="section">
+        <div className="panel relative overflow-hidden p-8 md:p-12">
+          <div
+            className="absolute inset-0"
+            style={{ background: 'var(--hero-vignette)' }}
+          />
+          <div className="relative">
+            <div className="mb-10 text-center">
+              <p className="section-label mb-4">The short version</p>
+              <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
+                Experience Highlights
+              </h2>
+            </div>
+            <div className="mx-auto grid max-w-3xl grid-cols-1 gap-5 md:grid-cols-3">
+              {highlights.map(item => (
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-line bg-(--surface) p-6 text-center"
+                >
+                  <div className="font-display mb-1 text-4xl font-bold text-(--accent)">
+                    <CountUp value={item.value} />
+                  </div>
+                  <div className="text-sm text-secondary-fg">{item.label}</div>
                 </div>
-
-                <div className="space-y-4">
-                  {category.skills.map((skill, skillIndex) => (
-                    <div key={skillIndex} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {skill.name}
-                        </span>
-                        <span className="text-sm font-bold text-gray-900 dark:text-white">
-                          {skill.level}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full bg-gradient-to-r ${getSkillColor(skill.level)} transition-all duration-500`}
-                          style={{ width: `${skill.level}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </section>
-
-      {/* Experience Summary */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-gray-800 dark:to-gray-900">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-            Experience Highlights
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md">
-              <div className="text-3xl font-bold text-purple-600 mb-2">8+</div>
-              <div className="text-gray-600 dark:text-gray-300">
-                Years Experience
-              </div>
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md">
-              <div className="text-3xl font-bold text-blue-600 mb-2">165M+</div>
-              <div className="text-gray-600 dark:text-gray-300">
-                Users Served
-              </div>
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md">
-              <div className="text-3xl font-bold text-green-600 mb-2">13</div>
-              <div className="text-gray-600 dark:text-gray-300">
-                Max Team Size
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      </Reveal>
     </div>
   )
 }
