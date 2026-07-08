@@ -159,13 +159,6 @@ export default function FifaFitPage() {
   const [filter, setFilter] = useState<MatchFilter>(null)
   const t = fifaContent[locale]
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-palette', 'fifa')
-    return () => {
-      document.documentElement.removeAttribute('data-palette')
-    }
-  }, [])
-
   const allRows = t.profileMatchSection.panels.flatMap(p => p.rows)
   const matchCount = allRows.filter(r => r.isMatch).length
   const transferCount = allRows.length - matchCount

@@ -5,7 +5,10 @@
 
 /* =============================================
    DESIGN TOKENS — "Ink & Signal"
-   Light-first, electric indigo accent.
+   Light-first. Accent is FIFA's own brand blue
+   (navy #051d39 / highlight blue #1277d9 / sky
+   #4da6ff), sourced from jobs.fifa.com's theme-fifa
+   CSS, applied site-wide.
    ============================================= */
 
 :root {
@@ -22,22 +25,22 @@
   --border: rgba(21, 21, 28, 0.1);
   --border-strong: rgba(21, 21, 28, 0.18);
 
-  --accent: #5b50e8;
-  --accent-soft: rgba(91, 80, 232, 0.1);
-  --accent-glow: rgba(91, 80, 232, 0.25);
+  --accent: #1277d9;
+  --accent-soft: rgba(18, 119, 217, 0.1);
+  --accent-glow: rgba(18, 119, 217, 0.25);
   --accent-contrast: #ffffff;
 
   --gradient-signal: linear-gradient(
     100deg,
-    #5b50e8 0%,
-    #8b5cf6 55%,
-    #d946a8 110%
+    #051d39 0%,
+    #1277d9 60%,
+    #4da6ff 115%
   );
 
   --nav-bg: rgba(250, 250, 252, 0.82);
   --hero-vignette: radial-gradient(
     ellipse 80% 60% at 50% -10%,
-    rgba(91, 80, 232, 0.14),
+    rgba(18, 119, 217, 0.14),
     transparent 70%
   );
 }
@@ -56,55 +59,6 @@
   --border: rgba(255, 255, 255, 0.09);
   --border-strong: rgba(255, 255, 255, 0.16);
 
-  --accent: #8b85ff;
-  --accent-soft: rgba(139, 133, 255, 0.12);
-  --accent-glow: rgba(139, 133, 255, 0.3);
-  --accent-contrast: #0a0a12;
-
-  --gradient-signal: linear-gradient(
-    100deg,
-    #8b85ff 0%,
-    #b794f6 55%,
-    #f0abcf 110%
-  );
-
-  --nav-bg: rgba(7, 7, 13, 0.78);
-  --hero-vignette: radial-gradient(
-    ellipse 80% 60% at 50% -10%,
-    rgba(139, 133, 255, 0.16),
-    transparent 70%
-  );
-}
-
-/* =============================================
-   PALETTE — "FIFA"
-   Sourced from jobs.fifa.com's own theme-fifa CSS:
-   navy #051d39 / highlight blue #1277d9 / mist #e4e8f0.
-   Overrides accent tokens only — background/foreground
-   scales stay the same as the active light/dark theme.
-   ============================================= */
-
-[data-palette='fifa'] {
-  --accent: #1277d9;
-  --accent-soft: rgba(18, 119, 217, 0.1);
-  --accent-glow: rgba(18, 119, 217, 0.25);
-  --accent-contrast: #ffffff;
-
-  --gradient-signal: linear-gradient(
-    100deg,
-    #051d39 0%,
-    #1277d9 60%,
-    #4da6ff 115%
-  );
-
-  --hero-vignette: radial-gradient(
-    ellipse 80% 60% at 50% -10%,
-    rgba(18, 119, 217, 0.14),
-    transparent 70%
-  );
-}
-
-.dark[data-palette='fifa'] {
   --accent: #4da6ff;
   --accent-soft: rgba(77, 166, 255, 0.12);
   --accent-glow: rgba(77, 166, 255, 0.3);
@@ -117,6 +71,7 @@
     #051d39 115%
   );
 
+  --nav-bg: rgba(7, 7, 13, 0.78);
   --hero-vignette: radial-gradient(
     ellipse 80% 60% at 50% -10%,
     rgba(77, 166, 255, 0.16),

@@ -42,8 +42,8 @@ export function HeroCanvas({ className }: { className?: string }) {
 
     const accent = () =>
       document.documentElement.classList.contains('dark')
-        ? { r: 139, g: 133, b: 255 }
-        : { r: 91, g: 80, b: 232 }
+        ? { r: 77, g: 166, b: 255 }
+        : { r: 18, g: 119, b: 217 }
 
     const build = () => {
       const rect = canvas.getBoundingClientRect()
