@@ -106,34 +106,40 @@ export default function AboutPage() {
 
       {/* Philosophy */}
       <section className="mb-24">
-        <Reveal className="mb-12 max-w-2xl">
-          <p className="section-label mb-4">Principles</p>
-          <h2 className="font-display mb-4 text-3xl font-bold tracking-tight md:text-4xl">
-            {content.philosophy?.title || ''}
-          </h2>
-          <p className="text-lg leading-relaxed text-secondary-fg">
-            {content.philosophy?.description || ''}
-          </p>
-        </Reveal>
-        <Reveal stagger={0.08} className="grid gap-5 md:grid-cols-3">
-          {(content.philosophy?.cards || []).map((card, index) => (
-            <div
-              key={index}
-              data-reveal-child
-              className="panel panel-hover p-7"
-            >
-              <div className="font-display mb-6 text-sm font-medium text-tertiary-fg">
-                {String(index + 1).padStart(2, '0')}
-              </div>
-              <h3 className="font-display mb-3 text-xl font-semibold leading-snug">
-                {card?.title || ''}
-              </h3>
-              <p className="text-sm leading-relaxed text-secondary-fg">
-                {card?.description || ''}
+        <div className="grid gap-12 lg:grid-cols-12">
+          <Reveal className="lg:col-span-4">
+            <div className="lg:sticky lg:top-28">
+              <p className="section-label mb-4">Principles</p>
+              <h2 className="font-display mb-4 text-3xl font-bold tracking-tight md:text-4xl">
+                {content.philosophy?.title || ''}
+              </h2>
+              <p className="text-lg leading-relaxed text-secondary-fg">
+                {content.philosophy?.description || ''}
               </p>
             </div>
-          ))}
-        </Reveal>
+          </Reveal>
+          <Reveal stagger={0.06} className="lg:col-span-8">
+            {(content.philosophy?.cards || []).map((card, index) => (
+              <article
+                key={index}
+                data-reveal-child
+                className="group grid gap-2 border-t border-line py-7 first:border-t-0 first:pt-0 sm:grid-cols-[3.5rem_1fr] sm:gap-6"
+              >
+                <span className="font-display pt-0.5 text-sm font-medium text-tertiary-fg transition-colors duration-300 group-hover:text-(--accent)">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <div className="transition-transform duration-300 group-hover:translate-x-1">
+                  <h3 className="font-display mb-2 text-xl font-semibold leading-snug">
+                    {card?.title || ''}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-secondary-fg">
+                    {card?.description || ''}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </Reveal>
+        </div>
       </section>
 
       {/* Journey — timeline */}

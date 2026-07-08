@@ -93,7 +93,7 @@ export default function Home() {
       {/* ============ HERO ============ */}
       <section
         ref={heroRef}
-        className="grain relative flex min-h-[92svh] flex-col justify-center overflow-hidden"
+        className="grain relative flex min-h-[100svh] flex-col overflow-hidden"
       >
         <div
           className="absolute inset-0"
@@ -101,79 +101,81 @@ export default function Home() {
         />
         <HeroCanvas />
 
-        <div className="relative mx-auto w-full max-w-6xl px-4 pt-24 pb-16 sm:px-6 lg:px-8">
+        <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pt-10 pb-24 sm:px-6 lg:px-8">
           {/* Availability badge */}
-          <div data-hero className="mb-8 flex justify-center">
+          <div data-hero>
             <span className="chip">
               <span className="pulse-dot h-2 w-2 rounded-full bg-emerald-400" />
               {content.hero?.badge || ''}
             </span>
           </div>
 
-          {/* Headline */}
-          <h1 className="font-display mb-8 text-center text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
-            {(content.hero.headline || []).map((line, index) => (
-              <span key={index} data-hero className="block">
-                <span
-                  className={
-                    index === (content.hero.headline || []).length - 1
-                      ? 'text-gradient'
-                      : 'text-foreground'
-                  }
-                >
-                  {line}
+          <div className="mt-auto pt-16">
+            {/* Headline */}
+            <h1 className="font-display max-w-5xl text-[2.75rem] font-bold leading-[1.03] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
+              {(content.hero.headline || []).map((line, index) => (
+                <span key={index} data-hero className="block">
+                  <span
+                    className={
+                      index === (content.hero.headline || []).length - 1
+                        ? 'text-gradient'
+                        : 'text-foreground'
+                    }
+                  >
+                    {line}
+                  </span>
                 </span>
-              </span>
-            ))}
-          </h1>
+              ))}
+            </h1>
 
-          {/* Subheadline */}
-          <p
-            data-hero
-            className="mx-auto mb-12 max-w-2xl text-center text-lg leading-relaxed text-secondary-fg md:text-xl"
-          >
-            {content.hero?.subheadline || ''}
-          </p>
-
-          {/* CTAs */}
-          <div
-            data-hero
-            className="mb-20 flex flex-col items-center justify-center gap-4 sm:flex-row"
-          >
-            <Magnetic>
-              <Link href="/work" className="btn-accent">
-                View my work
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Magnetic>
-            <Magnetic>
-              <Link href="/contact" className="btn-ghost">
-                Get in touch
-              </Link>
-            </Magnetic>
-            <Magnetic>
-              <a
-                href="https://linkedin.com/in/hosala"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-ghost"
-              >
-                <Linkedin className="h-4 w-4" />
-                LinkedIn
-              </a>
-            </Magnetic>
+            {/* Subheadline + CTAs in an offset editorial grid */}
+            <div
+              data-hero
+              className="mt-10 grid gap-8 md:grid-cols-12 md:items-end"
+            >
+              <p className="max-w-xl text-lg leading-relaxed text-secondary-fg md:col-span-7 md:text-xl">
+                {content.hero?.subheadline || ''}
+              </p>
+              <div className="flex flex-wrap gap-4 md:col-span-5 md:justify-end">
+                <Magnetic>
+                  <Link href="/work" className="btn-accent">
+                    View my work
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Magnetic>
+                <Magnetic>
+                  <Link href="/contact" className="btn-ghost">
+                    Get in touch
+                  </Link>
+                </Magnetic>
+                <Magnetic>
+                  <a
+                    href="https://linkedin.com/in/hosala"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-ghost"
+                  >
+                    <Linkedin className="h-4 w-4" />
+                    LinkedIn
+                  </a>
+                </Magnetic>
+              </div>
+            </div>
           </div>
+        </div>
 
-          {/* Metrics */}
-          <div
-            data-hero
-            className="mx-auto grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-4"
-          >
+        {/* Scroll hint */}
+        <div className="pointer-events-none absolute right-6 bottom-8 hidden md:block lg:right-10">
+          <ChevronDown className="scroll-hint h-5 w-5 text-tertiary-fg" />
+        </div>
+      </section>
+
+      {/* Metrics band overlapping the hero's bottom edge */}
+      <div className="relative z-10 mx-auto -mt-14 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+        <Reveal>
+          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line shadow-2xl md:grid-cols-4">
             {(content.hero.metrics || []).map((metric, index) => (
-              <div
-                key={index}
-                className="bg-background/80 px-4 py-6 text-center backdrop-blur-sm"
-              >
+              <div key={index} className="bg-background px-5 py-6">
                 <div className="font-display mb-1 text-3xl font-bold text-foreground md:text-4xl">
                   <CountUp value={metric?.value || ''} />
                 </div>
@@ -183,16 +185,11 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Scroll hint */}
-        <div className="pointer-events-none absolute bottom-6 left-1/2 hidden -translate-x-1/2 md:block">
-          <ChevronDown className="scroll-hint h-5 w-5 text-tertiary-fg" />
-        </div>
-      </section>
+        </Reveal>
+      </div>
 
       {/* ============ MARQUEE ============ */}
-      <section className="border-y border-line py-6">
+      <section className="mt-16 border-y border-line py-6 md:mt-20">
         <Marquee
           items={marqueeItems.map(item => (
             <span
@@ -208,44 +205,47 @@ export default function Home() {
       {/* ============ COMPETENCIES ============ */}
       <section className="py-24 md:py-32">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <Reveal className="mb-16 max-w-2xl">
-            <p className="section-label mb-4">What I do</p>
-            <h2 className="font-display mb-5 text-4xl font-bold tracking-tight md:text-5xl">
-              Core competencies
-            </h2>
-            <p className="text-lg leading-relaxed text-secondary-fg">
-              Eight years across digital sports, e-commerce, fintech, and SaaS —
-              including building PlayerGrade from scratch as sole founder.
-              Here&apos;s what I&apos;ve picked up.
-            </p>
-          </Reveal>
-
-          <Reveal
-            stagger={0.08}
-            className="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
-          >
-            {(
-              content.competencies ||
-              defaultContent.homepage.competencies ||
-              []
-            ).map((competency, index) => (
-              <div
-                key={index}
-                data-reveal-child
-                className="panel panel-hover group p-7"
-              >
-                <div className="font-display mb-6 text-sm font-medium text-tertiary-fg transition-colors group-hover:text-(--accent)">
-                  {String(index + 1).padStart(2, '0')}
-                </div>
-                <h3 className="font-display mb-3 text-xl font-semibold leading-snug text-foreground">
-                  {competency?.title || ''}
-                </h3>
-                <p className="text-sm leading-relaxed text-secondary-fg">
-                  {competency?.description || ''}
+          <div className="grid gap-12 lg:grid-cols-12">
+            <Reveal className="lg:col-span-4">
+              <div className="lg:sticky lg:top-28">
+                <p className="section-label mb-4">What I do</p>
+                <h2 className="font-display mb-5 text-4xl font-bold tracking-tight md:text-5xl">
+                  Core competencies
+                </h2>
+                <p className="text-lg leading-relaxed text-secondary-fg">
+                  Eight years across digital sports, e-commerce, fintech, and
+                  SaaS — including building PlayerGrade from scratch as sole
+                  founder. Here&apos;s what I&apos;ve picked up.
                 </p>
               </div>
-            ))}
-          </Reveal>
+            </Reveal>
+
+            <Reveal stagger={0.06} className="lg:col-span-8">
+              {(
+                content.competencies ||
+                defaultContent.homepage.competencies ||
+                []
+              ).map((competency, index) => (
+                <article
+                  key={index}
+                  data-reveal-child
+                  className="group grid gap-2 border-t border-line py-7 first:border-t-0 first:pt-0 sm:grid-cols-[3.5rem_1fr] sm:gap-6"
+                >
+                  <span className="font-display pt-0.5 text-sm font-medium text-tertiary-fg transition-colors duration-300 group-hover:text-(--accent)">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <div className="transition-transform duration-300 group-hover:translate-x-1">
+                    <h3 className="font-display mb-2 text-xl font-semibold leading-snug text-foreground">
+                      {competency?.title || ''}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-secondary-fg">
+                      {competency?.description || ''}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </Reveal>
+          </div>
         </div>
       </section>
 

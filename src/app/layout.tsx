@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import { Navigation } from '@/components/ui/navigation'
 import { Footer } from '@/components/ui/footer'
+import { ScrollProgress } from '@/components/motion/scroll-progress'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -115,17 +116,18 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `document.documentElement.classList.add('js');try{var t=localStorage.getItem('portfolio-theme');if(t==='light'){document.documentElement.classList.remove('dark')}}catch(e){}`,
+            __html: `document.documentElement.classList.add('js');try{var t=localStorage.getItem('portfolio-theme');if(t==='dark'){document.documentElement.classList.add('dark')}}catch(e){}`,
           }}
         />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased`}
       >
+        <ScrollProgress />
         <div className="flex min-h-screen flex-col">
           <Navigation />
           <main className="flex-1">{children}</main>

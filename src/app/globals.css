@@ -5,11 +5,12 @@
 
 /* =============================================
    DESIGN TOKENS — "Ink & Signal"
-   Dark-first, electric indigo accent.
+   Light-first, electric indigo accent.
    ============================================= */
 
 :root {
-  /* Light theme */
+  /* Light theme (site default) */
+  color-scheme: light;
   --background: #fafafc;
   --background-elevated: #ffffff;
   --foreground: #15151c;
@@ -71,6 +72,54 @@
   --hero-vignette: radial-gradient(
     ellipse 80% 60% at 50% -10%,
     rgba(139, 133, 255, 0.16),
+    transparent 70%
+  );
+}
+
+/* =============================================
+   PALETTE — "FIFA"
+   Sourced from jobs.fifa.com's own theme-fifa CSS:
+   navy #051d39 / highlight blue #1277d9 / mist #e4e8f0.
+   Overrides accent tokens only — background/foreground
+   scales stay the same as the active light/dark theme.
+   ============================================= */
+
+[data-palette='fifa'] {
+  --accent: #1277d9;
+  --accent-soft: rgba(18, 119, 217, 0.1);
+  --accent-glow: rgba(18, 119, 217, 0.25);
+  --accent-contrast: #ffffff;
+
+  --gradient-signal: linear-gradient(
+    100deg,
+    #051d39 0%,
+    #1277d9 60%,
+    #4da6ff 115%
+  );
+
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(18, 119, 217, 0.14),
+    transparent 70%
+  );
+}
+
+.dark[data-palette='fifa'] {
+  --accent: #4da6ff;
+  --accent-soft: rgba(77, 166, 255, 0.12);
+  --accent-glow: rgba(77, 166, 255, 0.3);
+  --accent-contrast: #051d39;
+
+  --gradient-signal: linear-gradient(
+    100deg,
+    #4da6ff 0%,
+    #1277d9 55%,
+    #051d39 115%
+  );
+
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(77, 166, 255, 0.16),
     transparent 70%
   );
 }
