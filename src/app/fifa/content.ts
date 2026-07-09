@@ -29,8 +29,6 @@ export interface FifaContent {
     headlineLead: string
     headlineGradient: string
     description: string
-    note: string
-    paletteNote: string
     chips: string[]
     statsLabel: string
     stats: HeroStat[]
@@ -63,8 +61,6 @@ export interface FifaContent {
     heading: string
     body: string
     credentials: string[]
-    ctaContact: string
-    ctaLinkedIn: string
     signature: string
   }
 }
@@ -77,9 +73,6 @@ export const fifaContent: Record<Locale, FifaContent> = {
       headlineGradient: 'Just not with this job title yet.',
       description:
         'Eight years at adidas, building products used by 165M+ people and making sure they stayed GDPR-compliant along the way. These days I build with Claude, OpenAI, and Vertex AI daily, and I lead the analytics department at a professional football club on the side. This page walks through how that experience lines up with what FIFA is actually looking for.',
-      note: 'One page, built specifically for this application — not linked anywhere else on the site.',
-      paletteNote:
-        "The color palette is a deliberate nod to FIFA's own brand — this isn't an official FIFA page.",
       chips: [
         'AI Governance',
         'Data Compliance',
@@ -268,8 +261,6 @@ export const fifaContent: Record<Locale, FifaContent> = {
         'UEFA A Licence',
         'Slovak · English C2 · Italian B2 · German',
       ],
-      ctaContact: 'Get in touch',
-      ctaLinkedIn: 'Connect on LinkedIn',
       signature: 'Lukáš Hošala, based in Italy, ready to relocate to Zurich.',
     },
   },
@@ -280,9 +271,6 @@ export const fifaContent: Record<Locale, FifaContent> = {
       headlineGradient: 'Solo non con questo titolo, ancora.',
       description:
         "Otto anni in adidas, a costruire prodotti usati da oltre 165 milioni di persone e a garantire che restassero conformi al GDPR lungo il percorso. Oggi lavoro ogni giorno con Claude, OpenAI e Vertex AI, e nel tempo libero guido il reparto analisi di un club di calcio professionistico. Questa pagina ripercorre come quell'esperienza si allinei con quello che FIFA sta effettivamente cercando.",
-      note: 'Una pagina pensata specificamente per questa candidatura — non collegata al resto del sito.',
-      paletteNote:
-        'La palette cromatica è un omaggio volontario ai colori di FIFA — non è una pagina ufficiale FIFA.',
       chips: [
         'Governance AI',
         'Compliance dei dati',
@@ -475,8 +463,6 @@ export const fifaContent: Record<Locale, FifaContent> = {
         'Licenza UEFA A',
         'Slovacco · Inglese C2 · Italiano B2 · Tedesco',
       ],
-      ctaContact: 'Contattami',
-      ctaLinkedIn: 'Collegati su LinkedIn',
       signature:
         'Lukáš Hošala, basato in Italia, pronto a trasferirmi a Zurigo.',
     },
@@ -488,9 +474,6 @@ export const fifaContent: Record<Locale, FifaContent> = {
       headlineGradient: 'Nur eben noch ohne diesen Titel.',
       description:
         'Acht Jahre bei adidas, in denen ich Produkte für über 165 Millionen Menschen gebaut und dabei die DSGVO-Konformität sichergestellt habe. Heute arbeite ich täglich mit Claude, OpenAI und Vertex AI, und nebenbei leite ich die Analyseabteilung eines Profi-Fußballvereins. Diese Seite zeigt, wie diese Erfahrung zu dem passt, was FIFA tatsächlich sucht.',
-      note: 'Eine Seite, gezielt für diese Bewerbung erstellt — nirgendwo sonst auf der Website verlinkt.',
-      paletteNote:
-        'Die Farbpalette ist eine bewusste Anlehnung an FIFAs eigene Marke — dies ist keine offizielle FIFA-Seite.',
       chips: [
         'KI-Governance',
         'Datenschutz-Compliance',
@@ -686,8 +669,6 @@ export const fifaContent: Record<Locale, FifaContent> = {
         'UEFA-A-Lizenz',
         'Slowakisch · Englisch C2 · Italienisch B2 · Deutsch',
       ],
-      ctaContact: 'Kontakt aufnehmen',
-      ctaLinkedIn: 'Auf LinkedIn vernetzen',
       signature:
         'Lukáš Hošala, wohnhaft in Italien, bereit für den Umzug nach Zürich.',
     },

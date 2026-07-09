@@ -1,13 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, ChevronDown, Linkedin } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { Reveal } from '@/components/motion/reveal'
 import { CountUp } from '@/components/motion/count-up'
 import { Marquee } from '@/components/motion/marquee'
-import { Magnetic } from '@/components/motion/magnetic'
 import { gsap, useGSAP, prefersReducedMotion } from '@/lib/gsap'
 import { fifaContent, type Locale } from './content'
 
@@ -194,15 +192,9 @@ export default function FifaFitPage() {
               </h1>
             </Reveal>
             <Reveal delay={0.15}>
-              <div className="mt-10 grid gap-8 md:grid-cols-12 md:items-end">
-                <p className="max-w-xl text-base leading-relaxed text-white/80 md:col-span-7 md:text-lg">
-                  {t.hero.description}
-                </p>
-                <div className="space-y-1 text-xs text-white/40 md:col-span-5 md:justify-self-end md:text-right">
-                  <p>{t.hero.note}</p>
-                  <p>{t.hero.paletteNote}</p>
-                </div>
-              </div>
+              <p className="mt-10 max-w-xl text-base leading-relaxed text-white/80 md:text-lg">
+                {t.hero.description}
+              </p>
             </Reveal>
           </div>
         </div>
@@ -436,25 +428,6 @@ export default function FifaFitPage() {
                     {credential}
                   </span>
                 ))}
-              </div>
-              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Magnetic>
-                  <Link href="/contact" className="btn-accent">
-                    {t.closing.ctaContact}
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Magnetic>
-                <Magnetic>
-                  <a
-                    href="https://linkedin.com/in/hosala"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-ghost"
-                  >
-                    <Linkedin className="h-4 w-4" />
-                    {t.closing.ctaLinkedIn}
-                  </a>
-                </Magnetic>
               </div>
               <p className="mt-10 text-sm text-tertiary-fg">
                 {t.closing.signature}
