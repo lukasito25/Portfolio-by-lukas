@@ -225,11 +225,15 @@ model Analytics {
   country     String?
   city        String?
 
-  // Referrer info
+  // Referrer / attribution info
   referrer    String?
   source      String?   // e.g., "google", "direct", "github"
   medium      String?   // e.g., "organic", "social", "referral"
   campaign    String?
+  ref         String?   // per-recruiter link tag from ?ref=
+
+  // Visitor info
+  isReturning Boolean   @default(false) // first-party returning visitor (90d)
 
   // Engagement metrics
   duration    Int?      // time spent on page in seconds
@@ -241,6 +245,7 @@ model Analytics {
   @@index([path])
   @@index([sessionId])
   @@index([createdAt])
+  @@index([ref])
 }
 
 model MediaFile {

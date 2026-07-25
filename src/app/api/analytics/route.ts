@@ -1,320 +1,230 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
 import { prisma } from '@/lib/prisma'
+import { authOptions } from '@/lib/auth'
 
 const USE_API = process.env.NEXT_PUBLIC_USE_API === 'true'
-const DISABLE_LOCAL_ANALYTICS = process.env.DISABLE_LOCAL_ANALYTICS === 'true'
-const HAS_EXTERNAL_ANALYTICS = process.env.EXTERNAL_ANALYTICS_URL || false
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '')
+const API_SECRET = process.env.API_SECRET || ''
+// In production we persist to the Cloudflare D1 Worker; locally we fall back to
+// Prisma so the dashboard works in dev too.
+const useWorker = Boolean(USE_API && API_URL && API_SECRET)
 
-// POST - Track analytics events
-export async function POST(request: NextRequest) {
-  // Only disable local analytics if explicitly configured AND external analytics is available
-  if (DISABLE_LOCAL_ANALYTICS && HAS_EXTERNAL_ANALYTICS) {
-    return NextResponse.json(
-      { message: 'Analytics disabled - using external analytics service' },
-      { status: 503 }
-    )
-  }
+interface PageViewInput {
+  path?: string
+  title?: string
+  sessionId?: string
+  userAgent?: string
+  country?: string
+  city?: string
+  referrer?: string
+  source?: string
+  medium?: string
+  campaign?: string
+  ref?: string | null
+  isReturning?: boolean
+  duration?: number
+}
 
-  // If using API mode but no external analytics, use local analytics as fallback
-  if (USE_API && !HAS_EXTERNAL_ANALYTICS) {
-    console.log('Using local analytics as fallback in API mode')
-  }
-
-  // In production with API mode, disable analytics to avoid database connection issues
-  if (
-    USE_API &&
-    process.env.NODE_ENV === 'production' &&
-    !HAS_EXTERNAL_ANALYTICS
-  ) {
-    console.log(
-      'Analytics disabled in production API mode - no external analytics configured'
-    )
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Analytics tracking disabled in production API mode',
-      },
-      { status: 200 }
-    )
-  }
-
-  try {
-    const body = await request.json()
-
-    // Extract client information
-    const userAgent = request.headers.get('user-agent') || ''
-    const forwarded = request.headers.get('x-forwarded-for')
-    const realIp = request.headers.get('x-real-ip')
-    const ipAddress = forwarded ? forwarded.split(',')[0] : realIp || 'unknown'
-
-    // Handle different event types
-    if (body.name) {
-      // This is an event from the analytics library
-      const eventData = {
-        path: body.properties?.url
-          ? new URL(body.properties.url).pathname
-          : '/',
-        title: body.properties?.title || '',
-        sessionId: body.sessionId,
-        ipAddress,
-        userAgent,
-        referrer: body.properties?.referrer || '',
-        source: body.properties?.source || 'direct',
-        medium: body.properties?.medium || '',
-        campaign: body.properties?.campaign || '',
-        duration: body.properties?.duration
-          ? parseInt(body.properties.duration)
-          : null,
-        scrollDepth: body.properties?.scrollDepth
-          ? parseInt(body.properties.scrollDepth)
-          : null,
-        country: body.properties?.country || '',
-        city: body.properties?.city || '',
-      }
-
-      const analyticsEntry = await prisma.analytics.create({
-        data: eventData,
-      })
-
-      return NextResponse.json({
-        success: true,
-        id: analyticsEntry.id,
-      })
-    } else {
-      // Direct analytics data
-      const analyticsEntry = await prisma.analytics.create({
-        data: {
-          path: body.path || '/',
-          title: body.title || '',
-          sessionId: body.sessionId || `session_${Date.now()}`,
-          ipAddress,
-          userAgent,
-          referrer: body.referrer || '',
-          source: body.source || 'direct',
-          medium: body.medium || '',
-          campaign: body.campaign || '',
-          duration: body.duration || null,
-          scrollDepth: body.scrollDepth || null,
-          country: body.country || '',
-          city: body.city || '',
-        },
-      })
-
-      return NextResponse.json({
-        success: true,
-        id: analyticsEntry.id,
-      })
+// Accept either the middleware's flat page-view shape or a library event
+// ({ name, properties }); normalize to one shape.
+function normalize(body: any): PageViewInput {
+  if (body?.name && body?.properties) {
+    const p = body.properties
+    return {
+      path: p.url ? safePath(p.url) : p.path || '/',
+      title: p.title || '',
+      sessionId: body.sessionId,
+      userAgent: p.userAgent || '',
+      country: p.country || '',
+      city: p.city || '',
+      referrer: p.referrer || '',
+      source: p.source || 'direct',
+      medium: p.medium || '',
+      campaign: p.campaign || '',
+      ref: p.ref || null,
+      isReturning: Boolean(p.isReturning),
+      duration: numeric(p.duration),
     }
+  }
+  return {
+    path: body?.path || '/',
+    title: body?.title || '',
+    sessionId: body?.sessionId,
+    userAgent: body?.userAgent || '',
+    country: body?.country || '',
+    city: body?.city || '',
+    referrer: body?.referrer || '',
+    source: body?.source || 'direct',
+    medium: body?.medium || '',
+    campaign: body?.campaign || '',
+    ref: body?.ref ?? null,
+    isReturning: Boolean(body?.isReturning),
+    duration: numeric(body?.duration),
+  }
+}
+
+function safePath(url: string): string {
+  try {
+    return new URL(url).pathname
   } catch {
-    // Analytics tracking is non-critical — silently succeed
+    return '/'
+  }
+}
+function numeric(v: unknown): number | undefined {
+  const n = typeof v === 'string' ? parseInt(v, 10) : (v as number)
+  return Number.isFinite(n) ? n : undefined
+}
+
+// POST — record a page view (fire-and-forget from middleware). Never throws.
+export async function POST(request: NextRequest) {
+  try {
+    const event = normalize(await request.json())
+
+    if (useWorker) {
+      await fetch(`${API_URL}/analytics`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${API_SECRET}`,
+        },
+        body: JSON.stringify(event),
+      })
+      return NextResponse.json({ success: true })
+    }
+
+    // Dev fallback: Prisma
+    await prisma.analytics.create({
+      data: {
+        path: event.path || '/',
+        title: event.title || '',
+        sessionId: event.sessionId || `session_${Date.now()}`,
+        userAgent: event.userAgent || '',
+        country: event.country || '',
+        city: event.city || '',
+        referrer: event.referrer || '',
+        source: event.source || 'direct',
+        medium: event.medium || '',
+        campaign: event.campaign || '',
+        ref: event.ref || null,
+        isReturning: Boolean(event.isReturning),
+        duration: event.duration ?? null,
+      },
+    })
+    return NextResponse.json({ success: true })
+  } catch {
+    // Analytics is non-critical — always succeed.
     return NextResponse.json({ success: true })
   }
 }
 
-// GET - Retrieve analytics data for dashboard
+// GET — admin-only aggregated summary for the dashboard.
 export async function GET(request: NextRequest) {
-  // In production with API mode, return mock data to avoid database connection issues
-  if (
-    USE_API &&
-    process.env.NODE_ENV === 'production' &&
-    !HAS_EXTERNAL_ANALYTICS
-  ) {
-    console.log('Returning mock analytics data in production API mode')
-    const { searchParams } = new URL(request.url)
-    const timeframe = searchParams.get('timeframe') || '30d'
-
-    const mockData = {
-      analytics: [],
-      pagination: {
-        page: 1,
-        limit: 50,
-        total: 0,
-        pages: 0,
-      },
-      stats: {
-        topPages: [
-          { path: '/', _count: { id: 450 }, _avg: { duration: 120000 } },
-          { path: '/about', _count: { id: 280 }, _avg: { duration: 95000 } },
-          { path: '/work', _count: { id: 220 }, _avg: { duration: 150000 } },
-          { path: '/blog', _count: { id: 180 }, _avg: { duration: 85000 } },
-          { path: '/contact', _count: { id: 120 }, _avg: { duration: 60000 } },
-        ],
-        topSources: [
-          { source: 'direct', _count: { id: 420 } },
-          { source: 'google', _count: { id: 280 } },
-          { source: 'linkedin', _count: { id: 150 } },
-          { source: 'github', _count: { id: 100 } },
-          { source: 'twitter', _count: { id: 50 } },
-        ],
-        totalViews: 1250,
-        timeframe,
-      },
-    }
-
-    return NextResponse.json(mockData)
+  const session = await getServerSession(authOptions)
+  if (!session || (session.user as { role?: string })?.role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Only use mock data if external analytics is configured
-  if (USE_API && HAS_EXTERNAL_ANALYTICS) {
-    const { searchParams } = new URL(request.url)
-    const timeframe = searchParams.get('timeframe') || '30d'
+  const timeframe = new URL(request.url).searchParams.get('timeframe') || '30d'
 
-    // Return mock analytics data
-    const mockData = {
-      analytics: [],
-      pagination: {
-        page: 1,
-        limit: 50,
-        total: 0,
-        pages: 0,
-      },
-      stats: {
-        topPages: [
-          { path: '/', _count: { id: 450 }, _avg: { duration: 120000 } },
-          { path: '/about', _count: { id: 280 }, _avg: { duration: 95000 } },
-          { path: '/work', _count: { id: 220 }, _avg: { duration: 150000 } },
-          { path: '/blog', _count: { id: 180 }, _avg: { duration: 85000 } },
-          { path: '/contact', _count: { id: 120 }, _avg: { duration: 60000 } },
-        ],
-        topSources: [
-          { source: 'direct', _count: { id: 420 } },
-          { source: 'google', _count: { id: 280 } },
-          { source: 'linkedin', _count: { id: 150 } },
-          { source: 'github', _count: { id: 100 } },
-          { source: 'twitter', _count: { id: 50 } },
-        ],
-        totalViews: 1250,
-        timeframe,
-      },
+  if (useWorker) {
+    try {
+      const res = await fetch(
+        `${API_URL}/analytics/summary?timeframe=${timeframe}`,
+        { headers: { Authorization: `Bearer ${API_SECRET}` } }
+      )
+      const data = await res.json()
+      return NextResponse.json(data, { status: res.status })
+    } catch {
+      return NextResponse.json(
+        { error: 'Failed to fetch analytics summary' },
+        { status: 502 }
+      )
     }
-
-    return NextResponse.json(mockData)
   }
 
+  // Dev fallback: build the same summary shape from Prisma.
   try {
-    const { searchParams } = new URL(request.url)
-    const timeframe = searchParams.get('timeframe') || '30d'
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const offset = (page - 1) * limit
+    const days =
+      timeframe === '1d'
+        ? 1
+        : timeframe === '7d'
+          ? 7
+          : timeframe === '90d'
+            ? 90
+            : 30
+    const start = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+    const where = { createdAt: { gte: start } }
 
-    // Calculate date range
-    const now = new Date()
-    let startDate: Date
-    switch (timeframe) {
-      case '1d':
-        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-        break
-      case '7d':
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-        break
-      case '30d':
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-        break
-      case '90d':
-        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
-        break
-      default:
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-    }
-
-    // Get paginated analytics data
-    const [analytics, totalCount] = await Promise.all([
+    const [rows, totalViews] = await Promise.all([
       prisma.analytics.findMany({
-        where: {
-          createdAt: {
-            gte: startDate,
-          },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-        skip: offset,
-        take: limit,
+        where,
+        orderBy: { createdAt: 'desc' },
       }),
-      prisma.analytics.count({
-        where: {
-          createdAt: {
-            gte: startDate,
-          },
-        },
-      }),
+      prisma.analytics.count({ where }),
     ])
 
-    // Get aggregated stats
-    const [topPages, topSources, totalViews] = await Promise.all([
-      // Top pages with average duration
-      prisma.analytics.groupBy({
-        by: ['path'],
-        where: {
-          createdAt: {
-            gte: startDate,
-          },
-        },
-        _count: {
-          id: true,
-        },
-        _avg: {
-          duration: true,
-        },
-        orderBy: {
-          _count: {
-            id: 'desc',
-          },
-        },
-        take: 10,
-      }),
-
-      // Top traffic sources
-      prisma.analytics.groupBy({
-        by: ['source'],
-        where: {
-          createdAt: {
-            gte: startDate,
-          },
-        },
-        _count: {
-          id: true,
-        },
-        orderBy: {
-          _count: {
-            id: 'desc',
-          },
-        },
-        take: 10,
-      }),
-
-      // Total views count
-      prisma.analytics.count({
-        where: {
-          createdAt: {
-            gte: startDate,
-          },
-        },
-      }),
-    ])
-
-    const response = {
-      analytics,
-      pagination: {
-        page,
-        limit,
-        total: totalCount,
-        pages: Math.ceil(totalCount / limit),
-      },
-      stats: {
-        topPages,
-        topSources,
-        totalViews,
-        timeframe,
-      },
+    const tally = <T extends string>(
+      key: (r: (typeof rows)[number]) => T | null | undefined
+    ) => {
+      const m = new Map<T, number>()
+      for (const r of rows) {
+        const k = key(r)
+        if (k) m.set(k, (m.get(k) || 0) + 1)
+      }
+      return m
     }
 
-    return NextResponse.json(response)
+    const pathViews = tally(r => r.path)
+    const pages = [...pathViews.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([path, views]) => ({
+        path,
+        views,
+        avgDuration: null,
+        countries: [
+          ...tally(r => (r.path === path ? r.country || '' : '')).entries(),
+        ]
+          .filter(([c]) => c)
+          .sort((a, b) => b[1] - a[1])
+          .map(([country, v]) => ({ country, views: v })),
+        refs: [...tally(r => (r.path === path ? r.ref || '' : '')).entries()]
+          .filter(([c]) => c)
+          .sort((a, b) => b[1] - a[1])
+          .map(([ref, v]) => ({ ref, views: v })),
+      }))
+
+    return NextResponse.json({
+      timeframe,
+      totalViews,
+      newVsReturning: {
+        new: rows.filter(r => !r.isReturning).length,
+        returning: rows.filter(r => r.isReturning).length,
+      },
+      pages,
+      countries: [...tally(r => r.country || '').entries()]
+        .filter(([c]) => c)
+        .sort((a, b) => b[1] - a[1])
+        .map(([country, views]) => ({ country, views })),
+      refs: [...tally(r => r.ref || '').entries()]
+        .filter(([c]) => c)
+        .sort((a, b) => b[1] - a[1])
+        .map(([ref, views]) => ({ ref, views })),
+      recent: rows.slice(0, 25).map(r => ({
+        path: r.path,
+        country: r.country,
+        city: r.city,
+        ref: r.ref,
+        source: r.source,
+        referrer: r.referrer,
+        isReturning: r.isReturning ? 1 : 0,
+        createdAt: r.createdAt,
+      })),
+    })
   } catch (error) {
-    console.error('Analytics retrieval error:', error)
+    console.error('Analytics summary (dev) error:', error)
     return NextResponse.json(
-      { error: 'Failed to retrieve analytics data' },
+      { error: 'Failed to build analytics summary' },
       { status: 500 }
     )
   }

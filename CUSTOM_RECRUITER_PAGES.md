@@ -157,3 +157,124 @@ Say the next role is at UEFA — target URL `/uefa`:
 - [ ] Page is **not** added to `src/components/ui/navigation.tsx`
 - [ ] Page is **not** added to `src/app/sitemap.xml/route.ts`
 - [ ] You share the URL directly with the recruiter (there's no other way in)
+
+## 9. Geo campaign banners (driving homepage traffic to a fit brief)
+
+A recruiter who lands on the **homepage** first (not the direct link) can be nudged to
+the right fit brief with a small, non-invasive banner targeted by the visitor's country.
+
+### Files
+
+- **`src/lib/location-campaigns.ts`** — the campaign registry. One object per campaign.
+- **`src/components/location-campaign-banner.tsx`** — the client banner (bottom-right card).
+- **`src/middleware.ts`** — resolves Vercel edge geo (`x-vercel-ip-country` / `-city`) into
+  short-lived, client-readable cookies (`visitor-country` / `visitor-city`).
+- Mounted once in **`src/app/page.tsx`** (`<LocationCampaignBanner />`) — homepage only.
+
+### Add a campaign (one object)
+
+```ts
+// src/lib/location-campaigns.ts → locationCampaigns[]
+{
+  id: 'uefa-ch',              // stable & unique — also the localStorage dismissal key
+  countries: ['CH'],         // ISO 3166-1 alpha-2; add cities?: ['Nyon'] to narrow further
+  startsAt: '2026-09-01',    // REQUIRED — YYYY-MM-DD, drives auto-expiry
+  eyebrow: 'Recruiting for UEFA?',
+  title: 'I mapped my experience to your role.',
+  body: 'A short brief for the <role> opening in <city>.',
+  ctaLabel: 'See the fit brief',
+  href: '/uefa',             // the fit-brief page; banner never shows on this path
+}
+```
+
+That's it — no component changes. Order entries **most-specific first**; the first active,
+matching, non-dismissed campaign wins.
+
+### Behaviour (already built in)
+
+- **Auto-expiry.** `startsAt` is required and every campaign is hard-capped at
+  `MAX_CAMPAIGN_DURATION_MONTHS` (2 months). Optional `endsAt` can end it _earlier_ but is
+  clamped to the cap — so old banners retire on their own and never clash with new ones.
+  Expired entries can stay in the file as a record.
+- **Reveal on scroll.** Appears only after the visitor scrolls past (most of) the hero.
+- **Dismissible & remembered.** The ✕ persists dismissal in `localStorage`.
+- **Never self-targets.** Hidden on its own `href` page.
+- **Accessible & motion-safe.** Mounts only when shown (not in the DOM before/after);
+  honors `prefers-reduced-motion`; styled with the site's own tokens (uses the homepage
+  accent, not a per-page brand override).
+
+### Test locally (Vercel geo headers don't exist off-platform)
+
+- `/?geo=GB` — simulate a UK visitor → scroll → banner
+- `/?geo=CH&city=Zurich` — simulate a city
+- `/?campaign=<id>` — force-preview a specific campaign (bypasses geo, dismissal, **and** the
+  time window) — also the way to preview it in production from the wrong country
+
+### Live campaigns (example)
+
+| id                 | Country | Links to  | Starts     | Auto-expires |
+| ------------------ | ------- | --------- | ---------- | ------------ |
+| `genius-sports-uk` | GB      | `/genius` | 2026-07-25 | 2026-09-25   |
+| `fifa-ch`          | CH      | `/fifa`   | 2026-07-08 | 2026-09-08   |
+
+## 10. Analytics — did the recruiter look, and from where?
+
+Two complementary systems track traffic; both are already wired.
+
+### a) Vercel Web Analytics (aggregate, zero-maintenance)
+
+`<Analytics />` is mounted in `src/app/layout.tsx`. The Vercel dashboard shows page views
+filterable by path with a country breakdown — the fastest read on "how many visitors from
+which country hit `/genius`". Cookieless and privacy-friendly; aggregate only.
+
+### b) Self-owned dashboard at `/admin/analytics` (detailed + ref attribution)
+
+This is the one that answers **"did _this_ recruiter open the page?"** It records every
+page view to the Cloudflare **D1 `Analytics` table** and renders, per page: total views, the
+**country** breakdown, and any **`?ref=` tags** used — plus new-vs-returning and recent visits.
+
+Data flow: `middleware.ts` (resolves geo + `?ref=`/UTM + returning-visitor cookie) →
+`/api/analytics` (POST) → Cloudflare Worker `/analytics` → D1. The dashboard reads
+`/api/analytics` (GET, admin-only) → Worker `/analytics/summary`. Locally (`USE_API=false`)
+it uses Prisma/SQLite instead, so the dashboard works in dev too.
+
+**Privacy:** raw IP is never stored — only country/city (from the edge) and a hashed-ish
+session id.
+
+### Unique recruiter links (`?ref=`) — the flow for every new page
+
+When you send a fit-brief link, tag it per recipient:
+
+```
+https://portfolio-by-lukas.vercel.app/genius?ref=jane-smith
+https://portfolio-by-lukas.vercel.app/fifa?ref=hans-mueller
+```
+
+A hit on `/genius?ref=jane-smith` is almost certainly that specific person — far more
+reliable than geo alone. The dashboard groups views by `ref`, per page. Standard
+`utm_source` / `utm_medium` / `utm_campaign` params are captured too (e.g. `?utm_source=linkedin`).
+Convention: keep `ref` a short kebab-case recruiter/company slug; you map slug→person yourself.
+
+### Returning visitors
+
+A first-party cookie (`pv_seen`, 90-day rolling) flags whether a visitor has been on the site
+before. The dashboard shows new-vs-returning and tags returning rows in the recent-visits
+list — so a recruiter coming back to re-read a page is visible. Analytics-only; it does not
+change what visitors see.
+
+### One-time + per-change Worker deploy
+
+The self-owned analytics lives in the Cloudflare Worker (`cloudflare-api/`, a separate,
+git-ignored deployment). After changing it — or the first time — run:
+
+```bash
+cd cloudflare-api
+# once: add the ref + isReturning columns to the live D1 table
+npx wrangler d1 execute portfolio-db --remote --file=migrations/add_analytics_ref_returning.sql
+# deploy the Worker (adds the /analytics endpoints)
+npx wrangler deploy
+```
+
+Vercel Web Analytics and the Next app deploy automatically with the normal git push; only the
+Worker needs this manual step. Until it's deployed, the dashboard shows no self-owned data in
+production (Vercel Web Analytics still works).

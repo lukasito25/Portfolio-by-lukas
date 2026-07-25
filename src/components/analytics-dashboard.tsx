@@ -5,72 +5,73 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
   BarChart3,
-  Users,
   Eye,
-  Clock,
-  TrendingUp,
   Globe,
-  MessageSquare,
-  Target,
+  Link2,
+  Repeat,
+  MapPin,
+  Clock,
 } from 'lucide-react'
 
-interface AnalyticsData {
-  analytics: any[]
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    pages: number
-  }
-  stats: {
-    topPages: Array<{
-      path: string
-      _count: { id: number }
-      _avg: { duration: number | null }
-    }>
-    topSources: Array<{
-      source: string
-      _count: { id: number }
-    }>
-    totalViews: number
-    timeframe: string
-  }
+interface CountViews {
+  country: string
+  views: number
 }
+interface RefViews {
+  ref: string
+  views: number
+}
+interface PageRow {
+  path: string
+  views: number
+  avgDuration: number | null
+  countries: CountViews[]
+  refs: RefViews[]
+}
+interface RecentRow {
+  path: string
+  country?: string | null
+  city?: string | null
+  ref?: string | null
+  source?: string | null
+  referrer?: string | null
+  isReturning?: number
+  createdAt: string
+}
+interface Summary {
+  timeframe: string
+  totalViews: number
+  newVsReturning: { new: number; returning: number }
+  pages: PageRow[]
+  countries: CountViews[]
+  refs: RefViews[]
+  recent: RecentRow[]
+}
+
+/** ISO 3166-1 alpha-2 → flag emoji. */
+function flag(cc?: string | null): string {
+  if (!cc || cc.length !== 2) return '🏳️'
+  return String.fromCodePoint(
+    ...[...cc.toUpperCase()].map(ch => 0x1f1e6 + ch.charCodeAt(0) - 65)
+  )
+}
+
+const prettyPath = (p: string) => (p === '/' ? 'Home' : p)
 
 interface MetricCardProps {
   title: string
   value: string | number
-  change?: string
+  sub?: string
   icon: React.ReactNode
-  trend?: 'up' | 'down' | 'neutral'
 }
-
-function MetricCard({
-  title,
-  value,
-  change,
-  icon,
-  trend = 'neutral',
-}: MetricCardProps) {
-  const trendColor =
-    trend === 'up'
-      ? 'text-green-600'
-      : trend === 'down'
-        ? 'text-red-600'
-        : 'text-gray-600'
-
+function MetricCard({ title, value, sub, icon }: MetricCardProps) {
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
           <p className="text-3xl font-bold text-gray-900">{value}</p>
-          {change && (
-            <p className={`text-sm ${trendColor} flex items-center mt-1`}>
-              {trend === 'up' && <TrendingUp className="h-4 w-4 mr-1" />}
-              {change}
-            </p>
-          )}
+          {sub && <p className="mt-1 text-sm text-gray-500">{sub}</p>}
         </div>
         <div className="text-gray-400">{icon}</div>
       </div>
@@ -79,26 +80,18 @@ function MetricCard({
 }
 
 export function AnalyticsDashboard() {
-  const [data, setData] = useState<AnalyticsData | null>(null)
+  const [data, setData] = useState<Summary | null>(null)
   const [loading, setLoading] = useState(true)
   const [timeframe, setTimeframe] = useState('30d')
   const [error, setError] = useState<string | null>(null)
 
-  const fetchAnalytics = async (selectedTimeframe: string) => {
+  const fetchAnalytics = async (tf: string) => {
     try {
       setLoading(true)
       setError(null)
-
-      const response = await fetch(
-        `/api/analytics?timeframe=${selectedTimeframe}`
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch analytics data')
-      }
-
-      const analyticsData = await response.json()
-      setData(analyticsData)
+      const res = await fetch(`/api/analytics?timeframe=${tf}`)
+      if (!res.ok) throw new Error('Failed to fetch analytics data')
+      setData(await res.json())
     } catch (err) {
       console.error('Error fetching analytics:', err)
       setError('Failed to load analytics data')
@@ -111,38 +104,17 @@ export function AnalyticsDashboard() {
     fetchAnalytics(timeframe)
   }, [timeframe])
 
-  const formatDuration = (duration: number | null): string => {
-    if (!duration) return '0s'
-    const minutes = Math.floor(duration / 60000)
-    const seconds = Math.floor((duration % 60000) / 1000)
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`
-  }
-
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) {
-      return `${(num / 1000000).toFixed(1)}M`
-    }
-    if (num >= 1000) {
-      return `${(num / 1000).toFixed(1)}K`
-    }
-    return num.toString()
-  }
-
   if (loading) {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-64"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="h-8 w-64 rounded bg-gray-200" />
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
+              <div key={i} className="h-32 rounded bg-gray-200" />
             ))}
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {[...Array(2)].map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded"></div>
-            ))}
-          </div>
+          <div className="h-96 rounded bg-gray-200" />
         </div>
       </div>
     )
@@ -152,199 +124,278 @@ export function AnalyticsDashboard() {
     return (
       <div className="p-6">
         <Card className="p-8 text-center">
-          <div className="text-red-500 mb-4">
-            <BarChart3 className="h-12 w-12 mx-auto" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <BarChart3 className="mx-auto mb-4 h-12 w-12 text-red-500" />
+          <h3 className="mb-2 text-lg font-semibold text-gray-900">
             Analytics Error
           </h3>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="mb-4 text-gray-600">{error}</p>
           <Button onClick={() => fetchAnalytics(timeframe)}>Try Again</Button>
         </Card>
       </div>
     )
   }
 
-  if (!data) {
+  if (!data || data.totalViews === 0) {
     return (
       <div className="p-6">
-        <Card className="p-8 text-center">
-          <div className="text-gray-400 mb-4">
-            <BarChart3 className="h-12 w-12 mx-auto" />
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Analytics Dashboard
+          </h1>
+          <div className="mt-4 flex space-x-2 sm:mt-0">
+            {['1d', '7d', '30d', '90d'].map(p => (
+              <Button
+                key={p}
+                variant={timeframe === p ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setTimeframe(p)}
+              >
+                {p}
+              </Button>
+            ))}
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No Data Available
+        </div>
+        <Card className="p-8 text-center">
+          <BarChart3 className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+          <h3 className="mb-2 text-lg font-semibold text-gray-900">
+            No visits in this window
           </h3>
           <p className="text-gray-600">
-            Analytics data will appear here once visitors start browsing your
-            portfolio.
+            Page views appear here as visitors browse. Share a page with{' '}
+            <code className="rounded bg-gray-100 px-1">?ref=name</code> to
+            attribute a specific recruiter.
           </p>
         </Card>
       </div>
     )
   }
 
-  const avgTimeOnSite =
-    data.stats.topPages.reduce((acc, page) => {
-      return acc + (page._avg.duration || 0)
-    }, 0) / (data.stats.topPages.length || 1)
-
-  const uniqueSources = data.stats.topSources.length
-  const totalSessions = Math.floor(data.stats.totalViews * 0.7) // Estimate sessions as 70% of views
+  const returningPct = data.totalViews
+    ? Math.round((data.newVsReturning.returning / data.totalViews) * 100)
+    : 0
+  const refViews = data.refs.reduce((a, r) => a + r.views, 0)
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Analytics Dashboard
-        </h1>
-        <div className="flex space-x-2 mt-4 sm:mt-0">
-          {['1d', '7d', '30d', '90d'].map(period => (
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Analytics Dashboard
+          </h1>
+          <p className="text-sm text-gray-500">
+            Page views by page, country, and recruiter link
+          </p>
+        </div>
+        <div className="mt-4 flex space-x-2 sm:mt-0">
+          {['1d', '7d', '30d', '90d'].map(p => (
             <Button
-              key={period}
-              variant={timeframe === period ? 'default' : 'outline'}
+              key={p}
+              variant={timeframe === p ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setTimeframe(period)}
+              onClick={() => setTimeframe(p)}
             >
-              {period}
+              {p}
             </Button>
           ))}
         </div>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Key metrics */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           title="Total Page Views"
-          value={formatNumber(data.stats.totalViews)}
+          value={data.totalViews}
           icon={<Eye className="h-8 w-8" />}
-          trend="up"
         />
         <MetricCard
-          title="Unique Visitors"
-          value={formatNumber(totalSessions)}
-          icon={<Users className="h-8 w-8" />}
-          trend="up"
-        />
-        <MetricCard
-          title="Avg. Time on Site"
-          value={formatDuration(avgTimeOnSite)}
-          icon={<Clock className="h-8 w-8" />}
-          trend="neutral"
-        />
-        <MetricCard
-          title="Traffic Sources"
-          value={uniqueSources}
+          title="Countries"
+          value={data.countries.length}
+          sub={
+            data.countries[0]
+              ? `Top: ${flag(data.countries[0].country)} ${data.countries[0].country}`
+              : undefined
+          }
           icon={<Globe className="h-8 w-8" />}
-          trend="neutral"
+        />
+        <MetricCard
+          title="Ref-tagged Views"
+          value={refViews}
+          sub={`${data.refs.length} unique ref${data.refs.length === 1 ? '' : 's'}`}
+          icon={<Link2 className="h-8 w-8" />}
+        />
+        <MetricCard
+          title="Returning"
+          value={`${returningPct}%`}
+          sub={`${data.newVsReturning.returning} of ${data.totalViews} views`}
+          icon={<Repeat className="h-8 w-8" />}
         />
       </div>
 
-      {/* Charts and Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Pages */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <Target className="h-5 w-5 mr-2" />
-            Top Pages
-          </h3>
-          <div className="space-y-4">
-            {data.stats.topPages.slice(0, 5).map((page, index) => (
-              <div
-                key={page.path}
-                className="flex items-center justify-between"
-              >
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900 truncate">
-                    {page.path === '/' ? 'Home' : page.path.replace('/', '')}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Avg. time: {formatDuration(page._avg.duration)}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900">
-                    {page._count.id}
-                  </p>
-                  <p className="text-sm text-gray-500">views</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Traffic Sources */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <Globe className="h-5 w-5 mr-2" />
-            Traffic Sources
-          </h3>
-          <div className="space-y-4">
-            {data.stats.topSources.slice(0, 5).map((source, index) => {
-              const percentage = (
-                (source._count.id / data.stats.totalViews) *
-                100
-              ).toFixed(1)
-              return (
-                <div
-                  key={source.source}
-                  className="flex items-center justify-between"
+      {/* Pages × country × ref — the main table */}
+      <Card className="p-6">
+        <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
+          <MapPin className="mr-2 h-5 w-5" />
+          Pages — who looked, and from where
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px] text-sm">
+            <thead>
+              <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
+                <th className="py-2 pr-4 font-medium">Page</th>
+                <th className="py-2 pr-4 font-medium">Views</th>
+                <th className="py-2 pr-4 font-medium">Top countries</th>
+                <th className="py-2 font-medium">Ref links used</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.pages.map(page => (
+                <tr
+                  key={page.path}
+                  className="border-b border-gray-100 align-top last:border-b-0"
                 >
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900 capitalize">
-                      {source.source || 'Direct'}
-                    </p>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${percentage}%` }}
-                      ></div>
+                  <td className="py-3 pr-4">
+                    <span className="font-medium text-gray-900">
+                      {prettyPath(page.path)}
+                    </span>
+                  </td>
+                  <td className="py-3 pr-4 font-semibold text-gray-900">
+                    {page.views}
+                  </td>
+                  <td className="py-3 pr-4">
+                    <div className="flex flex-wrap gap-1.5">
+                      {page.countries.length ? (
+                        page.countries.slice(0, 6).map(c => (
+                          <span
+                            key={c.country}
+                            className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700"
+                            title={`${c.country}: ${c.views}`}
+                          >
+                            {flag(c.country)} {c.country} {c.views}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
                     </div>
+                  </td>
+                  <td className="py-3">
+                    <div className="flex flex-wrap gap-1.5">
+                      {page.refs.length ? (
+                        page.refs.map(r => (
+                          <span
+                            key={r.ref}
+                            className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700"
+                          >
+                            <Link2 className="h-3 w-3" />
+                            {r.ref} {r.views}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Countries overview */}
+        <Card className="p-6">
+          <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
+            <Globe className="mr-2 h-5 w-5" />
+            Countries (all pages)
+          </h3>
+          <div className="space-y-3">
+            {data.countries.slice(0, 8).map(c => {
+              const pct = Math.round((c.views / data.totalViews) * 100)
+              return (
+                <div key={c.country} className="flex items-center gap-3">
+                  <span className="w-16 text-sm text-gray-700">
+                    {flag(c.country)} {c.country}
+                  </span>
+                  <div className="h-2 flex-1 rounded-full bg-gray-200">
+                    <div
+                      className="h-2 rounded-full bg-blue-600"
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
-                  <div className="text-right ml-4">
-                    <p className="font-semibold text-gray-900">
-                      {source._count.id}
-                    </p>
-                    <p className="text-sm text-gray-500">{percentage}%</p>
-                  </div>
+                  <span className="w-14 text-right text-sm text-gray-600">
+                    {c.views} · {pct}%
+                  </span>
                 </div>
               )
             })}
           </div>
         </Card>
+
+        {/* Ref links overview */}
+        <Card className="p-6">
+          <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
+            <Link2 className="mr-2 h-5 w-5" />
+            Recruiter links (?ref=)
+          </h3>
+          {data.refs.length ? (
+            <div className="space-y-3">
+              {data.refs.slice(0, 10).map(r => (
+                <div
+                  key={r.ref}
+                  className="flex items-center justify-between border-b border-gray-100 pb-2 last:border-b-0"
+                >
+                  <span className="font-medium text-gray-900">{r.ref}</span>
+                  <span className="text-sm text-gray-600">{r.views} views</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">
+              No tagged links used yet. Share a page as{' '}
+              <code className="rounded bg-gray-100 px-1">
+                /genius?ref=jane-smith
+              </code>{' '}
+              to see it here.
+            </p>
+          )}
+        </Card>
       </div>
 
-      {/* Recent Activity */}
+      {/* Recent activity */}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <MessageSquare className="h-5 w-5 mr-2" />
-          Recent Activity
+        <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
+          <Clock className="mr-2 h-5 w-5" />
+          Recent visits
         </h3>
-        <div className="space-y-3">
-          {data.analytics.slice(0, 10).map((activity, index) => (
+        <div className="space-y-2">
+          {data.recent.map((a, i) => (
             <div
-              key={activity.id}
-              className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
+              key={i}
+              className="flex items-center justify-between border-b border-gray-100 py-2 text-sm last:border-b-0"
             >
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">
-                  {activity.path === '/'
-                    ? 'Home Page'
-                    : activity.title || activity.path}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {activity.source && `from ${activity.source}`} •{' '}
-                  {activity.userAgent?.includes('Mobile')
-                    ? 'Mobile'
-                    : 'Desktop'}
-                </p>
+              <div className="flex min-w-0 items-center gap-2">
+                <span title={a.country || ''}>{flag(a.country)}</span>
+                <span className="font-medium text-gray-900">
+                  {prettyPath(a.path)}
+                </span>
+                {a.ref && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                    <Link2 className="h-3 w-3" />
+                    {a.ref}
+                  </span>
+                )}
+                {a.isReturning ? (
+                  <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
+                    returning
+                  </span>
+                ) : null}
               </div>
-              <div className="text-right">
-                <p className="text-xs text-gray-500">
-                  {new Date(activity.createdAt).toLocaleTimeString()}
-                </p>
-              </div>
+              <span className="whitespace-nowrap text-xs text-gray-500">
+                {a.city ? `${a.city} · ` : ''}
+                {new Date(a.createdAt).toLocaleString()}
+              </span>
             </div>
           ))}
         </div>
