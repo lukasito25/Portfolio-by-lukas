@@ -23,23 +23,65 @@ export async function middleware(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   response.headers.set('X-XSS-Protection', '1; mode=block')
 
-  // Expose the visitor's edge-resolved geo (Vercel headers) as readable cookies
-  // so the client-side location-campaign banner can target by country/city.
-  // These are populated by Vercel in production; absent locally (use the
-  // ?geo= / ?city= query overrides for testing there).
-  if (!pathname.startsWith('/api/') && !pathname.startsWith('/_next/')) {
+  // Build page-view tracking context for real page navigations (not APIs,
+  // assets, admin, or prefetches). This is also where we resolve the visitor's
+  // edge geo (Vercel headers — populated in production; absent locally, where
+  // the banner's ?geo=/?city= overrides fill in) and expose it as cookies for
+  // the client-side location-campaign banner.
+  const isPageView =
+    request.method === 'GET' &&
+    !pathname.startsWith('/api/') &&
+    !pathname.startsWith('/_next/') &&
+    !pathname.startsWith('/admin') &&
+    !request.headers.get('next-router-prefetch') &&
+    request.headers.get('purpose') !== 'prefetch'
+
+  let pageView: Record<string, unknown> | null = null
+
+  if (isPageView) {
     const country =
       request.headers.get('x-vercel-ip-country') || request.geo?.country || ''
     const city = decodeURIComponent(
       request.headers.get('x-vercel-ip-city') || request.geo?.city || ''
     )
-    const cookieOpts = {
-      path: '/',
-      sameSite: 'lax' as const,
-      maxAge: 60 * 60, // 1 hour
+    const params = request.nextUrl.searchParams
+    const ref = params.get('ref')
+    const base = { path: '/', sameSite: 'lax' as const }
+
+    // Banner geo cookies (1h, client-readable)
+    if (country)
+      response.cookies.set('visitor-country', country, {
+        ...base,
+        maxAge: 3600,
+      })
+    if (city)
+      response.cookies.set('visitor-city', city, { ...base, maxAge: 3600 })
+
+    // First-party returning-visitor flag — read the INCOMING cookie (before we
+    // refresh it), giving a 90-day rolling "seen before" window.
+    const isReturning = Boolean(request.cookies.get('pv_seen'))
+    response.cookies.set('pv_seen', '1', { ...base, maxAge: 60 * 60 * 24 * 90 })
+
+    // Coarse session id (~30 min) to group one visit's page views.
+    let sessionId = request.cookies.get('pv_sid')?.value || ''
+    if (!sessionId) {
+      sessionId = crypto.randomUUID()
+      response.cookies.set('pv_sid', sessionId, { ...base, maxAge: 60 * 30 })
     }
-    if (country) response.cookies.set('visitor-country', country, cookieOpts)
-    if (city) response.cookies.set('visitor-city', city, cookieOpts)
+
+    pageView = {
+      path: pathname,
+      country,
+      city,
+      ref: ref || null,
+      source: params.get('utm_source') || (ref ? 'ref' : 'direct'),
+      medium: params.get('utm_medium') || '',
+      campaign: params.get('utm_campaign') || '',
+      isReturning,
+      sessionId,
+      referrer: request.headers.get('referer') || '',
+      userAgent: request.headers.get('user-agent') || '',
+    }
   }
 
   // CORS handling for API routes
@@ -98,42 +140,23 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Analytics tracking for page views
-  if (!pathname.startsWith('/api/') && !pathname.startsWith('/_next/')) {
-    // Track page view (in a real app, you might want to do this client-side)
-    trackPageView(request, pathname)
+  // Fire-and-forget page-view tracking (opt out with ANALYTICS_ENABLED=false).
+  if (pageView && process.env.ANALYTICS_ENABLED !== 'false') {
+    trackPageView(request.nextUrl.origin, pageView)
   }
 
   return response
 }
 
-async function trackPageView(request: NextRequest, pathname: string) {
-  if (process.env.ANALYTICS_ENABLED !== 'true') {
-    return
-  }
-
-  try {
-    // Generate a session ID from IP and user agent
-    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown'
-    const userAgent = request.headers.get('user-agent') || ''
-    const sessionId = btoa(`${ip}:${userAgent}`).substring(0, 32)
-
-    // Send analytics data to our API (fire and forget)
-    fetch(`${request.nextUrl.origin}/api/analytics`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        path: pathname,
-        sessionId,
-        referrer: request.headers.get('referer'),
-        userAgent,
-      }),
-    }).catch(error => {
-      console.error('Failed to track page view:', error)
-    })
-  } catch (error) {
-    console.error('Error in analytics tracking:', error)
-  }
+function trackPageView(origin: string, data: Record<string, unknown>) {
+  // Non-blocking: the /api/analytics route persists it (forwarding to the
+  // Cloudflare Worker in production). Failures are swallowed — analytics must
+  // never affect the page response.
+  fetch(`${origin}/api/analytics`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  }).catch(() => {})
 }
 
 export const config = {
