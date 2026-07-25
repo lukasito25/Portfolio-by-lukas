@@ -79,6 +79,37 @@
   );
 }
 
+/* =============================================
+   PER-PAGE BRAND OVERRIDE — Genius Sports
+   Electric blue #0000DC (light) / lifted periwinkle
+   (dark), sourced from geniussports.com. Scoped to
+   [data-brand='genius'] so only the /genius brief
+   re-themes; the rest of the site stays FIFA blue.
+   ============================================= */
+[data-brand='genius'] {
+  --accent: #0000dc;
+  --accent-soft: rgba(0, 0, 220, 0.1);
+  --accent-glow: rgba(0, 0, 220, 0.22);
+  --accent-contrast: #ffffff;
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(0, 0, 220, 0.12),
+    transparent 70%
+  );
+}
+
+.dark [data-brand='genius'] {
+  --accent: #6d78ff;
+  --accent-soft: rgba(109, 120, 255, 0.14);
+  --accent-glow: rgba(109, 120, 255, 0.3);
+  --accent-contrast: #060714;
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(109, 120, 255, 0.16),
+    transparent 70%
+  );
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-background-elevated: var(--background-elevated);
