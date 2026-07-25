@@ -22,6 +22,14 @@ This document provides a comprehensive overview of all features available in the
 - **Skills Overview**: Highlights key technologies and competencies
 - **Recent Blog Posts**: Latest content from the blog
 - **Contact Preview**: Quick contact information and social links
+- **Geo campaign banner**: Non-invasive bottom-corner banner that routes geo-matched recruiters to the relevant fit-brief page (see below)
+
+#### Private recruiter fit-brief pages (`/fifa`, `/genius`)
+
+- **Role-tailored, `noindex`, unlisted** (not in nav or sitemap) — shared by direct link alongside a CV
+- **EN / IT / DE** in-page language toggle; cinematic video hero; interactive requirement-match filter
+- **Per-page brand accent** (e.g. `/genius` uses Genius Sports' electric blue) via a scoped `[data-brand]` override
+- Cloned per role from the `/fifa` template — full guide in **`CUSTOM_RECRUITER_PAGES.md`**
 
 #### About Page (`/about`)
 
@@ -97,11 +105,10 @@ This document provides a comprehensive overview of all features available in the
 
 ### 📊 Analytics & Tracking
 
-- **Mixpanel Integration**: Advanced user behavior tracking
-- **Vercel Analytics**: Performance monitoring and Core Web Vitals
-- **Custom Analytics**: Portfolio-specific metrics and insights
-- **User Journey Tracking**: Comprehensive visitor behavior analysis
-- **Performance Monitoring**: Real-time performance metrics
+- **Vercel Web Analytics**: Aggregate page views + country breakdown (`<Analytics/>` mounted in the root layout)
+- **Self-owned analytics**: Every page view recorded to Cloudflare D1 via `middleware.ts → /api/analytics → Worker`, capturing **country/city, `?ref=` recruiter-link attribution, UTM, and a 90-day returning-visitor flag** (raw IP not stored). See `ANALYTICS.md`.
+- **Geo-targeted recruiter banners**: Homepage banners route UK/CH (etc.) visitors to the matching fit-brief page, with 2-month auto-expiry per campaign
+- **Mixpanel Integration**: Available (token via env) for advanced behavior tracking
 - **Conversion Tracking**: Contact form and engagement metrics
 
 ### 🔍 SEO & Optimization
@@ -164,14 +171,12 @@ This document provides a comprehensive overview of all features available in the
 
 ### 📈 Analytics Dashboard (`/admin/analytics`)
 
-- **Visitor Analytics**: Comprehensive visitor behavior tracking
-- **Content Performance**: Track performance of projects and blog posts
-- **Traffic Sources**: Understand how visitors find the portfolio
-- **Engagement Metrics**: Time on site, bounce rate, and interactions
-- **Real-time Data**: Live visitor tracking and activity
-- **Export Functionality**: Data export for external analysis
-- **Custom Date Ranges**: Flexible analytics time periods
-- **Visual Charts**: Interactive charts and graphs
+- **Pages × country × ref**: Per-page table of views, country breakdown (with flags), and `?ref=` recruiter-link tags — "who looked, and from where"
+- **Countries overview**: Top countries across all pages
+- **Recruiter links**: View counts grouped by `?ref=` tag (did a specific recruiter open the page?)
+- **New vs returning**: First-party returning-visitor split
+- **Recent visits**: Latest visits with country, ref, and returning flag
+- **Custom date ranges**: 1d / 7d / 30d / 90d timeframes
 
 ### 🔒 Authentication & Security
 

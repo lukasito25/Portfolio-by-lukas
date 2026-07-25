@@ -6,6 +6,17 @@ This document provides comprehensive information about the portfolio's analytics
 
 The portfolio includes a comprehensive analytics system that tracks user engagement, project views, form submissions, and page performance. The system is designed to be privacy-friendly and provides both real-time tracking and historical data analysis.
 
+### Two systems in production
+
+1. **Vercel Web Analytics** — `<Analytics />` is mounted in `src/app/layout.tsx`; aggregate page views + country breakdown in the Vercel dashboard (cookieless). Enable once in the Vercel dashboard (Project → Analytics).
+2. **Self-owned analytics** (this doc) — every page view is recorded to the Cloudflare **D1 `Analytics` table** and surfaced at `/admin/analytics`, with **per-page country breakdown, `?ref=` recruiter-link attribution, UTM, and new-vs-returning**.
+
+### Production data flow
+
+`middleware.ts` (resolves country/city from Vercel edge headers, `?ref=`/UTM query params, and a first-party 90-day returning-visitor cookie) → `POST /api/analytics` → **Cloudflare Worker** `/analytics` → **D1**. The dashboard reads `GET /api/analytics` (admin-only) → Worker `/analytics/summary`.
+
+Storage is chosen by `NODE_ENV` + presence of `API_SECRET`: **production** → Worker/D1; **local dev** → Prisma/SQLite (so the dashboard works in dev). The only Vercel env var required is `API_SECRET` (matching the Worker's secret); the Worker URL has a built-in fallback. The Worker lives in `cloudflare-api/` (git-ignored) and is deployed with `wrangler` — see **CUSTOM_RECRUITER_PAGES.md §10** for the full flow, the `?ref=` convention, and the `sink` troubleshooting field.
+
 ## Built-in Analytics Features
 
 ### Current Analytics Capabilities
@@ -35,12 +46,13 @@ The portfolio includes a comprehensive analytics system that tracks user engagem
 
 ### Analytics Dashboard
 
-The admin analytics dashboard (`/admin/analytics`) provides:
+The admin analytics dashboard (`/admin/analytics`, admin-only) provides:
 
-- **Key Metrics**: Total views, unique visitors, session duration
-- **Top Pages**: Most visited pages with average duration
-- **Traffic Sources**: Breakdown of visitor referrers
-- **Recent Activity**: Real-time visitor activity feed
+- **Key metrics**: total page views, countries, ref-tagged views, returning %
+- **Pages table**: per page — total views, **country breakdown** (with flags), and **`?ref=` tags used** (the "who looked, and from where" view)
+- **Countries overview**: top countries across all pages
+- **Recruiter links**: view counts grouped by `?ref=` tag
+- **Recent visits**: latest visits with country, ref, and returning flag
 
 ## API Endpoints
 
@@ -50,52 +62,59 @@ The admin analytics dashboard (`/admin/analytics`) provides:
 POST /api/analytics
 ```
 
+Normally fired automatically by `middleware.ts` for real page navigations; the body it sends:
+
 **Request Body:**
 
 ```json
 {
-  "path": "/",
-  "title": "Portfolio Home",
-  "sessionId": "session_1234567890_abc123",
-  "referrer": "https://google.com",
-  "source": "google",
-  "medium": "organic",
-  "duration": 30000,
-  "scrollDepth": 75,
-  "country": "US",
-  "city": "San Francisco"
+  "path": "/genius",
+  "sessionId": "…",
+  "referrer": "https://linkedin.com",
+  "source": "ref",
+  "medium": "",
+  "campaign": "",
+  "ref": "jane-smith",
+  "isReturning": false,
+  "country": "GB",
+  "city": "London",
+  "userAgent": "…"
 }
 ```
 
-### Analytics Data Retrieval
+**Response** — includes a non-secret `sink` field showing where the write went (`worker-ok`, `worker-<status>`, `prisma-ok`, or `error:dev-prisma`):
+
+```json
+{ "success": true, "sink": "worker-ok" }
+```
+
+### Analytics Data Retrieval (admin-only)
 
 ```
-GET /api/analytics?timeframe=30d&page=1&limit=50
+GET /api/analytics?timeframe=30d
 ```
 
-**Response:**
+Requires an admin session (401 otherwise). Returns the aggregated summary the dashboard renders:
 
 ```json
 {
-  "analytics": [
-    /* analytics entries */
+  "timeframe": "30d",
+  "totalViews": 1234,
+  "newVsReturning": { "new": 1000, "returning": 234 },
+  "pages": [
+    {
+      "path": "/genius",
+      "views": 42,
+      "avgDuration": null,
+      "countries": [{ "country": "GB", "views": 30 }],
+      "refs": [{ "ref": "jane-smith", "views": 3 }]
+    }
   ],
-  "pagination": {
-    "page": 1,
-    "limit": 50,
-    "total": 1234,
-    "pages": 25
-  },
-  "stats": {
-    "topPages": [
-      /* page statistics */
-    ],
-    "topSources": [
-      /* traffic sources */
-    ],
-    "totalViews": 1234,
-    "timeframe": "30d"
-  }
+  "countries": [{ "country": "GB", "views": 300 }],
+  "refs": [{ "ref": "jane-smith", "views": 3 }],
+  "recent": [
+    /* latest 25 visits: path, country, city, ref, source, referrer, isReturning, createdAt */
+  ]
 }
 ```
 
@@ -103,13 +122,15 @@ GET /api/analytics?timeframe=30d&page=1&limit=50
 
 ### Analytics Table
 
-```sql
+Mirrored in Prisma (`prisma/schema.prisma`, dev) and D1 (`cloudflare-api/migrations/schema.sql` + `add_analytics_ref_returning.sql`, prod). `ref` and `isReturning` were added for recruiter-link attribution and the returning-visitor signal. **`ipAddress` is intentionally left null in production** — only country/city (from the edge) and a coarse session id are stored.
+
+```prisma
 model Analytics {
   id          String   @id @default(cuid())
   path        String
   title       String?
   sessionId   String
-  ipAddress   String?
+  ipAddress   String?  // not stored in prod (privacy)
   userAgent   String?
   country     String?
   city        String?
@@ -117,8 +138,11 @@ model Analytics {
   source      String?
   medium      String?
   campaign    String?
+  ref         String?  // per-recruiter ?ref= tag
+  isReturning Boolean  @default(false) // first-party 90-day returning visitor
   duration    Int?
   scrollDepth Int?
+  bounce      Boolean  @default(false)
   createdAt   DateTime @default(now())
 }
 ```

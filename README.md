@@ -150,13 +150,17 @@ Once logged in, you have access to:
 - **📝 Content Editor** (`/admin/editor`) - Rich text editor for creating/editing content
 - **🗂️ Project Management** (`/admin/projects`) - Full CRUD operations for portfolio projects
 - **📰 Blog Management** (`/admin/blog`) - Complete blog post management system
-- **📈 Analytics Dashboard** (`/admin/analytics`) - View engagement metrics and visitor statistics
+- **📈 Analytics Dashboard** (`/admin/analytics`) - Page views by **page × country × recruiter `?ref=` link**, plus new-vs-returning and recent visits (self-owned, stored in Cloudflare D1; complements Vercel Web Analytics). See `ANALYTICS.md`.
+
+### Private recruiter fit-brief pages
+
+Private, `noindex`, unlisted pages that map experience to a specific job (`/fifa`, `/genius`), with EN/IT/DE and geo-targeted homepage banners that route recruiters to the right one. Tag links per recruiter with `?ref=name` for attribution in the analytics dashboard. Full guide: **`CUSTOM_RECRUITER_PAGES.md`**.
 
 ### Production
 
-- Set `NEXT_PUBLIC_USE_API=true` in production environment
 - Admin credentials are managed through the Cloudflare D1 database
 - Authentication uses JWT sessions (no database sessions required)
+- Self-owned analytics requires only the `API_SECRET` env var in Vercel (matching the Worker); the Cloudflare Worker in `cloudflare-api/` is deployed separately with `wrangler`
 - All admin features work seamlessly with cloud infrastructure
 
 ## 🛠 Development
