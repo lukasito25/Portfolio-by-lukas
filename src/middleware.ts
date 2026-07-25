@@ -23,6 +23,25 @@ export async function middleware(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   response.headers.set('X-XSS-Protection', '1; mode=block')
 
+  // Expose the visitor's edge-resolved geo (Vercel headers) as readable cookies
+  // so the client-side location-campaign banner can target by country/city.
+  // These are populated by Vercel in production; absent locally (use the
+  // ?geo= / ?city= query overrides for testing there).
+  if (!pathname.startsWith('/api/') && !pathname.startsWith('/_next/')) {
+    const country =
+      request.headers.get('x-vercel-ip-country') || request.geo?.country || ''
+    const city = decodeURIComponent(
+      request.headers.get('x-vercel-ip-city') || request.geo?.city || ''
+    )
+    const cookieOpts = {
+      path: '/',
+      sameSite: 'lax' as const,
+      maxAge: 60 * 60, // 1 hour
+    }
+    if (country) response.cookies.set('visitor-country', country, cookieOpts)
+    if (city) response.cookies.set('visitor-city', city, cookieOpts)
+  }
+
   // CORS handling for API routes
   if (pathname.startsWith('/api/')) {
     const origin = request.headers.get('origin')
