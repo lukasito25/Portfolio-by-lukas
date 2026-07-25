@@ -3,12 +3,17 @@ import { getServerSession } from 'next-auth/next'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
 
-const USE_API = process.env.NEXT_PUBLIC_USE_API === 'true'
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '')
+// Persist to the Cloudflare D1 Worker in production; use Prisma locally in dev.
+// The URL falls back to the known Worker (matching api-client / admin-proxy) so
+// a missing NEXT_PUBLIC_API_URL in Vercel doesn't silently disable analytics,
+// and the prod/dev split keys off NODE_ENV + presence of API_SECRET rather than
+// the build-inlined NEXT_PUBLIC_USE_API (which isn't set in Vercel).
+const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL ||
+  'https://portfolio-api.hosala-lukas.workers.dev'
+).replace(/\/$/, '')
 const API_SECRET = process.env.API_SECRET || ''
-// In production we persist to the Cloudflare D1 Worker; locally we fall back to
-// Prisma so the dashboard works in dev too.
-const useWorker = Boolean(USE_API && API_URL && API_SECRET)
+const useWorker = process.env.NODE_ENV === 'production' && Boolean(API_SECRET)
 
 interface PageViewInput {
   path?: string
