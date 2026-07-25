@@ -227,6 +227,10 @@ Two complementary systems track traffic; both are already wired.
 filterable by path with a country breakdown — the fastest read on "how many visitors from
 which country hit `/genius`". Cookieless and privacy-friendly; aggregate only.
 
+The component is already deployed — just enable collection once in the Vercel dashboard
+(Project → **Analytics**), then browse the live site; data appears within ~30s. Ad/content
+blockers can block the insights script, so verify in a clean browser if it reads zero.
+
 ### b) Self-owned dashboard at `/admin/analytics` (detailed + ref attribution)
 
 This is the one that answers **"did _this_ recruiter open the page?"** It records every
@@ -235,8 +239,9 @@ page view to the Cloudflare **D1 `Analytics` table** and renders, per page: tota
 
 Data flow: `middleware.ts` (resolves geo + `?ref=`/UTM + returning-visitor cookie) →
 `/api/analytics` (POST) → Cloudflare Worker `/analytics` → D1. The dashboard reads
-`/api/analytics` (GET, admin-only) → Worker `/analytics/summary`. Locally (`USE_API=false`)
-it uses Prisma/SQLite instead, so the dashboard works in dev too.
+`/api/analytics` (GET, admin-only) → Worker `/analytics/summary`. The route picks its store
+by `NODE_ENV` + `API_SECRET`: **production** → Worker/D1; **local dev** → Prisma/SQLite, so
+the dashboard works in dev too.
 
 **Privacy:** raw IP is never stored — only country/city (from the edge) and a hashed-ish
 session id.
@@ -278,3 +283,36 @@ npx wrangler deploy
 Vercel Web Analytics and the Next app deploy automatically with the normal git push; only the
 Worker needs this manual step. Until it's deployed, the dashboard shows no self-owned data in
 production (Vercel Web Analytics still works).
+
+### Production configuration (Vercel env)
+
+The analytics pipeline needs exactly **one** Vercel environment variable:
+
+- **`API_SECRET`** (Production scope) — set to the **same value as the Worker's secret** (your
+  local `.env` `API_SECRET`). This is what authorizes the Next route → Worker calls.
+
+The Worker URL is resolved with a built-in fallback
+(`https://portfolio-api.hosala-lukas.workers.dev`, matching `api-client` / `admin-proxy`), so
+`NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_USE_API` are **not** required in Vercel. Prod-vs-dev
+storage keys off `NODE_ENV` + presence of `API_SECRET` — not the build-inlined
+`NEXT_PUBLIC_USE_API`. After changing this env var, **redeploy** (env changes need a fresh
+deployment).
+
+### Troubleshooting
+
+`POST /api/analytics` returns a non-secret `sink` field showing where the write went:
+
+| `sink`             | Meaning                                                              |
+| ------------------ | -------------------------------------------------------------------- |
+| `worker-ok`        | Written to D1 via the Worker — healthy production state              |
+| `worker-<status>`  | Worker rejected it, e.g. `worker-401` = `API_SECRET` mismatch        |
+| `prisma-ok`        | Written locally via Prisma (dev)                                     |
+| `error:dev-prisma` | Prod route fell through to Prisma → `API_SECRET` missing (misconfig) |
+
+Quick production check:
+
+```bash
+curl -sX POST https://portfolio-by-lukas.vercel.app/api/analytics \
+  -H 'content-type: application/json' -d '{"path":"/genius","ref":"probe"}'
+# → {"success":true,"sink":"worker-ok"}
+```
