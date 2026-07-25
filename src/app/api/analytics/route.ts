@@ -77,12 +77,15 @@ function numeric(v: unknown): number | undefined {
 }
 
 // POST — record a page view (fire-and-forget from middleware). Never throws.
+// `sink` reports which storage path ran (no secrets) so misconfiguration is
+// diagnosable from the response / Vercel logs instead of failing silently.
 export async function POST(request: NextRequest) {
+  let sink = useWorker ? 'worker-attempt' : 'dev-prisma'
   try {
     const event = normalize(await request.json())
 
     if (useWorker) {
-      await fetch(`${API_URL}/analytics`, {
+      const res = await fetch(`${API_URL}/analytics`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,10 +93,16 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify(event),
       })
-      return NextResponse.json({ success: true })
+      sink = res.ok ? 'worker-ok' : `worker-${res.status}`
+      if (!res.ok) {
+        console.error(`[analytics] worker rejected write: HTTP ${res.status}`)
+      }
+      // Do NOT fall back to Prisma in production — the bundled SQLite is
+      // read-only/ephemeral on Vercel. Report the outcome instead.
+      return NextResponse.json({ success: res.ok, sink })
     }
 
-    // Dev fallback: Prisma
+    // Local dev only: persist via Prisma.
     await prisma.analytics.create({
       data: {
         path: event.path || '/',
@@ -111,10 +120,11 @@ export async function POST(request: NextRequest) {
         duration: event.duration ?? null,
       },
     })
-    return NextResponse.json({ success: true })
-  } catch {
-    // Analytics is non-critical — always succeed.
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, sink: 'prisma-ok' })
+  } catch (e) {
+    console.error('[analytics] POST failed:', (e as Error)?.message)
+    // Analytics is non-critical — never fail the caller.
+    return NextResponse.json({ success: true, sink: `error:${sink}` })
   }
 }
 
