@@ -17,6 +17,7 @@ import { Reveal } from '@/components/motion/reveal'
 import { CountUp } from '@/components/motion/count-up'
 import { Marquee } from '@/components/motion/marquee'
 import { Magnetic } from '@/components/motion/magnetic'
+import { LocationCampaignBanner } from '@/components/location-campaign-banner'
 
 const marqueeItems = [
   'adidas',
@@ -102,14 +103,6 @@ export default function Home() {
         <HeroCanvas />
 
         <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pt-10 pb-24 sm:px-6 lg:px-8">
-          {/* Availability badge */}
-          <div data-hero>
-            <span className="chip">
-              <span className="pulse-dot h-2 w-2 rounded-full bg-emerald-400" />
-              {content.hero?.badge || ''}
-            </span>
-          </div>
-
           <div className="mt-auto pt-16">
             {/* Headline */}
             <h1 className="font-display max-w-5xl text-[2.75rem] font-bold leading-[1.03] tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
@@ -398,6 +391,8 @@ export default function Home() {
           </Reveal>
         </div>
       </section>
+
+      <LocationCampaignBanner />
     </div>
   )
 }
