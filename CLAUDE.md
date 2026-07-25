@@ -55,7 +55,15 @@ NextAuth.js with JWT sessions (no DB adapter) at `src/app/api/auth/[...nextauth]
 
 ### Routes
 
-Public: `/` (home), `/about`, `/work`, `/projects/[slug]`, `/blog`, `/skills`, `/contact`, `/privacy`, `/fifa`. Recruiter personalization: `/r/[slug]`. SEO: `sitemap.xml`, `robots.txt`.
+Public: `/` (home), `/about`, `/work`, `/projects/[slug]`, `/blog`, `/skills`, `/contact`, `/privacy`. Private recruiter "fit brief" pages (noindex, unlisted, not in nav/sitemap): `/fifa`, `/genius`. Recruiter personalization: `/r/[slug]`. SEO: `sitemap.xml`, `robots.txt`.
+
+### Recruiter fit-brief pages, geo banners & analytics
+
+Three linked subsystems for the job hunt — fully documented in **`CUSTOM_RECRUITER_PAGES.md`** (and analytics in **`ANALYTICS.md`**):
+
+- **Fit-brief pages** (`src/app/fifa/`, `src/app/genius/`) — private, `noindex`, self-contained pages (`page.tsx` + `layout.tsx` + `content.ts`, EN/IT/DE) that map experience to one job. Cloned per role from the `/fifa` template; `/genius` re-themes the accent via a page-scoped `[data-brand]` override in `globals.css`.
+- **Geo campaign banners** — `src/lib/location-campaigns.ts` (config registry, each entry has a required `startsAt` with a hard 2-month auto-expiry) + `src/components/location-campaign-banner.tsx` (bottom-corner banner, homepage only), routing geo-matched visitors to the right fit brief. Geo comes from `middleware.ts` (Vercel edge headers → client-readable cookies).
+- **Analytics** — Vercel Web Analytics (`<Analytics/>` in `layout.tsx`) **plus** self-owned tracking: `middleware.ts` captures geo + `?ref=`/UTM + a 90-day returning-visitor cookie → `POST /api/analytics` → Cloudflare Worker `/analytics` → D1. Dashboard at `/admin/analytics` (admin-only) reads `GET /api/analytics` → Worker `/analytics/summary`. Prod-vs-dev storage keys off `NODE_ENV` + `API_SECRET` (the only required Vercel env var; Worker URL has a built-in fallback). The Worker (`cloudflare-api/`, git-ignored) needs a manual `wrangler deploy` when its analytics code changes.
 
 ### Other libs (`src/lib/`)
 

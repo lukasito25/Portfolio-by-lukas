@@ -81,6 +81,17 @@ npm start
    - Google PageSpeed Insights
    - Core Web Vitals assessment
 
+4. **Analytics:**
+   - Enable **Vercel Web Analytics** in the Vercel dashboard (Project → Analytics) — the `<Analytics/>` component is already deployed.
+   - For the **self-owned analytics dashboard** (`/admin/analytics`): set the `API_SECRET` env var in Vercel (matching the Cloudflare Worker's secret) — this is the only env var it needs. The Worker URL has a built-in fallback.
+   - Deploy the Cloudflare Worker (separate, git-ignored `cloudflare-api/`) whenever its analytics code changes:
+     ```bash
+     cd cloudflare-api
+     npx wrangler d1 execute portfolio-db --remote --file=migrations/add_analytics_ref_returning.sql  # once
+     npx wrangler deploy
+     ```
+   - Verify: `curl -sX POST https://<site>/api/analytics -H 'content-type: application/json' -d '{"path":"/","ref":"probe"}'` → expect `"sink":"worker-ok"`. Full details in `ANALYTICS.md` and `CUSTOM_RECRUITER_PAGES.md` §10.
+
 ## 📊 SEO Features Summary
 
 - **Technical SEO:** Sitemap, robots.txt, canonical URLs
