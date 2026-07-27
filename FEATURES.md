@@ -172,11 +172,14 @@ This document provides a comprehensive overview of all features available in the
 
 ### 📈 Analytics Dashboard (`/admin/analytics`)
 
-- **Pages × country × ref**: Per-page table of views, country breakdown (with flags), and `?ref=` recruiter-link tags — "who looked, and from where"
+- **Pages × country × ref**: Per-page table of views, avg. time, avg. scroll, country breakdown (with flags), and `?ref=` recruiter-link tags — "who looked, and from where"
+- **Bot filtering**: Automated traffic (CLI tools, crawlers, AI bots, email link scanners) is classified via `ua-parser-js` and **hidden by default**, with a per-reason breakdown and a toggle
+- **Browser confirmation**: A client-side beacon marks views where JavaScript actually ran, catching link scanners that spoof a real browser user agent — plus dwell time and scroll depth
+- **Visitors & sources**: Unique sessions, pages-per-visit, entry pages, referring host and UTM campaign breakdown, device/browser/OS
 - **Countries overview**: Top countries across all pages
 - **Recruiter links**: View counts grouped by `?ref=` tag (did a specific recruiter open the page?)
 - **New vs returning**: First-party returning-visitor split
-- **Recent visits**: Latest visits with country, ref, and returning flag
+- **Recent visits**: Latest visits with country, ref, source, device, engagement and a confirmed/unconfirmed/bot badge
 - **Custom date ranges**: 1d / 7d / 30d / 90d timeframes
 
 ### 🔒 Authentication & Security
