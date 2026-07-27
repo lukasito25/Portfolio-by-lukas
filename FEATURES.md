@@ -24,12 +24,12 @@ This document provides a comprehensive overview of all features available in the
 - **Contact Preview**: Quick contact information and social links
 - **Geo campaign banner**: Non-invasive bottom-corner banner that routes geo-matched recruiters to the relevant fit-brief page (see below)
 
-#### Private recruiter fit-brief pages (`/fifa`, `/genius`, `/qualcomm`)
+#### Private recruiter fit-brief pages (`/fifa`, `/genius`, `/qualcomm`, `/archlet`)
 
 - **Role-tailored, `noindex`, unlisted** (not in nav or sitemap) — shared by direct link alongside a CV
-- **EN / IT / DE** in-page language toggle; cinematic hero; interactive requirement-match filter
-- **Hero is video or code-generated** — `/fifa` and `/genius` use a looping clip; `/qualcomm` renders an animated SVG circuit board instead, shipping no binary assets
-- **Per-page brand accent** (`/genius` Genius Sports electric blue, `/qualcomm` Arduino teal) via a scoped `[data-brand]` override
+- **In-page language toggle** (EN/IT/DE, or EN/DE/ES/IT on `/archlet`); cinematic hero; interactive requirement-match filter
+- **Hero is video or code-generated** — `/fifa` and `/genius` use a looping clip; `/qualcomm` renders an animated SVG circuit board and `/archlet` an animated bid lattice, both shipping no binary assets
+- **Per-page brand accent** (`/genius` Genius Sports electric blue, `/qualcomm` Arduino teal, `/archlet` Archlet indigo) via a scoped `[data-brand]` override
 - Cloned per role from the `/fifa` template — full guide in **`CUSTOM_RECRUITER_PAGES.md`**
 
 #### About Page (`/about`)

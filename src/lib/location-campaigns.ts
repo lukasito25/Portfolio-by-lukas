@@ -82,6 +82,19 @@ export function isCampaignActive(
 
 export const locationCampaigns: LocationCampaign[] = [
   {
+    id: 'archlet-es',
+    // Archlet's HQ is Zurich, but `fifa-ch` already owns CH until it
+    // auto-expires 2026-09-08 and the first match wins — so this targets the
+    // Spain-remote offices only and leaves the FIFA banner intact.
+    countries: ['ES'],
+    startsAt: '2026-07-27',
+    eyebrow: 'Recruiting for Archlet?',
+    title: 'I mapped my experience to your role.',
+    body: 'A short brief for the Senior Product Manager opening — Barcelona, Madrid or Zurich.',
+    ctaLabel: 'See the fit brief',
+    href: '/archlet',
+  },
+  {
     id: 'qualcomm-arduino-it',
     countries: ['IT'],
     startsAt: '2026-07-27',
