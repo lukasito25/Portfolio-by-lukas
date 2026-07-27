@@ -82,6 +82,16 @@ export function isCampaignActive(
 
 export const locationCampaigns: LocationCampaign[] = [
   {
+    id: 'qualcomm-arduino-it',
+    countries: ['IT'],
+    startsAt: '2026-07-27',
+    eyebrow: 'Recruiting for Arduino?',
+    title: 'I mapped my experience to your role.',
+    body: 'A short brief for the AI Product Manager opening in Turin — from someone already in Italy.',
+    ctaLabel: 'See the fit brief',
+    href: '/qualcomm',
+  },
+  {
     id: 'genius-sports-uk',
     countries: ['GB'],
     startsAt: '2026-07-25',
