@@ -220,12 +220,13 @@ matching, non-dismissed campaign wins.
 
 ### Live campaigns (example)
 
-| id                    | Country | Links to    | Starts     | Auto-expires |
-| --------------------- | ------- | ----------- | ---------- | ------------ |
-| `archlet-es`          | ES      | `/archlet`  | 2026-07-27 | 2026-09-27   |
-| `qualcomm-arduino-it` | IT      | `/qualcomm` | 2026-07-27 | 2026-09-27   |
-| `genius-sports-uk`    | GB      | `/genius`   | 2026-07-25 | 2026-09-25   |
-| `fifa-ch`             | CH      | `/fifa`     | 2026-07-08 | 2026-09-08   |
+| id                    | Country | Links to         | Starts     | Auto-expires |
+| --------------------- | ------- | ---------------- | ---------- | ------------ |
+| `launchmetrics-fr`    | FR      | `/launchmetrics` | 2026-07-27 | 2026-09-27   |
+| `archlet-es`          | ES      | `/archlet`       | 2026-07-27 | 2026-09-27   |
+| `qualcomm-arduino-it` | IT      | `/qualcomm`      | 2026-07-27 | 2026-09-27   |
+| `genius-sports-uk`    | GB      | `/genius`        | 2026-07-25 | 2026-09-25   |
+| `fifa-ch`             | CH      | `/fifa`          | 2026-07-08 | 2026-09-08   |
 
 > **Two roles in one country?** Archlet's HQ is Zurich, but `fifa-ch` already owns `CH`
 > until it auto-expires, and the first match wins. Rather than shadow the FIFA banner,

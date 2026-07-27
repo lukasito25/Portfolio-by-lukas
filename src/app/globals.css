@@ -172,6 +172,37 @@
   );
 }
 
+/* =============================================
+   PER-PAGE BRAND OVERRIDE — Launchmetrics
+   Their brand mint #4df7b9 is unusable on white
+   (~1.4:1), so light mode uses a deep mint of the
+   same hue and dark mode gets the real thing.
+   Scoped to [data-brand='launchmetrics'].
+   ============================================= */
+[data-brand='launchmetrics'] {
+  --accent: #077a56;
+  --accent-soft: rgba(7, 122, 86, 0.1);
+  --accent-glow: rgba(7, 122, 86, 0.22);
+  --accent-contrast: #ffffff;
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(7, 122, 86, 0.12),
+    transparent 70%
+  );
+}
+
+.dark [data-brand='launchmetrics'] {
+  --accent: #4df7b9;
+  --accent-soft: rgba(77, 247, 185, 0.14);
+  --accent-glow: rgba(77, 247, 185, 0.3);
+  --accent-contrast: #141218;
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(77, 247, 185, 0.16),
+    transparent 70%
+  );
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-background-elevated: var(--background-elevated);

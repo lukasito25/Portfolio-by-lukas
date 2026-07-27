@@ -281,7 +281,7 @@ export const archletContent: Record<Locale, ArchletContent> = {
               isMatch: true,
               tierLabel: 'Direct match',
               proof:
-                'English C2, plus German, Italian B2 and Slovak. This page is written in four of them.',
+                'English C2, plus German, Italian B2 and Slovak. To be straight about it: this page is offered in four languages, but the Spanish is a translation rather than a fluency of mine — better you hear that from me than discover it in an interview.',
             },
           ],
         },
@@ -543,7 +543,7 @@ export const archletContent: Record<Locale, ArchletContent> = {
               isMatch: true,
               tierLabel: 'Direkte Übereinstimmung',
               proof:
-                'Englisch C2, dazu Deutsch, Italienisch B2 und Slowakisch. Diese Seite ist in vier davon geschrieben.',
+                'Englisch C2, dazu Deutsch, Italienisch B2 und Slowakisch. Ganz offen: Diese Seite wird in vier Sprachen angeboten, aber das Spanische ist eine Übersetzung und keine Sprache, die ich spreche — das sage ich Ihnen lieber jetzt, als dass Sie es im Gespräch bemerken.',
             },
           ],
         },
@@ -806,7 +806,7 @@ export const archletContent: Record<Locale, ArchletContent> = {
               isMatch: true,
               tierLabel: 'Correspondencia directa',
               proof:
-                'Inglés C2, además de alemán, italiano B2 y eslovaco. Esta página está escrita en cuatro de ellos.',
+                'Inglés C2, además de alemán, italiano B2 y eslovaco. Para ser claro: esta página se ofrece en cuatro idiomas, pero el español es una traducción y no un idioma que yo hable — prefiero decirlo aquí que descubrirlo en una entrevista.',
             },
           ],
         },
@@ -1067,7 +1067,7 @@ export const archletContent: Record<Locale, ArchletContent> = {
               isMatch: true,
               tierLabel: 'Corrispondenza diretta',
               proof:
-                'Inglese C2, più tedesco, italiano B2 e slovacco. Questa pagina è scritta in quattro di queste lingue.',
+                'Inglese C2, più tedesco, italiano B2 e slovacco. Per essere chiaro: questa pagina è offerta in quattro lingue, ma lo spagnolo è una traduzione e non una lingua che parlo — meglio dirlo qui che scoprirlo in un colloquio.',
             },
           ],
         },
