@@ -28,7 +28,23 @@ interface PageViewInput {
   campaign?: string
   ref?: string | null
   isReturning?: boolean
+  isOwner?: boolean
   duration?: number
+}
+
+/**
+ * D1/SQLite writes CURRENT_TIMESTAMP as 'YYYY-MM-DD HH:MM:SS' — UTC, but with
+ * no timezone marker. `new Date()` parses that shape as LOCAL time, so the
+ * dashboard rendered every visit shifted by the viewer's UTC offset (2 hours
+ * behind in CEST). Normalize to explicit ISO-8601 UTC at the API boundary so no
+ * consumer can misread it. Values that already carry a zone are left alone.
+ */
+function toIsoUtc(value: unknown): unknown {
+  if (typeof value !== 'string') return value
+  const m = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})(\.\d+)?$/.exec(
+    value.trim()
+  )
+  return m ? `${m[1]}T${m[2]}${m[3] ?? ''}Z` : value
 }
 
 // Accept either the middleware's flat page-view shape or a library event
@@ -49,6 +65,7 @@ function normalize(body: any): PageViewInput {
       campaign: p.campaign || '',
       ref: p.ref || null,
       isReturning: Boolean(p.isReturning),
+      isOwner: Boolean(p.isOwner),
       duration: numeric(p.duration),
     }
   }
@@ -65,6 +82,7 @@ function normalize(body: any): PageViewInput {
     campaign: body?.campaign || '',
     ref: body?.ref ?? null,
     isReturning: Boolean(body?.isReturning),
+    isOwner: Boolean(body?.isOwner),
     duration: numeric(body?.duration),
   }
 }
@@ -122,6 +140,7 @@ export async function POST(request: NextRequest) {
         campaign: event.campaign || '',
         ref: event.ref || null,
         isReturning: Boolean(event.isReturning),
+        isOwner: Boolean(event.isOwner),
         duration: event.duration ?? null,
       },
     })
@@ -140,15 +159,28 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const timeframe = new URL(request.url).searchParams.get('timeframe') || '30d'
+  const url = new URL(request.url)
+  const timeframe = url.searchParams.get('timeframe') || '30d'
+  // Own visits are excluded by default so self-traffic doesn't inflate the
+  // recruiter numbers; the dashboard toggle flips this on.
+  const includeOwner = url.searchParams.get('includeOwner') === '1'
 
   if (useWorker) {
     try {
       const res = await fetch(
-        `${API_URL}/analytics/summary?timeframe=${timeframe}`,
+        `${API_URL}/analytics/summary?timeframe=${timeframe}${
+          includeOwner ? '&includeOwner=1' : ''
+        }`,
         { headers: { Authorization: `Bearer ${API_SECRET}` } }
       )
       const data = await res.json()
+      // The Worker returns SQLite-style timestamps; make them unambiguous UTC.
+      if (data && Array.isArray(data.recent)) {
+        data.recent = data.recent.map((r: Record<string, unknown>) => ({
+          ...r,
+          createdAt: toIsoUtc(r.createdAt),
+        }))
+      }
       return NextResponse.json(data, { status: res.status })
     } catch {
       return NextResponse.json(
@@ -169,14 +201,20 @@ export async function GET(request: NextRequest) {
             ? 90
             : 30
     const start = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
-    const where = { createdAt: { gte: start } }
+    const where = {
+      createdAt: { gte: start },
+      ...(includeOwner ? {} : { isOwner: false }),
+    }
 
-    const [rows, totalViews] = await Promise.all([
+    const [rows, totalViews, ownerViews] = await Promise.all([
       prisma.analytics.findMany({
         where,
         orderBy: { createdAt: 'desc' },
       }),
       prisma.analytics.count({ where }),
+      prisma.analytics.count({
+        where: { createdAt: { gte: start }, isOwner: true },
+      }),
     ])
 
     const tally = <T extends string>(
@@ -212,6 +250,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       timeframe,
       totalViews,
+      ownerViews,
+      includeOwner,
       newVsReturning: {
         new: rows.filter(r => !r.isReturning).length,
         returning: rows.filter(r => r.isReturning).length,
@@ -233,6 +273,7 @@ export async function GET(request: NextRequest) {
         source: r.source,
         referrer: r.referrer,
         isReturning: r.isReturning ? 1 : 0,
+        isOwner: r.isOwner ? 1 : 0,
         createdAt: r.createdAt,
       })),
     })

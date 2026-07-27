@@ -69,6 +69,45 @@ export async function middleware(request: NextRequest) {
       response.cookies.set('pv_sid', sessionId, { ...base, maxAge: 60 * 30 })
     }
 
+    // Owner ("my own visits") flag — the dashboard hides these by default so
+    // self-traffic doesn't inflate recruiter numbers. Two mechanisms, because
+    // neither is reliable alone:
+    //   - Visit `/?owner=1` once per device to set a 1-year cookie. Survives IP
+    //     changes (mobile, VPN, travel) and is the recommended way in.
+    //     `/?owner=0` clears it again.
+    //   - OWNER_IPS (comma-separated env var) matches the edge client IP for
+    //     devices where the cookie was never set or has been cleared. The IP is
+    //     only compared in memory here and is never stored — see the schema,
+    //     where ipAddress is deliberately left null.
+    const ownerParam = params.get('owner')
+    if (ownerParam === '1') {
+      response.cookies.set('pv_owner', '1', {
+        ...base,
+        maxAge: 60 * 60 * 24 * 365,
+      })
+    } else if (ownerParam === '0') {
+      response.cookies.set('pv_owner', '', { ...base, maxAge: 0 })
+    }
+
+    const ownerIps = (process.env.OWNER_IPS || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean)
+    const clientIp = (
+      request.headers.get('x-vercel-forwarded-for') ||
+      request.headers.get('x-forwarded-for') ||
+      request.headers.get('x-real-ip') ||
+      ''
+    )
+      .split(',')[0]
+      .trim()
+
+    const isOwner =
+      ownerParam === '1' ||
+      (ownerParam !== '0' &&
+        (Boolean(request.cookies.get('pv_owner')) ||
+          (clientIp !== '' && ownerIps.includes(clientIp))))
+
     pageView = {
       path: pathname,
       country,
@@ -78,6 +117,7 @@ export async function middleware(request: NextRequest) {
       medium: params.get('utm_medium') || '',
       campaign: params.get('utm_campaign') || '',
       isReturning,
+      isOwner,
       sessionId,
       referrer: request.headers.get('referer') || '',
       userAgent: request.headers.get('user-agent') || '',

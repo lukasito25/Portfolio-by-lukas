@@ -52,7 +52,29 @@ The admin analytics dashboard (`/admin/analytics`, admin-only) provides:
 - **Pages table**: per page — total views, **country breakdown** (with flags), and **`?ref=` tags used** (the "who looked, and from where" view)
 - **Countries overview**: top countries across all pages
 - **Recruiter links**: view counts grouped by `?ref=` tag
-- **Recent visits**: latest visits with country, ref, and returning flag
+- **Recent visits**: latest visits with country, ref, returning flag, and a **local-time timestamp with its timezone** (e.g. `Jul 27, 2026, 11:25 AM GMT+2`)
+- **Own-visit filter**: your own visits are **excluded from every figure by default**; the header shows how many were held back and the **My visits hidden / shown** button toggles them back in
+
+### Excluding your own visits
+
+Self-traffic would otherwise inflate the recruiter numbers, so each view is tagged
+`isOwner` and hidden from the dashboard unless you ask for it. Two mechanisms, because
+neither is reliable on its own:
+
+| Mechanism  | How to enable                                   | Notes                                                                                     |
+| ---------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **Cookie** | Visit **`/?owner=1`** once per device/browser   | 1-year cookie; survives IP changes, VPNs, travel. `/?owner=0` clears it. **Recommended.** |
+| **IP**     | Set **`OWNER_IPS`** (comma-separated) in Vercel | Catches devices where the cookie was never set or was cleared. Optional.                  |
+
+Owner rows are tagged **`you`** in the recent-visits list when shown. Privacy is unchanged:
+the IP is compared in memory in `middleware.ts` and is still never stored — `ipAddress`
+remains null in every row.
+
+> **Timestamps.** D1/SQLite writes `CURRENT_TIMESTAMP` as `YYYY-MM-DD HH:MM:SS` in UTC with
+> **no timezone marker**. `new Date()` parses that shape as _local_ time, which previously
+> made every visit render shifted by the viewer's UTC offset — 2 hours behind in CEST. The
+> admin GET endpoint now normalizes those values to explicit ISO-8601 UTC (`…Z`) before they
+> reach the client, and the dashboard renders them with the zone shown.
 
 ## API Endpoints
 
@@ -76,6 +98,7 @@ Normally fired automatically by `middleware.ts` for real page navigations; the b
   "campaign": "",
   "ref": "jane-smith",
   "isReturning": false,
+  "isOwner": false,
   "country": "GB",
   "city": "London",
   "userAgent": "…"
@@ -100,6 +123,8 @@ Requires an admin session (401 otherwise). Returns the aggregated summary the da
 {
   "timeframe": "30d",
   "totalViews": 1234,
+  "ownerViews": 18,
+  "includeOwner": false,
   "newVsReturning": { "new": 1000, "returning": 234 },
   "pages": [
     {
@@ -113,16 +138,20 @@ Requires an admin session (401 otherwise). Returns the aggregated summary the da
   "countries": [{ "country": "GB", "views": 300 }],
   "refs": [{ "ref": "jane-smith", "views": 3 }],
   "recent": [
-    /* latest 25 visits: path, country, city, ref, source, referrer, isReturning, createdAt */
+    /* latest 25 visits: path, country, city, ref, source, referrer, isReturning,
+       isOwner, createdAt (ISO-8601 UTC, e.g. "2026-07-27T09:25:00Z") */
   ]
 }
 ```
+
+`totalViews` and every aggregate exclude owner visits unless the request carries
+`?includeOwner=1`; `ownerViews` always reports how many exist in the window.
 
 ## Database Schema
 
 ### Analytics Table
 
-Mirrored in Prisma (`prisma/schema.prisma`, dev) and D1 (`cloudflare-api/migrations/schema.sql` + `add_analytics_ref_returning.sql`, prod). `ref` and `isReturning` were added for recruiter-link attribution and the returning-visitor signal. **`ipAddress` is intentionally left null in production** — only country/city (from the edge) and a coarse session id are stored.
+Mirrored in Prisma (`prisma/schema.prisma`, dev) and D1 (`cloudflare-api/migrations/schema.sql` + `add_analytics_ref_returning.sql` + `add_analytics_owner.sql`, prod). `ref` and `isReturning` were added for recruiter-link attribution and the returning-visitor signal; `isOwner` marks your own visits so they can be excluded. **`ipAddress` is intentionally left null in production** — only country/city (from the edge) and a coarse session id are stored.
 
 ```prisma
 model Analytics {
@@ -140,6 +169,7 @@ model Analytics {
   campaign    String?
   ref         String?  // per-recruiter ?ref= tag
   isReturning Boolean  @default(false) // first-party 90-day returning visitor
+  isOwner     Boolean  @default(false) // the owner's own visit — hidden from the dashboard by default
   duration    Int?
   scrollDepth Int?
   bounce      Boolean  @default(false)
