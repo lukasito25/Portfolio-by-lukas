@@ -262,19 +262,24 @@ the dashboard works in dev too.
 **Privacy:** raw IP is never stored — only country/city (from the edge) and a hashed-ish
 session id.
 
-### Unique recruiter links (`?ref=`) — the flow for every new page
+### Tagged links (`?ref=`) — the flow for every new page
 
-When you send a fit-brief link, tag it per recipient:
+Tag a link by **channel or page**, so you can tell where a visit came from:
 
 ```
-https://portfolio-by-lukas.vercel.app/genius?ref=jane-smith
-https://portfolio-by-lukas.vercel.app/fifa?ref=hans-mueller
+https://portfolio-by-lukas.vercel.app/genius?ref=recruiter
+https://portfolio-by-lukas.vercel.app/fifa?ref=linkedin-post
+https://portfolio-by-lukas.vercel.app/archlet?ref=application
 ```
 
-A hit on `/genius?ref=jane-smith` is almost certainly that specific person — far more
-reliable than geo alone. The dashboard groups views by `ref`, per page. Standard
-`utm_source` / `utm_medium` / `utm_campaign` params are captured too (e.g. `?utm_source=linkedin`).
-Convention: keep `ref` a short kebab-case recruiter/company slug; you map slug→person yourself.
+The dashboard groups views by `ref`, per page. Standard `utm_source` / `utm_medium` /
+`utm_campaign` params are captured too (e.g. `?utm_source=linkedin`).
+
+> **Never use a person's name in `ref`.** `/privacy` states that these tags are
+> page- and channel-level labels that "do not contain names and are not used to identify
+> individual people" — `?ref=jane-smith` would make that statement false, and would turn
+> an exempt audience-measurement tag into personal data with the consent obligations that
+> follow. Use `recruiter`, `linkedin-post`, `application`, or the company name.
 
 ### Returning visitors
 

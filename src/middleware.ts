@@ -62,6 +62,12 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
     }
   })()
 
+  // Opting out (see /privacy) stops analytics: no page-view record and no
+  // session or returning-visitor cookie. The short-lived geo pair below is NOT
+  // analytics — it decides which campaign banner a visitor sees, and that
+  // banner is shown either way — so it survives the opt-out.
+  const optedOut = request.cookies.get('pv_optout')?.value === '1'
+
   const isPageView =
     request.method === 'GET' &&
     !pathname.startsWith('/api/') &&
@@ -92,70 +98,77 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
     if (city)
       response.cookies.set('visitor-city', city, { ...base, maxAge: 3600 })
 
-    // First-party returning-visitor flag — read the INCOMING cookie (before we
-    // refresh it), giving a 90-day rolling "seen before" window.
-    const isReturning = Boolean(request.cookies.get('pv_seen'))
-    response.cookies.set('pv_seen', '1', { ...base, maxAge: 60 * 60 * 24 * 90 })
-
-    // Coarse session id (~30 min) to group one visit's page views.
-    let sessionId = request.cookies.get('pv_sid')?.value || ''
-    if (!sessionId) {
-      sessionId = crypto.randomUUID()
-      response.cookies.set('pv_sid', sessionId, { ...base, maxAge: 60 * 30 })
-    }
-
-    // Owner ("my own visits") flag — the dashboard hides these by default so
-    // self-traffic doesn't inflate recruiter numbers. Two mechanisms, because
-    // neither is reliable alone:
-    //   - Visit `/?owner=1` once per device to set a 1-year cookie. Survives IP
-    //     changes (mobile, VPN, travel) and is the recommended way in.
-    //     `/?owner=0` clears it again.
-    //   - OWNER_IPS (comma-separated env var) matches the edge client IP for
-    //     devices where the cookie was never set or has been cleared. The IP is
-    //     only compared in memory here and is never stored — see the schema,
-    //     where ipAddress is deliberately left null.
-    const ownerParam = params.get('owner')
-    if (ownerParam === '1') {
-      response.cookies.set('pv_owner', '1', {
+    // Everything below is analytics. An opted-out visitor keeps the geo cookies
+    // above (so campaign banners still work) but is otherwise untracked.
+    if (!optedOut) {
+      // First-party returning-visitor flag — read the INCOMING cookie (before
+      // we refresh it), giving a 90-day rolling "seen before" window.
+      const isReturning = Boolean(request.cookies.get('pv_seen'))
+      response.cookies.set('pv_seen', '1', {
         ...base,
-        maxAge: 60 * 60 * 24 * 365,
+        maxAge: 60 * 60 * 24 * 90,
       })
-    } else if (ownerParam === '0') {
-      response.cookies.set('pv_owner', '', { ...base, maxAge: 0 })
-    }
 
-    const ownerIps = (process.env.OWNER_IPS || '')
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean)
-    const clientIp = (
-      request.headers.get('x-vercel-forwarded-for') ||
-      request.headers.get('x-forwarded-for') ||
-      request.headers.get('x-real-ip') ||
-      ''
-    )
-      .split(',')[0]
-      .trim()
+      // Coarse session id (~30 min) to group one visit's page views.
+      let sessionId = request.cookies.get('pv_sid')?.value || ''
+      if (!sessionId) {
+        sessionId = crypto.randomUUID()
+        response.cookies.set('pv_sid', sessionId, { ...base, maxAge: 60 * 30 })
+      }
 
-    const isOwner =
-      ownerParam === '1' ||
-      (ownerParam !== '0' &&
-        (Boolean(request.cookies.get('pv_owner')) ||
-          (clientIp !== '' && ownerIps.includes(clientIp))))
+      // Owner ("my own visits") flag — the dashboard hides these by default so
+      // self-traffic doesn't inflate recruiter numbers. Two mechanisms, because
+      // neither is reliable alone:
+      //   - Visit `/?owner=1` once per device to set a 1-year cookie. Survives IP
+      //     changes (mobile, VPN, travel) and is the recommended way in.
+      //     `/?owner=0` clears it again.
+      //   - OWNER_IPS (comma-separated env var) matches the edge client IP for
+      //     devices where the cookie was never set or has been cleared. The IP is
+      //     only compared in memory here and is never stored — see the schema,
+      //     where ipAddress is deliberately left null.
+      const ownerParam = params.get('owner')
+      if (ownerParam === '1') {
+        response.cookies.set('pv_owner', '1', {
+          ...base,
+          maxAge: 60 * 60 * 24 * 365,
+        })
+      } else if (ownerParam === '0') {
+        response.cookies.set('pv_owner', '', { ...base, maxAge: 0 })
+      }
 
-    pageView = {
-      path: pathname,
-      country,
-      city,
-      ref: ref || null,
-      source: params.get('utm_source') || (ref ? 'ref' : 'direct'),
-      medium: params.get('utm_medium') || '',
-      campaign: params.get('utm_campaign') || '',
-      isReturning,
-      isOwner,
-      sessionId,
-      referrer: request.headers.get('referer') || '',
-      userAgent: request.headers.get('user-agent') || '',
+      const ownerIps = (process.env.OWNER_IPS || '')
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
+      const clientIp = (
+        request.headers.get('x-vercel-forwarded-for') ||
+        request.headers.get('x-forwarded-for') ||
+        request.headers.get('x-real-ip') ||
+        ''
+      )
+        .split(',')[0]
+        .trim()
+
+      const isOwner =
+        ownerParam === '1' ||
+        (ownerParam !== '0' &&
+          (Boolean(request.cookies.get('pv_owner')) ||
+            (clientIp !== '' && ownerIps.includes(clientIp))))
+
+      pageView = {
+        path: pathname,
+        country,
+        city,
+        ref: ref || null,
+        source: params.get('utm_source') || (ref ? 'ref' : 'direct'),
+        medium: params.get('utm_medium') || '',
+        campaign: params.get('utm_campaign') || '',
+        isReturning,
+        isOwner,
+        sessionId,
+        referrer: request.headers.get('referer') || '',
+        userAgent: request.headers.get('user-agent') || '',
+      }
     }
   }
 

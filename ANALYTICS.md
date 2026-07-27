@@ -75,6 +75,37 @@ Owner rows are tagged **`you`** in the recent-visits list when shown. Privacy is
 the IP is compared in memory in `middleware.ts` and is still never stored — `ipAddress`
 remains null in every row.
 
+### Visitor opt-out
+
+The site sets no advertising or cross-site cookies, so its analytics sit inside the
+**audience-measurement exemption** from prior consent that the Italian Garante and the
+French CNIL recognise — first-party only, aggregate, not shared, short-lived. That
+exemption is conditional on visitors being able to refuse, so there is a real opt-out.
+
+**There is deliberately no cookie consent banner.** One was built and then removed: it
+competed for the same screen corner as the geo campaign banner, and the exemption means a
+pop-up isn't required. Disclosure lives on `/privacy`, which the footer links from every
+page, and the opt-out control sits there.
+
+| Piece                   | Where                                                          |
+| ----------------------- | -------------------------------------------------------------- |
+| Opt-out state + helpers | `src/lib/consent.ts` (`pv_optout` cookie, 1 year)              |
+| Reversible control      | `src/components/analytics-opt-out.tsx`, rendered on `/privacy` |
+
+Opting out sets `pv_optout=1` and clears `pv_sid` and `pv_seen`. `middleware.ts` then
+skips the analytics branch, so **no page view is recorded and neither cookie is re-set**.
+The beacon checks it too.
+
+**Scope, deliberately narrow:** the 1-hour `visitor-country` / `visitor-city` cookies are
+_not_ cleared and keep being set. They are personalisation rather than measurement, and
+the geo campaign banner they drive is shown to every visitor regardless of opt-out. The
+privacy page states this explicitly rather than implying a broader opt-out than exists.
+
+> **`?ref=` must stay person-agnostic.** `/privacy` states these tags "do not contain names
+> and are not used to identify individual people". Use channel or page labels
+> (`recruiter`, `linkedin-post`, `application`). A personal name would make that statement
+> false and turn an exempt measurement tag into personal data.
+
 ### Filtering automated traffic
 
 Tracking happens **server-side** in `middleware.ts`, so anything that issues an HTTP request
@@ -136,7 +167,7 @@ Normally fired automatically by `middleware.ts` for real page navigations; the b
   "source": "ref",
   "medium": "",
   "campaign": "",
-  "ref": "jane-smith",
+  "ref": "recruiter",
   "isReturning": false,
   "isOwner": false,
   "country": "GB",
@@ -172,11 +203,11 @@ Requires an admin session (401 otherwise). Returns the aggregated summary the da
       "views": 42,
       "avgDuration": null,
       "countries": [{ "country": "GB", "views": 30 }],
-      "refs": [{ "ref": "jane-smith", "views": 3 }]
+      "refs": [{ "ref": "recruiter", "views": 3 }]
     }
   ],
   "countries": [{ "country": "GB", "views": 300 }],
-  "refs": [{ "ref": "jane-smith", "views": 3 }],
+  "refs": [{ "ref": "recruiter", "views": 3 }],
   "recent": [
     /* latest 25 visits: path, country, city, ref, source, referrer, isReturning,
        isOwner, createdAt (ISO-8601 UTC, e.g. "2026-07-27T09:25:00Z") */
