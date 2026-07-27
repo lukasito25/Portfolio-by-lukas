@@ -141,6 +141,37 @@
   );
 }
 
+/* =============================================
+   PER-PAGE BRAND OVERRIDE — Archlet
+   Archlet's indigo #4d65ff, darkened to #3f52e6
+   for light mode (the raw brand value clears only
+   4.51:1 on white). Scoped to [data-brand='archlet']
+   so only the /archlet brief re-themes.
+   ============================================= */
+[data-brand='archlet'] {
+  --accent: #3f52e6;
+  --accent-soft: rgba(63, 82, 230, 0.1);
+  --accent-glow: rgba(63, 82, 230, 0.22);
+  --accent-contrast: #ffffff;
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(63, 82, 230, 0.12),
+    transparent 70%
+  );
+}
+
+.dark [data-brand='archlet'] {
+  --accent: #8f9dff;
+  --accent-soft: rgba(143, 157, 255, 0.14);
+  --accent-glow: rgba(143, 157, 255, 0.3);
+  --accent-contrast: #0a0d1f;
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(143, 157, 255, 0.16),
+    transparent 70%
+  );
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-background-elevated: var(--background-elevated);
