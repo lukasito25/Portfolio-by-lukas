@@ -146,6 +146,14 @@ Say the next role is at UEFA — target URL `/uefa`:
   `content.ts`; the toggle renders whatever's in `locales`.
 - **Reduce/remove video weight.** The hero works with just the poster image — drop the
   `<video>` in `HeroVideo` if you don't have a clip, and it degrades cleanly.
+- **No footage that fits? Generate the hero in code.** `/qualcomm` replaces `HeroVideo`
+  entirely with `HeroCircuitry` — an inline SVG "PCB" whose traces carry GSAP-animated
+  signal pulses over a dark base, so the page ships **zero binary assets**. Same slot, same
+  overlays, same reduced-motion contract (static board, no tweens). Copy that component and
+  swap the motif when a stock clip would be off-domain (the `/fifa` hero is stadium footage,
+  which suits the football briefs and nothing else). Its decorative panel SVG
+  (`CircuitLines`, a chip with routed pins) is the `PitchLines` equivalent — same
+  self-drawing `strokeDashoffset`-on-scroll mechanic, different subject.
 - **Making it a true reusable scaffold.** If you'll do this often, consider renaming
   `FifaContent`/`fifaContent` to `FitBriefContent`/`briefContent` and moving the shared
   `page.tsx` sub-components into `src/components/` so each new role is _only_ a `content.ts`
@@ -212,10 +220,11 @@ matching, non-dismissed campaign wins.
 
 ### Live campaigns (example)
 
-| id                 | Country | Links to  | Starts     | Auto-expires |
-| ------------------ | ------- | --------- | ---------- | ------------ |
-| `genius-sports-uk` | GB      | `/genius` | 2026-07-25 | 2026-09-25   |
-| `fifa-ch`          | CH      | `/fifa`   | 2026-07-08 | 2026-09-08   |
+| id                    | Country | Links to    | Starts     | Auto-expires |
+| --------------------- | ------- | ----------- | ---------- | ------------ |
+| `qualcomm-arduino-it` | IT      | `/qualcomm` | 2026-07-27 | 2026-09-27   |
+| `genius-sports-uk`    | GB      | `/genius`   | 2026-07-25 | 2026-09-25   |
+| `fifa-ch`             | CH      | `/fifa`     | 2026-07-08 | 2026-09-08   |
 
 ## 10. Analytics — did the recruiter look, and from where?
 

@@ -110,6 +110,37 @@
   );
 }
 
+/* =============================================
+   PER-PAGE BRAND OVERRIDE — Qualcomm / Arduino
+   Arduino teal #008184 (light) / lifted teal
+   (dark), sourced from arduino.cc. Scoped to
+   [data-brand='qualcomm'] so only the /qualcomm
+   brief re-themes; the rest stays FIFA blue.
+   ============================================= */
+[data-brand='qualcomm'] {
+  --accent: #007175;
+  --accent-soft: rgba(0, 129, 132, 0.1);
+  --accent-glow: rgba(0, 129, 132, 0.22);
+  --accent-contrast: #ffffff;
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(0, 129, 132, 0.12),
+    transparent 70%
+  );
+}
+
+.dark [data-brand='qualcomm'] {
+  --accent: #35c8c8;
+  --accent-soft: rgba(53, 200, 200, 0.14);
+  --accent-glow: rgba(53, 200, 200, 0.3);
+  --accent-contrast: #04100f;
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(53, 200, 200, 0.16),
+    transparent 70%
+  );
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-background-elevated: var(--background-elevated);
