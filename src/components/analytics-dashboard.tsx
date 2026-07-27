@@ -11,6 +11,7 @@ import {
   Repeat,
   MapPin,
   Clock,
+  User,
 } from 'lucide-react'
 
 interface CountViews {
@@ -36,16 +37,41 @@ interface RecentRow {
   source?: string | null
   referrer?: string | null
   isReturning?: number
+  isOwner?: number
   createdAt: string
 }
 interface Summary {
   timeframe: string
   totalViews: number
+  /** Owner visits in this window — always counted, even when excluded above. */
+  ownerViews?: number
+  includeOwner?: boolean
   newVsReturning: { new: number; returning: number }
   pages: PageRow[]
   countries: CountViews[]
   refs: RefViews[]
   recent: RecentRow[]
+}
+
+/**
+ * Render a visit timestamp in the viewer's local time, with the zone shown so
+ * it can't be misread. The API normalizes storage timestamps to ISO-8601 UTC
+ * ('…Z') first — without that, SQLite's zone-less 'YYYY-MM-DD HH:MM:SS' parses
+ * as local time and every row appears shifted by the UTC offset.
+ */
+function visitTime(ts: string): string {
+  const d = new Date(ts)
+  if (Number.isNaN(d.getTime())) return ts
+  // Explicit components, not dateStyle/timeStyle — V8 throws if those are
+  // combined with timeZoneName.
+  return d.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  })
 }
 
 /** ISO 3166-1 alpha-2 → flag emoji. */
@@ -83,13 +109,16 @@ export function AnalyticsDashboard() {
   const [data, setData] = useState<Summary | null>(null)
   const [loading, setLoading] = useState(true)
   const [timeframe, setTimeframe] = useState('30d')
+  const [includeOwner, setIncludeOwner] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchAnalytics = async (tf: string) => {
+  const fetchAnalytics = async (tf: string, withOwner: boolean) => {
     try {
       setLoading(true)
       setError(null)
-      const res = await fetch(`/api/analytics?timeframe=${tf}`)
+      const res = await fetch(
+        `/api/analytics?timeframe=${tf}${withOwner ? '&includeOwner=1' : ''}`
+      )
       if (!res.ok) throw new Error('Failed to fetch analytics data')
       setData(await res.json())
     } catch (err) {
@@ -101,8 +130,8 @@ export function AnalyticsDashboard() {
   }
 
   useEffect(() => {
-    fetchAnalytics(timeframe)
-  }, [timeframe])
+    fetchAnalytics(timeframe, includeOwner)
+  }, [timeframe, includeOwner])
 
   if (loading) {
     return (
@@ -129,7 +158,9 @@ export function AnalyticsDashboard() {
             Analytics Error
           </h3>
           <p className="mb-4 text-gray-600">{error}</p>
-          <Button onClick={() => fetchAnalytics(timeframe)}>Try Again</Button>
+          <Button onClick={() => fetchAnalytics(timeframe, includeOwner)}>
+            Try Again
+          </Button>
         </Card>
       </div>
     )
@@ -142,7 +173,7 @@ export function AnalyticsDashboard() {
           <h1 className="text-2xl font-bold text-gray-900">
             Analytics Dashboard
           </h1>
-          <div className="mt-4 flex space-x-2 sm:mt-0">
+          <div className="mt-4 flex flex-wrap gap-2 sm:mt-0">
             {['1d', '7d', '30d', '90d'].map(p => (
               <Button
                 key={p}
@@ -153,6 +184,15 @@ export function AnalyticsDashboard() {
                 {p}
               </Button>
             ))}
+            <Button
+              variant={includeOwner ? 'default' : 'outline'}
+              size="sm"
+              aria-pressed={includeOwner}
+              onClick={() => setIncludeOwner(v => !v)}
+            >
+              <User className="mr-1 h-3.5 w-3.5" />
+              {includeOwner ? 'My visits shown' : 'My visits hidden'}
+            </Button>
           </div>
         </div>
         <Card className="p-8 text-center">
@@ -165,6 +205,15 @@ export function AnalyticsDashboard() {
             <code className="rounded bg-gray-100 px-1">?ref=name</code> to
             attribute a specific recruiter.
           </p>
+          {!includeOwner &&
+            typeof data?.ownerViews === 'number' &&
+            data.ownerViews > 0 && (
+              <p className="mt-3 text-sm text-gray-500">
+                {data.ownerViews} of your own visit
+                {data.ownerViews === 1 ? ' is' : 's are'} hidden — use “My
+                visits hidden” above to include them.
+              </p>
+            )}
         </Card>
       </div>
     )
@@ -185,9 +234,19 @@ export function AnalyticsDashboard() {
           </h1>
           <p className="text-sm text-gray-500">
             Page views by page, country, and recruiter link
+            {typeof data.ownerViews === 'number' && data.ownerViews > 0 && (
+              <>
+                {' · '}
+                <span className="text-gray-600">
+                  {includeOwner
+                    ? `including ${data.ownerViews} of your own visits`
+                    : `${data.ownerViews} of your own visits hidden`}
+                </span>
+              </>
+            )}
           </p>
         </div>
-        <div className="mt-4 flex space-x-2 sm:mt-0">
+        <div className="mt-4 flex flex-wrap gap-2 sm:mt-0">
           {['1d', '7d', '30d', '90d'].map(p => (
             <Button
               key={p}
@@ -198,6 +257,16 @@ export function AnalyticsDashboard() {
               {p}
             </Button>
           ))}
+          <Button
+            variant={includeOwner ? 'default' : 'outline'}
+            size="sm"
+            aria-pressed={includeOwner}
+            title="Your own visits are excluded by default. Visit /?owner=1 once on each of your devices to tag them."
+            onClick={() => setIncludeOwner(v => !v)}
+          >
+            <User className="mr-1 h-3.5 w-3.5" />
+            {includeOwner ? 'My visits shown' : 'My visits hidden'}
+          </Button>
         </div>
       </div>
 
@@ -391,10 +460,16 @@ export function AnalyticsDashboard() {
                     returning
                   </span>
                 ) : null}
+                {a.isOwner ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                    <User className="h-3 w-3" />
+                    you
+                  </span>
+                ) : null}
               </div>
               <span className="whitespace-nowrap text-xs text-gray-500">
                 {a.city ? `${a.city} · ` : ''}
-                {new Date(a.createdAt).toLocaleString()}
+                {visitTime(a.createdAt)}
               </span>
             </div>
           ))}

@@ -234,6 +234,7 @@ model Analytics {
 
   // Visitor info
   isReturning Boolean   @default(false) // first-party returning visitor (90d)
+  isOwner     Boolean   @default(false) // the site owner's own visit (excluded from the dashboard by default)
 
   // Engagement metrics
   duration    Int?      // time spent on page in seconds
