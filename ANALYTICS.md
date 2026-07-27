@@ -52,8 +52,13 @@ The admin analytics dashboard (`/admin/analytics`, admin-only) provides:
 - **Pages table**: per page — total views, **country breakdown** (with flags), and **`?ref=` tags used** (the "who looked, and from where" view)
 - **Countries overview**: top countries across all pages
 - **Recruiter links**: view counts grouped by `?ref=` tag
-- **Recent visits**: latest visits with country, ref, returning flag, and a **local-time timestamp with its timezone** (e.g. `Jul 27, 2026, 11:25 AM GMT+2`)
+- **Recent visits**: latest visits with country, ref, source host, device, dwell/scroll, returning flag, a **confirmed / unconfirmed / bot** badge, and a **local-time timestamp with its timezone** (e.g. `Jul 27, 2026, 11:25 AM GMT+2`)
 - **Own-visit filter**: your own visits are **excluded from every figure by default**; the header shows how many were held back and the **My visits hidden / shown** button toggles them back in
+- **Bot filter**: automated traffic is likewise excluded by default, with a **Bots hidden / shown** toggle and a per-reason breakdown (`cli 2 · crawler 1 · email-scanner 1`)
+- **Visitors**: unique sessions, pages-per-visit, average dwell and scroll, and entry pages
+- **Sources**: referring host (`linkedin.com`, `direct`) plus a UTM `source / medium / campaign` breakdown
+- **Devices**: type, browser and OS, parsed from the user agent
+- **Pages table**: adds **avg. time** and **avg. scroll** per page — the strongest signal a recruiter actually read a brief
 
 ### Excluding your own visits
 
@@ -69,6 +74,41 @@ neither is reliable on its own:
 Owner rows are tagged **`you`** in the recent-visits list when shown. Privacy is unchanged:
 the IP is compared in memory in `middleware.ts` and is still never stored — `ipAddress`
 remains null in every row.
+
+### Filtering automated traffic
+
+Tracking happens **server-side** in `middleware.ts`, so anything that issues an HTTP request
+is recorded — CLI tools, crawlers, uptime monitors and email link scanners included. At one
+point **34% of stored rows were automated** and were being counted as real visitors. (The
+single largest contributor was a `curl` deploy-polling loop hitting the site every 15
+seconds.) Hosted tools like GA4 or Plausible don't have this problem because they track
+client-side; that difference, not the vendor, is the quality lever.
+
+Two independent signals, because neither is sufficient alone:
+
+| Signal                                                                                    | Catches                                                                                                                         | Misses                                |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| **User-agent classification** (`src/lib/analytics-classify.ts`, runs in `/api/analytics`) | Declared bots and CLI tools — `curl`, `wget`, python, Googlebot, GPTBot/ClaudeBot, Slackbot, Outlook SafeLinks, headless Chrome | Scanners presenting a real browser UA |
+| **Client beacon** (`src/components/analytics/page-view-beacon.tsx`)                       | Anything that doesn't execute JavaScript — i.e. exactly those spoofing scanners                                                 | Visitors who block JS                 |
+
+`botReason` records _why_ a row was flagged (`cli`, `crawler`, `ai-bot`, `fetcher`,
+`email-scanner`, `headless`, `empty-ua`), so filtering is auditable rather than a silent
+drop. Bots are **stored and hidden**, never discarded — toggle **Bots shown** to inspect them.
+
+Classification lives in the API route, not middleware: the middleware bundle is edge runtime
+and `ua-parser-js` would bloat it. The route is Node and already receives the user agent.
+
+### The client beacon (engagement + human confirmation)
+
+`<PageViewBeacon/>` is mounted once in `src/app/layout.tsx`. It **never creates a row** — it
+confirms the most recent matching one via `POST /api/analytics` with `{type:'confirm'}` →
+Worker `POST /analytics/confirm`, matched on the `pv_sid` cookie + path within 30 minutes.
+It reports **dwell time** and **max scroll depth**, which can only be measured client-side.
+
+`isHuman` is a **confidence badge and optional filter, not the default filter** — a
+privacy-conscious visitor blocking JS would otherwise vanish from the figures. The default
+view excludes owner traffic and _declared_ bots; UA-spoofing scanners then surface as
+**unconfirmed** rather than being silently dropped.
 
 > **Timestamps.** D1/SQLite writes `CURRENT_TIMESTAMP` as `YYYY-MM-DD HH:MM:SS` in UTC with
 > **no timezone marker**. `new Date()` parses that shape as _local_ time, which previously

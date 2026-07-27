@@ -12,6 +12,10 @@ import {
   MapPin,
   Clock,
   User,
+  Bot,
+  Monitor,
+  Users,
+  ExternalLink,
 } from 'lucide-react'
 
 interface CountViews {
@@ -26,6 +30,7 @@ interface PageRow {
   path: string
   views: number
   avgDuration: number | null
+  avgScroll?: number | null
   countries: CountViews[]
   refs: RefViews[]
 }
@@ -36,21 +41,57 @@ interface RecentRow {
   ref?: string | null
   source?: string | null
   referrer?: string | null
+  refHost?: string | null
+  browser?: string | null
+  os?: string | null
+  deviceType?: string | null
+  duration?: number | null
+  scrollDepth?: number | null
   isReturning?: number
   isOwner?: number
+  isBot?: number
+  botReason?: string | null
+  isHuman?: number
   createdAt: string
+}
+interface NameViews {
+  name: string
+  views: number
 }
 interface Summary {
   timeframe: string
   totalViews: number
   /** Owner visits in this window — always counted, even when excluded above. */
   ownerViews?: number
+  /** Automated visits in this window — likewise always counted. */
+  botViews?: number
+  /** Views confirmed by the client beacon, i.e. JavaScript actually ran. */
+  humanViews?: number
   includeOwner?: boolean
+  includeBots?: boolean
+  visitors?: {
+    unique: number
+    pagesPerVisit: number
+    avgDuration: number | null
+    avgScroll: number | null
+    entryPages: { path: string; visits: number }[]
+  }
+  sources?: { source: string; views: number }[]
+  campaigns?: { campaign: string; views: number }[]
+  devices?: { types: NameViews[]; browsers: NameViews[]; os: NameViews[] }
+  bots?: { reason: string; views: number }[]
   newVsReturning: { new: number; returning: number }
   pages: PageRow[]
   countries: CountViews[]
   refs: RefViews[]
   recent: RecentRow[]
+}
+
+/** Seconds → compact "3m 12s" / "8s". */
+function dwell(seconds?: number | null): string {
+  if (seconds == null) return '—'
+  if (seconds < 60) return `${seconds}s`
+  return `${Math.floor(seconds / 60)}m ${seconds % 60}s`
 }
 
 /**
@@ -110,14 +151,21 @@ export function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true)
   const [timeframe, setTimeframe] = useState('30d')
   const [includeOwner, setIncludeOwner] = useState(false)
+  const [includeBots, setIncludeBots] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchAnalytics = async (tf: string, withOwner: boolean) => {
+  const fetchAnalytics = async (
+    tf: string,
+    withOwner: boolean,
+    withBots: boolean
+  ) => {
     try {
       setLoading(true)
       setError(null)
       const res = await fetch(
-        `/api/analytics?timeframe=${tf}${withOwner ? '&includeOwner=1' : ''}`
+        `/api/analytics?timeframe=${tf}${withOwner ? '&includeOwner=1' : ''}${
+          withBots ? '&includeBots=1' : ''
+        }`
       )
       if (!res.ok) throw new Error('Failed to fetch analytics data')
       setData(await res.json())
@@ -130,8 +178,8 @@ export function AnalyticsDashboard() {
   }
 
   useEffect(() => {
-    fetchAnalytics(timeframe, includeOwner)
-  }, [timeframe, includeOwner])
+    fetchAnalytics(timeframe, includeOwner, includeBots)
+  }, [timeframe, includeOwner, includeBots])
 
   if (loading) {
     return (
@@ -158,7 +206,9 @@ export function AnalyticsDashboard() {
             Analytics Error
           </h3>
           <p className="mb-4 text-gray-600">{error}</p>
-          <Button onClick={() => fetchAnalytics(timeframe, includeOwner)}>
+          <Button
+            onClick={() => fetchAnalytics(timeframe, includeOwner, includeBots)}
+          >
             Try Again
           </Button>
         </Card>
@@ -192,6 +242,15 @@ export function AnalyticsDashboard() {
             >
               <User className="mr-1 h-3.5 w-3.5" />
               {includeOwner ? 'My visits shown' : 'My visits hidden'}
+            </Button>
+            <Button
+              variant={includeBots ? 'default' : 'outline'}
+              size="sm"
+              aria-pressed={includeBots}
+              onClick={() => setIncludeBots(v => !v)}
+            >
+              <Bot className="mr-1 h-3.5 w-3.5" />
+              {includeBots ? 'Bots shown' : 'Bots hidden'}
             </Button>
           </div>
         </div>
@@ -233,14 +292,24 @@ export function AnalyticsDashboard() {
             Analytics Dashboard
           </h1>
           <p className="text-sm text-gray-500">
-            Page views by page, country, and recruiter link
+            Page views by page, country, source and recruiter link
             {typeof data.ownerViews === 'number' && data.ownerViews > 0 && (
               <>
                 {' · '}
                 <span className="text-gray-600">
                   {includeOwner
-                    ? `including ${data.ownerViews} of your own visits`
-                    : `${data.ownerViews} of your own visits hidden`}
+                    ? `incl. ${data.ownerViews} of yours`
+                    : `${data.ownerViews} of yours hidden`}
+                </span>
+              </>
+            )}
+            {typeof data.botViews === 'number' && data.botViews > 0 && (
+              <>
+                {' · '}
+                <span className="text-gray-600">
+                  {includeBots
+                    ? `incl. ${data.botViews} automated`
+                    : `${data.botViews} automated hidden`}
                 </span>
               </>
             )}
@@ -267,15 +336,40 @@ export function AnalyticsDashboard() {
             <User className="mr-1 h-3.5 w-3.5" />
             {includeOwner ? 'My visits shown' : 'My visits hidden'}
           </Button>
+          <Button
+            variant={includeBots ? 'default' : 'outline'}
+            size="sm"
+            aria-pressed={includeBots}
+            title="Automated traffic — CLI tools, crawlers, AI bots and email link scanners — is excluded by default."
+            onClick={() => setIncludeBots(v => !v)}
+          >
+            <Bot className="mr-1 h-3.5 w-3.5" />
+            {includeBots ? 'Bots shown' : 'Bots hidden'}
+          </Button>
         </div>
       </div>
 
       {/* Key metrics */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          title="Total Page Views"
-          value={data.totalViews}
-          icon={<Eye className="h-8 w-8" />}
+          title="Visitors"
+          value={data.visitors?.unique ?? '—'}
+          sub={
+            data.visitors
+              ? `${data.totalViews} views · ${data.visitors.pagesPerVisit} pages/visit`
+              : `${data.totalViews} views`
+          }
+          icon={<Users className="h-8 w-8" />}
+        />
+        <MetricCard
+          title="Avg. time on page"
+          value={dwell(data.visitors?.avgDuration)}
+          sub={
+            data.visitors?.avgScroll != null
+              ? `${data.visitors.avgScroll}% avg scroll`
+              : 'needs a confirmed visit'
+          }
+          icon={<Clock className="h-8 w-8" />}
         />
         <MetricCard
           title="Countries"
@@ -293,12 +387,156 @@ export function AnalyticsDashboard() {
           sub={`${data.refs.length} unique ref${data.refs.length === 1 ? '' : 's'}`}
           icon={<Link2 className="h-8 w-8" />}
         />
+      </div>
+
+      {/* Traffic quality — what was filtered, and how confident we are */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <MetricCard
           title="Returning"
           value={`${returningPct}%`}
           sub={`${data.newVsReturning.returning} of ${data.totalViews} views`}
           icon={<Repeat className="h-8 w-8" />}
         />
+        <MetricCard
+          title="Browser-confirmed"
+          value={
+            data.totalViews && typeof data.humanViews === 'number'
+              ? `${Math.round((data.humanViews / data.totalViews) * 100)}%`
+              : '—'
+          }
+          sub={
+            typeof data.humanViews === 'number'
+              ? `${data.humanViews} of ${data.totalViews} ran JavaScript`
+              : undefined
+          }
+          icon={<Eye className="h-8 w-8" />}
+        />
+        <MetricCard
+          title="Automated filtered"
+          value={data.botViews ?? 0}
+          sub={
+            data.bots?.length
+              ? data.bots.map(b => `${b.reason} ${b.views}`).join(' · ')
+              : 'none detected'
+          }
+          icon={<Bot className="h-8 w-8" />}
+        />
+      </div>
+
+      {/* Acquisition + devices */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <Card className="p-6">
+          <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
+            <ExternalLink className="mr-2 h-5 w-5" />
+            Sources
+          </h3>
+          {data.sources?.length ? (
+            <div className="space-y-2">
+              {data.sources.slice(0, 8).map(s => (
+                <div
+                  key={s.source}
+                  className="flex items-center justify-between text-sm"
+                >
+                  <span className="truncate text-gray-700">{s.source}</span>
+                  <span className="ml-3 font-medium text-gray-900">
+                    {s.views}
+                  </span>
+                </div>
+              ))}
+              {data.campaigns?.length ? (
+                <div className="mt-4 border-t border-gray-100 pt-3">
+                  <p className="mb-2 text-xs uppercase tracking-wide text-gray-500">
+                    UTM campaigns
+                  </p>
+                  {data.campaigns.slice(0, 5).map(cmp => (
+                    <div
+                      key={cmp.campaign}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <span className="truncate text-gray-700">
+                        {cmp.campaign}
+                      </span>
+                      <span className="ml-3 font-medium text-gray-900">
+                        {cmp.views}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">
+              No referrer data yet. Tag links with{' '}
+              <code className="rounded bg-gray-100 px-1">?utm_source=</code> to
+              break them out.
+            </p>
+          )}
+        </Card>
+
+        <Card className="p-6">
+          <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
+            <Monitor className="mr-2 h-5 w-5" />
+            Devices
+          </h3>
+          {data.devices &&
+          (data.devices.types.length || data.devices.browsers.length) ? (
+            <div className="space-y-4 text-sm">
+              {(
+                [
+                  ['Type', data.devices.types],
+                  ['Browser', data.devices.browsers],
+                  ['OS', data.devices.os],
+                ] as [string, NameViews[]][]
+              ).map(([label, list]) =>
+                list.length ? (
+                  <div key={label}>
+                    <p className="mb-1 text-xs uppercase tracking-wide text-gray-500">
+                      {label}
+                    </p>
+                    {list.slice(0, 4).map(d => (
+                      <div
+                        key={d.name}
+                        className="flex items-center justify-between"
+                      >
+                        <span className="truncate text-gray-700">{d.name}</span>
+                        <span className="ml-3 font-medium text-gray-900">
+                          {d.views}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : null
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">No device data yet.</p>
+          )}
+        </Card>
+
+        <Card className="p-6">
+          <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
+            <MapPin className="mr-2 h-5 w-5" />
+            Entry pages
+          </h3>
+          {data.visitors?.entryPages?.length ? (
+            <div className="space-y-2 text-sm">
+              {data.visitors.entryPages.map(e => (
+                <div key={e.path} className="flex items-center justify-between">
+                  <span className="truncate text-gray-700">
+                    {prettyPath(e.path)}
+                  </span>
+                  <span className="ml-3 font-medium text-gray-900">
+                    {e.visits}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">
+              The first page of each visit appears here.
+            </p>
+          )}
+        </Card>
       </div>
 
       {/* Pages × country × ref — the main table */}
@@ -313,6 +551,8 @@ export function AnalyticsDashboard() {
               <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
                 <th className="py-2 pr-4 font-medium">Page</th>
                 <th className="py-2 pr-4 font-medium">Views</th>
+                <th className="py-2 pr-4 font-medium">Avg. time</th>
+                <th className="py-2 pr-4 font-medium">Scroll</th>
                 <th className="py-2 pr-4 font-medium">Top countries</th>
                 <th className="py-2 font-medium">Ref links used</th>
               </tr>
@@ -330,6 +570,12 @@ export function AnalyticsDashboard() {
                   </td>
                   <td className="py-3 pr-4 font-semibold text-gray-900">
                     {page.views}
+                  </td>
+                  <td className="py-3 pr-4 whitespace-nowrap text-gray-700">
+                    {dwell(page.avgDuration)}
+                  </td>
+                  <td className="py-3 pr-4 whitespace-nowrap text-gray-700">
+                    {page.avgScroll != null ? `${page.avgScroll}%` : '—'}
                   </td>
                   <td className="py-3 pr-4">
                     <div className="flex flex-wrap gap-1.5">
@@ -466,8 +712,35 @@ export function AnalyticsDashboard() {
                     you
                   </span>
                 ) : null}
+                {a.isBot ? (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700"
+                    title="Filtered as automated traffic"
+                  >
+                    <Bot className="h-3 w-3" />
+                    {a.botReason || 'bot'}
+                  </span>
+                ) : a.isHuman ? (
+                  <span
+                    className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700"
+                    title="A browser ran JavaScript on this view"
+                  >
+                    confirmed
+                  </span>
+                ) : (
+                  <span
+                    className="rounded-full border border-gray-200 px-2 py-0.5 text-xs text-gray-400"
+                    title="No browser confirmation — could be a scanner presenting a browser user agent, or JavaScript was blocked"
+                  >
+                    unconfirmed
+                  </span>
+                )}
               </div>
               <span className="whitespace-nowrap text-xs text-gray-500">
+                {a.refHost && a.refHost !== 'direct' ? `${a.refHost} · ` : ''}
+                {a.deviceType ? `${a.deviceType} · ` : ''}
+                {a.duration != null ? `${dwell(a.duration)} · ` : ''}
+                {a.scrollDepth != null ? `${a.scrollDepth}% · ` : ''}
                 {a.city ? `${a.city} · ` : ''}
                 {visitTime(a.createdAt)}
               </span>

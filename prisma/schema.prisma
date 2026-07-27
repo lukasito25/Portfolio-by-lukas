@@ -236,6 +236,15 @@ model Analytics {
   isReturning Boolean   @default(false) // first-party returning visitor (90d)
   isOwner     Boolean   @default(false) // the site owner's own visit (excluded from the dashboard by default)
 
+  // Traffic quality — see src/lib/analytics-classify.ts
+  isBot       Boolean   @default(false) // automated traffic (excluded by default)
+  botReason   String?   // cli | crawler | ai-bot | fetcher | email-scanner | headless | empty-ua
+  isHuman     Boolean   @default(false) // confirmed by the client-side beacon (JS actually ran)
+  browser     String?
+  os          String?
+  deviceType  String?   // desktop | mobile | tablet
+  refHost     String?   // normalised referrer host, 'direct' for none/self
+
   // Engagement metrics
   duration    Int?      // time spent on page in seconds
   scrollDepth Int?      // percentage of page scrolled (0-100)

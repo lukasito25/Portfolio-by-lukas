@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import { Analytics } from '@vercel/analytics/next'
+import { PageViewBeacon } from '@/components/analytics/page-view-beacon'
 import { Navigation } from '@/components/ui/navigation'
 import { Footer } from '@/components/ui/footer'
 import { ScrollProgress } from '@/components/motion/scroll-progress'
@@ -135,6 +136,7 @@ export default function RootLayout({
           <Footer />
         </div>
         <Analytics />
+        <PageViewBeacon />
       </body>
     </html>
   )
