@@ -82,6 +82,19 @@ export function isCampaignActive(
 
 export const locationCampaigns: LocationCampaign[] = [
   {
+    id: 'launchmetrics-fr',
+    // Offices are Paris, Milan and Madrid/Girona, but IT and ES are already
+    // taken by qualcomm-arduino-it and archlet-es until they auto-expire on
+    // 2026-09-27. Paris is the operating HQ, so France alone avoids any clash.
+    countries: ['FR'],
+    startsAt: '2026-07-27',
+    eyebrow: 'Recruiting for Launchmetrics?',
+    title: 'I mapped my experience to your role.',
+    body: 'A short brief for the Senior Product Builder opening on Data Collection & Enrichment.',
+    ctaLabel: 'See the fit brief',
+    href: '/launchmetrics',
+  },
+  {
     id: 'archlet-es',
     // Archlet's HQ is Zurich, but `fifa-ch` already owns CH until it
     // auto-expires 2026-09-08 and the first match wins — so this targets the
