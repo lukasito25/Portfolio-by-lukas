@@ -261,8 +261,8 @@ export function AnalyticsDashboard() {
           </h3>
           <p className="text-gray-600">
             Page views appear here as visitors browse. Share a page with{' '}
-            <code className="rounded bg-gray-100 px-1">?ref=name</code> to
-            attribute a specific recruiter.
+            <code className="rounded bg-gray-100 px-1">?ref=recruiter</code> to
+            attribute the channel it came from.
           </p>
           {!includeOwner &&
             typeof data?.ownerViews === 'number' &&
@@ -670,9 +670,10 @@ export function AnalyticsDashboard() {
             <p className="text-sm text-gray-500">
               No tagged links used yet. Share a page as{' '}
               <code className="rounded bg-gray-100 px-1">
-                /genius?ref=jane-smith
+                /genius?ref=recruiter
               </code>{' '}
-              to see it here.
+              to see it here. Use channel or page labels, never personal names —
+              see <span className="whitespace-nowrap">/privacy</span>.
             </p>
           )}
         </Card>

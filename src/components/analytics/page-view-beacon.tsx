@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import { hasOptedOut } from '@/lib/consent'
 
 /**
  * Confirms a page view from the browser, and reports engagement.
@@ -22,6 +23,8 @@ export function PageViewBeacon() {
   useEffect(() => {
     // The admin area is excluded from tracking upstream; don't confirm it.
     if (!pathname || pathname.startsWith('/admin')) return
+    // Respect an opt-out made via the cookie notice.
+    if (hasOptedOut()) return
 
     const startedAt = Date.now()
     let maxScroll = 0

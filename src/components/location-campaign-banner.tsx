@@ -135,7 +135,7 @@ export function LocationCampaignBanner() {
         reduced ? '' : 'transition-all duration-500 ease-out'
       } ${entered ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
     >
-      <div className="relative overflow-hidden rounded-2xl border border-line bg-background-elevated p-5 shadow-2xl backdrop-blur-sm">
+      <div className="panel relative bg-background/95 p-4 shadow-lg backdrop-blur-sm">
         <button
           type="button"
           onClick={dismiss}
@@ -145,28 +145,35 @@ export function LocationCampaignBanner() {
           <X className="h-4 w-4" />
         </button>
 
-        <div className="mb-2 flex items-center gap-2">
+        <div className="mb-2 flex items-center gap-2 pr-6">
           <span
-            className="pulse-dot h-2 w-2 rounded-full"
+            className="pulse-dot h-1.5 w-1.5 rounded-full"
             style={{ background: 'var(--accent)' }}
           />
           <span className="section-label">{campaign.eyebrow}</span>
         </div>
 
-        <p className="font-display mb-1 pr-6 text-base font-semibold leading-snug">
-          {campaign.title}
-        </p>
-        <p className="mb-4 text-sm leading-relaxed text-secondary-fg">
+        <p className="text-sm leading-relaxed text-secondary-fg">
+          <strong className="text-foreground">{campaign.title}</strong>{' '}
           {campaign.body}
         </p>
 
-        <Link
-          href={campaign.href}
-          className="inline-flex items-center gap-1.5 rounded-full bg-(--accent) px-4 py-2 text-sm font-semibold text-(--accent-contrast) transition-transform hover:-translate-y-0.5"
-        >
-          {campaign.ctaLabel}
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Link
+            href={campaign.href}
+            className="inline-flex items-center gap-1.5 rounded-full bg-(--accent) px-4 py-1.5 text-xs font-semibold text-(--accent-contrast) transition-opacity hover:opacity-90"
+          >
+            {campaign.ctaLabel}
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+          <button
+            type="button"
+            onClick={dismiss}
+            className="rounded-full border border-line px-4 py-1.5 text-xs font-semibold text-secondary-fg transition-colors hover:border-(--accent) hover:text-foreground"
+          >
+            Not now
+          </button>
+        </div>
       </div>
     </div>
   )
