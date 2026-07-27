@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import type { NextFetchEvent, NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
 // Define protected routes that require authentication
@@ -11,7 +11,7 @@ const publicApiRoutes = [
   '/api/analytics',
 ]
 
-export async function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest, event: NextFetchEvent) {
   const { pathname } = request.nextUrl
 
   // Security headers for all responses
@@ -28,13 +28,48 @@ export async function middleware(request: NextRequest) {
   // edge geo (Vercel headers — populated in production; absent locally, where
   // the banner's ?geo=/?city= overrides fill in) and expose it as cookies for
   // the client-side location-campaign banner.
+  const h = request.headers
+
+  // Prefetch detection. `next-router-prefetch` alone is NOT reliable — it does
+  // not consistently survive to the edge, which let the App Router prefetch a
+  // page's whole nav and log a phantom view for every link. Check every signal:
+  // Next's own headers, the legacy `purpose`, and `Sec-Purpose` (Speculation
+  // Rules, which prefetches with Sec-Fetch-Dest: document).
+  const secPurpose = h.get('sec-purpose') || ''
+  const isPrefetch =
+    Boolean(h.get('next-router-prefetch')) ||
+    Boolean(h.get('x-middleware-prefetch')) ||
+    h.get('purpose') === 'prefetch' ||
+    secPurpose.includes('prefetch')
+
+  // Positive navigation test, rather than trusting prefetch headers to be
+  // absent. A real page load is Sec-Fetch-Dest: document; router prefetches and
+  // RSC payload fetches are 'empty'. Clients that send no Sec-Fetch-Dest at all
+  // (older Safari, curl, feed readers) fall back to "count it, unless it's an
+  // RSC fetch" so they aren't silently dropped.
+  const dest = h.get('sec-fetch-dest')
+  const isNavigation = dest ? dest === 'document' : !h.get('rsc')
+
+  // The admin dashboard renders the public nav and footer, so its own prefetches
+  // would otherwise show up as visits to every page on the site.
+  const fromAdmin = (() => {
+    const referer = h.get('referer')
+    if (!referer) return false
+    try {
+      return new URL(referer).pathname.startsWith('/admin')
+    } catch {
+      return false
+    }
+  })()
+
   const isPageView =
     request.method === 'GET' &&
     !pathname.startsWith('/api/') &&
     !pathname.startsWith('/_next/') &&
     !pathname.startsWith('/admin') &&
-    !request.headers.get('next-router-prefetch') &&
-    request.headers.get('purpose') !== 'prefetch'
+    !isPrefetch &&
+    isNavigation &&
+    !fromAdmin
 
   let pageView: Record<string, unknown> | null = null
 
@@ -180,23 +215,32 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Fire-and-forget page-view tracking (opt out with ANALYTICS_ENABLED=false).
+  // Page-view tracking (opt out with ANALYTICS_ENABLED=false). Handed to
+  // event.waitUntil so the edge runtime keeps the request alive until the write
+  // completes — a bare un-awaited fetch here gets cancelled once the response is
+  // returned, which silently dropped views (?ref= hits among them).
   if (pageView && process.env.ANALYTICS_ENABLED !== 'false') {
-    trackPageView(request.nextUrl.origin, pageView)
+    event.waitUntil(trackPageView(request.nextUrl.origin, pageView))
   }
 
   return response
 }
 
-function trackPageView(origin: string, data: Record<string, unknown>) {
-  // Non-blocking: the /api/analytics route persists it (forwarding to the
-  // Cloudflare Worker in production). Failures are swallowed — analytics must
-  // never affect the page response.
-  fetch(`${origin}/api/analytics`, {
+function trackPageView(
+  origin: string,
+  data: Record<string, unknown>
+): Promise<void> {
+  // Non-blocking for the visitor, but awaited by the runtime: the
+  // /api/analytics route persists it (forwarding to the Cloudflare Worker in
+  // production). Failures are swallowed — analytics must never affect the page
+  // response.
+  return fetch(`${origin}/api/analytics`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
-  }).catch(() => {})
+  })
+    .then(() => undefined)
+    .catch(() => undefined)
 }
 
 export const config = {
