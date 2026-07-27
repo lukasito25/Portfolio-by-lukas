@@ -31,6 +31,7 @@ export type BotReason =
   | 'email-scanner'
   | 'headless'
   | 'empty-ua'
+  | 'unknown-ua'
 
 export interface UaClassification {
   isBot: boolean
@@ -97,7 +98,14 @@ export function classifyUserAgent(ua?: string | null): UaClassification {
   // Prefer the extension-matched name — it identifies "curl" or "Chrome
   // Headless" where the base parser only sees a generic browser.
   const name = extended.browser.name || base.browser.name || ''
-  const flagged = isBot(agent) || /headless|phantomjs/i.test(name)
+
+  // An unidentifiable user agent is itself the signal: every mainstream browser
+  // resolves to a known name, so a string nothing recognises is a script with a
+  // custom UA. Caught in production when a hand-rolled "curl-selfcheck" agent
+  // slipped past the pattern lists.
+  const unknown = name === ''
+
+  const flagged = isBot(agent) || /headless|phantomjs/i.test(name) || unknown
 
   let botReason: BotReason | null = null
   if (flagged) {
@@ -107,7 +115,7 @@ export function classifyUserAgent(ua?: string | null): UaClassification {
       botReason =
         REASON_HINTS.find(([pattern]) => pattern.test(name))?.[1] ??
         REASON_HINTS.find(([pattern]) => pattern.test(agent))?.[1] ??
-        'crawler'
+        (unknown ? 'unknown-ua' : 'crawler')
     }
   }
 
