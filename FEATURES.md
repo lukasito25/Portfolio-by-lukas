@@ -24,12 +24,12 @@ This document provides a comprehensive overview of all features available in the
 - **Contact Preview**: Quick contact information and social links
 - **Geo campaign banner**: Non-invasive bottom-corner banner that routes geo-matched recruiters to the relevant fit-brief page (see below)
 
-#### Private recruiter fit-brief pages (`/fifa`, `/genius`, `/qualcomm`, `/archlet`, `/launchmetrics`)
+#### Private recruiter fit-brief pages (`/fifa`, `/genius`, `/qualcomm`, `/archlet`, `/launchmetrics`, `/qonto`)
 
 - **Role-tailored, `noindex`, unlisted** (not in nav or sitemap) — shared by direct link alongside a CV
-- **In-page language toggle**, chosen per role (EN/IT/DE, EN/DE/ES/IT on `/archlet`, EN/FR/IT/ES on `/launchmetrics`); cinematic hero; interactive requirement-match filter
-- **Hero is video or code-generated** — `/fifa` and `/genius` use a looping clip; `/qualcomm` renders an animated SVG circuit board, `/archlet` a bid lattice and `/launchmetrics` a data-flow pipeline, none of which ship binary assets
-- **Per-page brand accent** (`/genius` electric blue, `/qualcomm` Arduino teal, `/archlet` indigo, `/launchmetrics` mint) via a scoped `[data-brand]` override
+- **In-page language toggle**, chosen per role (EN/IT/DE, EN/DE/ES/IT on `/archlet`, EN/FR/IT/ES on `/launchmetrics`, EN/FR/IT/DE/ES on `/qonto`); cinematic hero; interactive requirement-match filter
+- **Hero is video or code-generated** — `/fifa` and `/genius` use a looping clip; `/qualcomm` renders an animated SVG circuit board, `/archlet` a bid lattice, `/launchmetrics` a data-flow pipeline and `/qonto` a transaction categoriser, none of which ship binary assets
+- **Per-page brand accent** (`/genius` electric blue, `/qualcomm` Arduino teal, `/archlet` indigo, `/launchmetrics` mint, `/qonto` yellow) via a scoped `[data-brand]` override
 - Cloned per role from the `/fifa` template — full guide in **`CUSTOM_RECRUITER_PAGES.md`**
 
 #### About Page (`/about`)

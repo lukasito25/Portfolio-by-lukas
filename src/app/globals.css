@@ -203,6 +203,38 @@
   );
 }
 
+/* =============================================
+   PER-PAGE BRAND OVERRIDE — Qonto
+   Qonto's identity is black + electric yellow
+   #ffe017, which is unreadable on white (~1.2:1).
+   Light mode uses a deep gold of the same hue;
+   dark mode gets the real brand yellow.
+   Scoped to [data-brand='qonto'].
+   ============================================= */
+[data-brand='qonto'] {
+  --accent: #8a6a00;
+  --accent-soft: rgba(138, 106, 0, 0.12);
+  --accent-glow: rgba(138, 106, 0, 0.22);
+  --accent-contrast: #ffffff;
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(138, 106, 0, 0.12),
+    transparent 70%
+  );
+}
+
+.dark [data-brand='qonto'] {
+  --accent: #ffe017;
+  --accent-soft: rgba(255, 224, 23, 0.14);
+  --accent-glow: rgba(255, 224, 23, 0.28);
+  --accent-contrast: #0a0a0a;
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(255, 224, 23, 0.14),
+    transparent 70%
+  );
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-background-elevated: var(--background-elevated);
