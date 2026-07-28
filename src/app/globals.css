@@ -235,6 +235,36 @@
   );
 }
 
+/* =============================================
+   PER-PAGE BRAND OVERRIDE — Kraken
+   Kraken's purple #7132f5 clears 6:1 on white, so
+   it is used as-is in light mode; dark mode gets a
+   lifted violet. Scoped to [data-brand='kraken'].
+   ============================================= */
+[data-brand='kraken'] {
+  --accent: #7132f5;
+  --accent-soft: rgba(113, 50, 245, 0.1);
+  --accent-glow: rgba(113, 50, 245, 0.22);
+  --accent-contrast: #ffffff;
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(113, 50, 245, 0.12),
+    transparent 70%
+  );
+}
+
+.dark [data-brand='kraken'] {
+  --accent: #a98bff;
+  --accent-soft: rgba(169, 139, 255, 0.14);
+  --accent-glow: rgba(169, 139, 255, 0.3);
+  --accent-contrast: #101114;
+  --hero-vignette: radial-gradient(
+    ellipse 80% 60% at 50% -10%,
+    rgba(169, 139, 255, 0.16),
+    transparent 70%
+  );
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-background-elevated: var(--background-elevated);
