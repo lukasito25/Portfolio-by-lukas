@@ -242,20 +242,28 @@ matching, non-dismissed campaign wins.
 - `/?campaign=<id>` — force-preview a specific campaign (bypasses geo, dismissal, **and** the
   time window) — also the way to preview it in production from the wrong country
 
-### Live campaigns (example)
+### Campaigns as of 2026-07-28
 
-| id                    | Country | Links to         | Starts     | Auto-expires |
-| --------------------- | ------- | ---------------- | ---------- | ------------ |
-| `launchmetrics-fr`    | FR      | `/launchmetrics` | 2026-07-27 | 2026-09-27   |
-| `archlet-es`          | ES      | `/archlet`       | 2026-07-27 | 2026-09-27   |
-| `qualcomm-arduino-it` | IT      | `/qualcomm`      | 2026-07-27 | 2026-09-27   |
-| `genius-sports-uk`    | GB      | `/genius`        | 2026-07-25 | 2026-09-25   |
-| `fifa-ch`             | CH      | `/fifa`          | 2026-07-08 | 2026-09-08   |
+**`/admin/campaigns` is the source of truth** — this table is a snapshot, not something to
+keep in sync by hand.
 
-> **Two roles in one country?** Archlet's HQ is Zurich, but `fifa-ch` already owns `CH`
-> until it auto-expires, and the first match wins. Rather than shadow the FIFA banner,
-> `archlet-es` targets only the Spain-remote offices. Once `fifa-ch` lapses, adding `'CH'`
-> to `archlet-es` picks Switzerland up cleanly.
+| id                    | Country | Links to         | Starts     | Auto-expires | State      |
+| --------------------- | ------- | ---------------- | ---------- | ------------ | ---------- |
+| `qonto-de-es`         | DE, ES  | `/qonto`         | 2026-07-28 | 2026-09-28   | Live       |
+| `qualcomm-arduino-it` | IT      | `/qualcomm`      | 2026-07-27 | 2026-09-27   | Live       |
+| `launchmetrics-fr`    | FR      | `/launchmetrics` | 2026-07-27 | 2026-09-27   | Live       |
+| `genius-sports-uk`    | GB      | `/genius`        | 2026-07-25 | 2026-09-25   | Live       |
+| `fifa-ch`             | CH      | `/fifa`          | 2026-07-08 | 2026-09-08   | Live       |
+| `archlet-es`          | ES      | `/archlet`       | 2026-07-27 | 2026-09-27   | **Paused** |
+
+> **Two roles in one country?** The first matching live campaign wins, so one country can
+> only carry one banner. Qonto's offices include Paris and Milan, but `launchmetrics-fr` and
+> `qualcomm-arduino-it` hold `FR` and `IT`, so `qonto-de-es` took Berlin and Barcelona
+> instead. To hand a country over, pause the incumbent in the panel — that is what the
+> switch is for, rather than juggling dates.
+>
+> Archlet is paused (unsuccessful application) but kept as a record, which is also why `ES`
+> was free for Qonto.
 
 ## 10. Analytics — did the recruiter look, and from where?
 
