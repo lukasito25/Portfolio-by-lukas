@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import LogoutButton from '@/components/LogoutButton'
 import { dataService } from '@/lib/data-service'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, Megaphone } from 'lucide-react'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -445,6 +445,39 @@ export default function AdminDashboard() {
                     className="font-medium text-red-700 hover:text-red-900"
                   >
                     View Dashboard →
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Campaign Banners Card */}
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-emerald-500 rounded-md flex items-center justify-center">
+                      <Megaphone className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Campaign Banners
+                      </dt>
+                      <dd className="text-lg font-medium text-gray-900">
+                        Geo-targeted CTAs
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-5 py-3">
+                <div className="text-sm">
+                  <Link
+                    href="/admin/campaigns"
+                    className="font-medium text-emerald-700 hover:text-emerald-900"
+                  >
+                    Manage Campaigns →
                   </Link>
                 </div>
               </div>

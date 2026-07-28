@@ -179,7 +179,31 @@ the right fit brief with a small, non-invasive banner targeted by the visitor's 
   short-lived, client-readable cookies (`visitor-country` / `visitor-city`).
 - Mounted once in **`src/app/page.tsx`** (`<LocationCampaignBanner />`) — homepage only.
 
-### Add a campaign (one object)
+### Managing campaigns — `/admin/campaigns`
+
+Campaigns live in the **`LocationCampaign` table** (D1 in production, Prisma locally) and are
+managed from the admin panel — create, edit, activate/deactivate and delete, **no deploy
+needed**. Each row shows its real state:
+
+| Badge       | Meaning                                                             |
+| ----------- | ------------------------------------------------------------------- |
+| **Live**    | Switched on _and_ inside its time window — visitors see it          |
+| **Paused**  | Switched off in the panel                                           |
+| **Expired** | Switched on but past `startsAt` + 2 months (or an earlier `endsAt`) |
+
+The banner reads `GET /api/campaigns`, which returns only campaigns that are both active and
+in-window, cached for 30s at the edge — so a toggle is visible within about half a minute.
+Admin writes go through `/api/admin-proxy/campaigns` → Worker `/campaigns` (session-checked
+by the proxy, secret-checked by the Worker).
+
+`src/lib/location-campaigns.ts` is still the **seed and the runtime fallback**: if the store
+is unreachable or empty, the banner uses the compiled-in list rather than disappearing. The
+types and the `MAX_CAMPAIGN_DURATION_MONTHS` cap live there too.
+
+> **Two roles in one country?** The first matching live campaign wins. Pause one rather than
+> juggling dates.
+
+### Add a campaign in code (the fallback list)
 
 ```ts
 // src/lib/location-campaigns.ts → locationCampaigns[]

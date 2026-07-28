@@ -211,6 +211,27 @@ model Newsletter {
   unsubscribedAt DateTime?
 }
 
+/// Geo-targeted homepage banner routing recruiters to a fit-brief page.
+/// Managed from /admin/campaigns; seeded from src/lib/location-campaigns.ts,
+/// which remains the fallback if the database is unreachable.
+model LocationCampaign {
+  id        String   @id // stable slug, e.g. "launchmetrics-fr"
+  countries String // comma-separated ISO 3166-1 alpha-2, e.g. "FR,IT"
+  cities    String? // optional comma-separated city names
+  startsAt  String // YYYY-MM-DD — drives the 2-month auto-expiry cap
+  endsAt    String? // optional earlier end; clamped to the cap
+  isActive  Boolean  @default(true) // the admin on/off switch
+  eyebrow   String
+  title     String
+  body      String
+  ctaLabel  String
+  href      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
 model Analytics {
   id          String   @id @default(cuid())
 
