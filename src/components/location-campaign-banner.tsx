@@ -20,12 +20,16 @@ function getCookie(name: string): string {
   return match ? decodeURIComponent(match[1]) : ''
 }
 
-function pickCampaign(country: string, city: string): LocationCampaign | null {
+function pickCampaign(
+  pool: LocationCampaign[],
+  country: string,
+  city: string
+): LocationCampaign | null {
   const c = country.toUpperCase()
   const ci = city.toLowerCase()
   const now = new Date()
   return (
-    locationCampaigns.find(campaign => {
+    pool.find(campaign => {
       if (!isCampaignActive(campaign, now)) return false
       const countryOk =
         !campaign.countries?.length ||
@@ -36,6 +40,25 @@ function pickCampaign(country: string, city: string): LocationCampaign | null {
       return countryOk && cityOk
     }) ?? null
   )
+}
+
+/**
+ * Campaigns are managed at /admin/campaigns and served from /api/campaigns,
+ * already filtered to those active right now. The compiled-in list is the
+ * fallback if that request fails, so the banner degrades to slightly stale copy
+ * rather than disappearing.
+ */
+async function loadCampaigns(): Promise<LocationCampaign[]> {
+  try {
+    const res = await fetch('/api/campaigns')
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const data = await res.json()
+    return Array.isArray(data.campaigns) && data.campaigns.length
+      ? data.campaigns
+      : locationCampaigns
+  } catch {
+    return locationCampaigns
+  }
 }
 
 /**
@@ -58,30 +81,46 @@ export function LocationCampaignBanner() {
 
   // Resolve which campaign (if any) applies to this visitor.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const forcedId = params.get('campaign')
+    let cancelled = false
 
-    let match: LocationCampaign | null = null
-    if (forcedId) {
-      match = locationCampaigns.find(c => c.id === forcedId) ?? null
-    } else {
-      const country = params.get('geo') || getCookie('visitor-country')
-      const city = params.get('city') || getCookie('visitor-city')
-      match = pickCampaign(country, city)
-    }
+    const resolve = async () => {
+      const params = new URLSearchParams(window.location.search)
+      const forcedId = params.get('campaign')
+      const pool = await loadCampaigns()
+      if (cancelled) return
 
-    if (!match) return
-    // Never show the banner on the page it points to.
-    if (window.location.pathname.startsWith(match.href)) return
-    // Respect a previous dismissal (unless force-testing a campaign).
-    if (!forcedId) {
-      try {
-        if (localStorage.getItem(DISMISS_PREFIX + match.id)) return
-      } catch {
-        /* localStorage unavailable — show anyway */
+      let match: LocationCampaign | null = null
+      if (forcedId) {
+        // Force-preview looks in the compiled-in list too, so a campaign that
+        // is paused or outside its window can still be checked.
+        match =
+          pool.find(c => c.id === forcedId) ??
+          locationCampaigns.find(c => c.id === forcedId) ??
+          null
+      } else {
+        const country = params.get('geo') || getCookie('visitor-country')
+        const city = params.get('city') || getCookie('visitor-city')
+        match = pickCampaign(pool, country, city)
       }
+
+      if (!match) return
+      // Never show the banner on the page it points to.
+      if (window.location.pathname.startsWith(match.href)) return
+      // Respect a previous dismissal (unless force-testing a campaign).
+      if (!forcedId) {
+        try {
+          if (localStorage.getItem(DISMISS_PREFIX + match.id)) return
+        } catch {
+          /* localStorage unavailable — show anyway */
+        }
+      }
+      setCampaign(match)
     }
-    setCampaign(match)
+
+    resolve()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // Reveal only after the visitor scrolls past (most of) the hero.
