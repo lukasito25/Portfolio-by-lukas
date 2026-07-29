@@ -132,6 +132,13 @@ Say the next role is at UEFA — target URL `/uefa`:
 6. **Ship.** No route config, DB, or nav change needed — visit `/uefa`. It stays unlisted
    because nothing links to it and it's absent from the sitemap.
 
+> **Code-generated hero? Round your coordinates.** Every brief after `/fifa` and `/genius`
+> draws its hero in SVG instead of shipping a video. If those coordinates come from
+> `Math.cos`/`Math.sin`, round them before they reach the DOM
+> (`Math.round(n * 100) / 100`) — Node and the browser can differ in the final bits, and
+> React reports the difference as a hydration mismatch in the console. `/ubp` shipped with
+> this bug and it was caught in the pre-PR browser check.
+
 ## 7. Customization knobs & things to rename
 
 - **The "football" and "blockchain" sections are FIFA-specific by name, not by purpose.**
@@ -264,6 +271,13 @@ keep in sync by hand.
 >
 > Archlet is paused (unsuccessful application) but kept as a record, which is also why `ES`
 > was free for Qonto.
+>
+> **`/ubp` has no campaign**: the role is London / Geneva / Zurich, and `CH` is held by
+> `fifa-ch` until 2026-09-08 with `GB` held by `genius-sports-uk` until 2026-09-25. Pause
+> one of those to free the country, or share the brief by direct link — which is how most
+> of these pages reach a recruiter anyway. **Check the live list before assuming a country
+> is free** (`curl -s localhost:3000/api/campaigns`); the table above is a snapshot and the
+> array in `src/lib/location-campaigns.ts` is only the fallback seed.
 
 ## 10. Analytics — did the recruiter look, and from where?
 

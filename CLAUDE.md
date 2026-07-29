@@ -55,7 +55,7 @@ NextAuth.js with JWT sessions (no DB adapter) at `src/app/api/auth/[...nextauth]
 
 ### Routes
 
-Public: `/` (home), `/about`, `/work`, `/projects/[slug]`, `/blog`, `/skills`, `/contact`, `/privacy`. Private recruiter "fit brief" pages (noindex, unlisted, not in nav/sitemap): `/fifa`, `/genius`. Recruiter personalization: `/r/[slug]`. SEO: `sitemap.xml`, `robots.txt`.
+Public: `/` (home), `/about`, `/work`, `/projects/[slug]`, `/blog`, `/skills`, `/contact`, `/privacy`. Private recruiter "fit brief" pages (noindex, unlisted, not in nav/sitemap): `/fifa`, `/genius`, `/qualcomm`, `/archlet`, `/launchmetrics`, `/qonto`, `/kraken`, `/ubp`. Recruiter personalization: `/r/[slug]`. SEO: `sitemap.xml`, `robots.txt`.
 
 ### Recruiter fit-brief pages, geo banners & analytics
 
@@ -75,6 +75,19 @@ Three linked subsystems for the job hunt — fully documented in **`CUSTOM_RECRU
 - `next.config.ts`: `output: 'standalone'`, ESLint ignored during builds, `cloudflare-api/` excluded from webpack.
 - Path alias `@/*` → `src/*` (tsconfig).
 - Add remote image hosts to `next.config.ts` `images.remotePatterns` before using them.
+
+## Shipping
+
+Use the **`ship` skill** (`/ship`) for anything going to production — it runs branch → verify → localhost review → PR → merge → deploy → verify live. Project specifics it needs:
+
+- **Branches**: `feat/…`, `fix/…`, `docs/…` off `main`. PRs are **squash-merged**; merging `main` auto-deploys to Vercel. Never push to `main` directly.
+- **Verification gate**: `npm run type-check` + `npm run build`. The Playwright suites (`tests/`) contain stale admin specs and are not a ship gate — verify what changed with targeted checks instead.
+- **Kill the dev server before `npm run build`.** Both write `.next` and the collision corrupts it; the failure masquerades as a code error. Recovery: kill dev → `rm -rf .next` → rebuild.
+- **`cloudflare-api/` is git-ignored** and never appears in a PR diff. If a change touches Worker routes or D1 schema, `wrangler deploy` + apply the migration **before** merging the app — the app writes columns the Worker must already have.
+- **Probing production writes analytics rows.** Poll deploys with `HEAD`, or send a `pv_optout=1` cookie. `GET` requests from `curl` are recorded as visits (now classified as bots, but still stored).
+- **New fit-brief page checklist**: `noindex` in `layout.tsx`, absent from nav and `sitemap.xml`, `[data-brand]` accent passing WCAG AA in both themes, every claim traceable — see `CUSTOM_RECRUITER_PAGES.md`.
+- **Never assert campaign availability from memory.** One country carries one banner, so before proposing or creating a campaign, query the live list — `curl -s localhost:3000/api/campaigns` (or the `/admin/campaigns` panel) — and check the target countries against it. The compiled-in list in `src/lib/location-campaigns.ts` is only the fallback seed and can be out of date.
+- **Docs in the same PR**: `CUSTOM_RECRUITER_PAGES.md` for briefs/campaigns, `ANALYTICS.md` for tracking, `ADMIN.md` for admin UI, this file for rules or commands.
 
 ## Environment
 
