@@ -55,7 +55,7 @@ NextAuth.js with JWT sessions (no DB adapter) at `src/app/api/auth/[...nextauth]
 
 ### Routes
 
-Public: `/` (home), `/about`, `/work`, `/projects/[slug]`, `/blog`, `/skills`, `/contact`, `/privacy`. Private recruiter "fit brief" pages (noindex, unlisted, not in nav/sitemap): `/fifa`, `/genius`, `/qualcomm`, `/archlet`, `/launchmetrics`, `/qonto`, `/kraken`, `/ubp`. Recruiter personalization: `/r/[slug]`. SEO: `sitemap.xml`, `robots.txt`.
+Public: `/` (home), `/about`, `/work`, `/projects/[slug]`, `/blog`, `/skills`, `/contact`, `/privacy`. Private recruiter "fit brief" pages (noindex, unlisted, not in nav/sitemap): `/fifa`, `/genius`, `/qualcomm`, `/archlet`, `/launchmetrics`, `/qonto`, `/kraken`, `/ubp`, `/scandit`. Recruiter personalization: `/r/[slug]`. SEO: `sitemap.xml`, `robots.txt`.
 
 ### Recruiter fit-brief pages, geo banners & analytics
 
