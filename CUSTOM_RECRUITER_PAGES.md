@@ -132,6 +132,14 @@ Say the next role is at UEFA — target URL `/uefa`:
 6. **Ship.** No route config, DB, or nav change needed — visit `/uefa`. It stays unlisted
    because nothing links to it and it's absent from the sitemap.
 
+> **Long page? Trade prose for interaction.** `/zalando` is the reference for a senior reader
+> who will not scroll through seven paragraphs: the role map is a card deck on native
+> scroll-snap (`overflow-x-auto snap-x snap-mandatory`, arrows + dot indicators derived from
+> `scrollLeft`), the spotlight is a short lede plus four numbered pillar cards, and the
+> profile-match panels are tabbed so only one set of rows renders. Content-side this needs
+> `roleMapSection.hint`, a `tag` per role item and `spotlight.pillars[]` instead of one long
+> `spotlight.body`. It cut that page from 18.1 kB to 15.1 kB.
+>
 > **A brand accent is optional.** Most briefs re-theme to the company's colours via
 > `[data-brand='…']`, but that is a choice, not a requirement. `/scandit` runs on the site's
 > own Ink & Signal palette and reuses the homepage hero composition (`HeroCanvas` + vignette
