@@ -298,6 +298,9 @@
   );
 }
 
+/* No per-page brand override for /scandit — that brief deliberately runs on
+   the site's own Ink & Signal palette and hero composition. */
+
 @theme inline {
   --color-background: var(--background);
   --color-background-elevated: var(--background-elevated);

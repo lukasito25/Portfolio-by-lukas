@@ -132,6 +132,14 @@ Say the next role is at UEFA — target URL `/uefa`:
 6. **Ship.** No route config, DB, or nav change needed — visit `/uefa`. It stays unlisted
    because nothing links to it and it's absent from the sitemap.
 
+> **A brand accent is optional.** Most briefs re-theme to the company's colours via
+> `[data-brand='…']`, but that is a choice, not a requirement. `/scandit` runs on the site's
+> own Ink & Signal palette and reuses the homepage hero composition (`HeroCanvas` + vignette
+>
+> - `grain`) — no override, no `data-brand` attribute. Reach for that when the company's
+>   palette would fight the site or when a bespoke hero starts to read as generated rather
+>   than designed.
+>
 > **Code-generated hero? Round your coordinates.** Every brief after `/fifa` and `/genius`
 > draws its hero in SVG instead of shipping a video. If those coordinates come from
 > `Math.cos`/`Math.sin`, round them before they reach the DOM
