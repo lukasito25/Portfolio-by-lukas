@@ -413,15 +413,21 @@ export const defaultContent: SiteContent = {
         "Built the platform from scratch as sole founder and PM. Designed a scoring engine (now on v6) that calibrates differently per position rather than using a one-size-fits-all model. Built multi-tenant architecture with DB-level isolation so clubs can't see each other's data. Added a shared Central & Eastern European player pool so clubs benefit from data they didn't have to collect themselves.",
       impact:
         '4 clubs onboarded in beta. 395 players profiled across the platform (239 private per club, 156 in the shared CEE pool). Scoring engine running natively across all 9 positions with 168 unit tests passing. The anchor tenant (MFK Ružomberok) is using it in their real scouting workflow.',
+      // Mirrors the repo's own stack table: React 18 + TS + Vite, shadcn/ui on
+      // Tailwind, Supabase for Postgres/Auth/Edge Functions/Storage, hosted on
+      // Cloudflare Pages.
       technologies: [
         'React',
         'TypeScript',
+        'Vite',
         'Supabase',
         'PostgreSQL',
-        'Tailwind CSS',
-        'Lovable',
         'Row-Level Security',
         'Edge Functions',
+        'Tailwind CSS',
+        'shadcn/ui',
+        'Cloudflare Pages',
+        'Lovable',
       ],
       metrics: [
         { label: 'Live club tenants', value: '4' },
@@ -524,12 +530,17 @@ export const defaultContent: SiteContent = {
           title: 'StagStrat — algorithmic trading platform',
           description:
             'Running product for an algorithmic trading startup targeting institutional investors. Built the roadmap from scratch, launched the website, and cut feature lead time by 80% by tightening how we scope and prioritise work. Also ran the SEO strategy for the site, which grew organic traffic by 40%.',
+          // Kept in step with the repo: React/TS/Vite front end, Supabase for
+          // Postgres + Deno edge functions, a Python agent suite on Vertex AI,
+          // TradeStation for market data, Docker for deployment.
           technologies: [
             'React',
+            'TypeScript',
+            'Vite',
+            'Supabase (Postgres + Edge Functions)',
             'Python',
-            'FastAPI',
-            'PostgreSQL',
-            'WebSocket',
+            'Vertex AI',
+            'TradeStation API',
             'Docker',
           ],
           metrics: [

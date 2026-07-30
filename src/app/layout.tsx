@@ -106,7 +106,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://portfolio-by-lukas.vercel.app',
     languages: {
-      'en-US': 'https://lukashosala.com',
+      // Self-referential: this site is the en-US version of itself. It must not
+      // point at lukashosala.com — that is the separate football-coaching site,
+      // and naming it here told search engines the two were translations.
+      'en-US': 'https://portfolio-by-lukas.vercel.app',
     },
   },
   category: 'Portfolio',
