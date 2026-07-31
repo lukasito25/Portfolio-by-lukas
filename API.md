@@ -12,10 +12,22 @@ This document provides comprehensive documentation for the Cloudflare Workers AP
 The API uses Bearer token authentication for admin operations. Include the API secret in the Authorization header:
 
 ```http
-Authorization: Bearer portfolio-api-secret-2024
+Authorization: Bearer $API_SECRET
 ```
 
-**Note**: Only admin routes require authentication. Public routes (projects, blog posts) are accessible without authentication.
+`$API_SECRET` is the shared secret held by the Worker (`wrangler secret`) and by Vercel. **Never commit the real value** — these examples use the variable deliberately.
+
+**Note**: Only admin routes and write operations require authentication. Public reads — projects, blog posts, **content sections** and **live campaigns** — are accessible without it.
+
+### How the Next.js app calls this API
+
+| Caller                                                                    | Path taken                                                                              |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Browser, public read (`GET /content/:section`, `/projects`, `/campaigns`) | **Direct** to the Worker (CORS allows the site origin)                                  |
+| Browser, `/admin*` or a content **write**                                 | Via `/api/admin-proxy/*`, which checks the NextAuth session then attaches `$API_SECRET` |
+| Server-side (route handlers)                                              | Direct, carrying `$API_SECRET` from the environment                                     |
+
+Routing public reads through the proxy returns **401 for anonymous visitors** — see `CLAUDE.md` for the incident this caused.
 
 ## 📁 API Structure
 
@@ -321,7 +333,7 @@ Get all projects (including drafts) for admin management.
 **Headers:**
 
 ```http
-Authorization: Bearer portfolio-api-secret-2024
+Authorization: Bearer $API_SECRET
 ```
 
 **Response:**
@@ -352,7 +364,7 @@ Create a new project.
 **Headers:**
 
 ```http
-Authorization: Bearer portfolio-api-secret-2024
+Authorization: Bearer $API_SECRET
 Content-Type: application/json
 ```
 
@@ -399,7 +411,7 @@ Update an existing project.
 **Headers:**
 
 ```http
-Authorization: Bearer portfolio-api-secret-2024
+Authorization: Bearer $API_SECRET
 Content-Type: application/json
 ```
 
@@ -424,7 +436,7 @@ Delete a project.
 **Headers:**
 
 ```http
-Authorization: Bearer portfolio-api-secret-2024
+Authorization: Bearer $API_SECRET
 ```
 
 **Response:**
@@ -442,7 +454,7 @@ Get all blog posts (including drafts) for admin management.
 **Headers:**
 
 ```http
-Authorization: Bearer portfolio-api-secret-2024
+Authorization: Bearer $API_SECRET
 ```
 
 **Response:**
@@ -464,6 +476,62 @@ Authorization: Bearer portfolio-api-secret-2024
   ]
 }
 ```
+
+## 📄 Content Endpoints
+
+Site copy for `homepage`, `about`, `work` and `blog`. Stored one row per top-level key in the `Content` table; `GET` rebuilds the nested object by splitting each `key` on `.` (rows are applied in `key ASC` order, so a `hero` object row and a `hero.title` row would collide — keep one shape per section).
+
+### GET /content/:section — public, no auth
+
+```http
+GET /content/homepage
+```
+
+```json
+{ "success": true, "content": { "hero": { … }, "competencies": [ … ], "cta": { … } } }
+```
+
+Returns `{"content": {}}` for an unknown or empty section, which makes the app fall back to `defaultContent`.
+
+### POST /content/:section — authenticated
+
+Upserts a whole section, flattening nested objects and storing arrays as JSON.
+
+```http
+POST /content/homepage
+Authorization: Bearer $API_SECRET
+
+{ "content": { "hero": { … }, "competencies": [ … ] } }
+```
+
+### PUT /content/:section/:key — authenticated
+
+Updates a single key (`.` may be written as `_` in the URL). Body: `{ "value": …, "type": "text" | "json" | "array" }`.
+
+> There is **no DELETE endpoint**. Removing a stale key requires `wrangler d1 execute`.
+
+## 📣 Campaign Endpoints
+
+Geo-targeted homepage banners, managed at `/admin/campaigns`.
+
+| Method   | Path             | Auth | Purpose                                                                                                |
+| -------- | ---------------- | ---- | ------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/campaigns`     | —    | All campaigns (the Next.js `/api/campaigns` filters to live ones)                                      |
+| `POST`   | `/campaigns`     | ✅   | Create. `id` is a slug, `href` must be internal, `startsAt` must be `YYYY-MM-DD`; duplicate id → `409` |
+| `PUT`    | `/campaigns/:id` | ✅   | Update any subset, including `isActive`                                                                |
+| `DELETE` | `/campaigns/:id` | ✅   | Remove                                                                                                 |
+
+One country carries one banner: the first live match wins. Every campaign auto-expires two months after `startsAt` regardless of `isActive`.
+
+## 📈 Analytics Endpoints
+
+| Method | Path                 | Auth | Purpose                                                                        |
+| ------ | -------------------- | ---- | ------------------------------------------------------------------------------ |
+| `POST` | `/analytics`         | ✅   | Record a page view (called by `/api/analytics`, itself fed by `middleware.ts`) |
+| `POST` | `/analytics/confirm` | ✅   | Client beacon marking a view human, with dwell + scroll depth                  |
+| `GET`  | `/analytics/summary` | ✅   | Dashboard aggregates: pages, countries, refs, sources, devices, visitors, bots |
+
+`summary` accepts `days`, `includeOwner=1` and `includeBots=1`. Owner visits and classified bots are excluded by default. See **`ANALYTICS.md`**.
 
 ## 📊 Database Schema
 
@@ -562,7 +630,7 @@ curl https://portfolio-api.hosala-lukas.workers.dev/projects
 **Admin Operation:**
 
 ```bash
-curl -H "Authorization: Bearer portfolio-api-secret-2024" \
+curl -H "Authorization: Bearer $API_SECRET" \
      https://portfolio-api.hosala-lukas.workers.dev/admin/projects
 ```
 
@@ -580,7 +648,7 @@ const adminResponse = await fetch(
   'https://portfolio-api.hosala-lukas.workers.dev/admin/projects',
   {
     headers: {
-      Authorization: 'Bearer portfolio-api-secret-2024',
+      Authorization: 'Bearer $API_SECRET',
     },
   }
 )

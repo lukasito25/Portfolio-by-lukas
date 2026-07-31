@@ -1,5 +1,7 @@
 # Enhanced Project Case Studies for Lukáš Hošala Portfolio
 
+> **Status:** Draft material, not shipped copy. The live wording is in `src/lib/content-config.ts` and the D1 `Content` table. Where the two disagree, this file is wrong.
+
 ## 1. StagStrat Algorithmic Trading Platform (2025-Present)
 
 **Role:** Head of Product | **Company:** StagStrat | **Location:** Remote, Leeds UK

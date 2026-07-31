@@ -1,8 +1,10 @@
 # Admin Panel Authentication & Functionality Verification Report
 
+> **Status:** Historical snapshot — admin verification of 22 January 2026. Predates the campaign manager, the analytics dashboard and the content-proxy fix. Kept as a record; **not an accurate description of the app today**.
+
 **Date:** January 22, 2026
 **Test Environment:** http://localhost:3001
-**Admin Credentials Tested:** hosala.lukas@gmail.com / admin123
+**Admin Credentials Tested:** <ADMIN_EMAIL> / <ADMIN_PASSWORD>
 
 ## Executive Summary
 
@@ -14,15 +16,15 @@ The comprehensive testing suite confirms that all major admin panel authenticati
 
 ### Core Functionality Tests ✅ 7/7 PASSED
 
-| Test Category                | Status  | Details                                                     |
-| ---------------------------- | ------- | ----------------------------------------------------------- |
-| Login Page Access            | ✅ PASS | Admin login page loads correctly                            |
-| Login with Valid Credentials | ✅ PASS | Successfully logs in with hosala.lukas@gmail.com / admin123 |
-| Dashboard Loading            | ✅ PASS | Admin dashboard loads and displays properly                 |
-| No Authentication Errors     | ✅ PASS | No 401 errors during normal operations                      |
-| Admin Cards Visibility       | ✅ PASS | All 8 admin cards display correctly                         |
-| Editor Page Access           | ✅ PASS | Admin editor is accessible after login                      |
-| API Proxy Functionality      | ✅ PASS | API calls properly route through /api/admin-proxy           |
+| Test Category                | Status  | Details                                                    |
+| ---------------------------- | ------- | ---------------------------------------------------------- |
+| Login Page Access            | ✅ PASS | Admin login page loads correctly                           |
+| Login with Valid Credentials | ✅ PASS | Successfully logs in with <ADMIN_EMAIL> / <ADMIN_PASSWORD> |
+| Dashboard Loading            | ✅ PASS | Admin dashboard loads and displays properly                |
+| No Authentication Errors     | ✅ PASS | No 401 errors during normal operations                     |
+| Admin Cards Visibility       | ✅ PASS | All 8 admin cards display correctly                        |
+| Editor Page Access           | ✅ PASS | Admin editor is accessible after login                     |
+| API Proxy Functionality      | ✅ PASS | API calls properly route through /api/admin-proxy          |
 
 ### Security Tests ✅ 3/3 PASSED
 

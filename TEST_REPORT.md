@@ -1,5 +1,7 @@
 # Comprehensive Portfolio Application Test Report
 
+> **Status:** Historical snapshot — Playwright run of 6 January 2026, before the Ink & Signal redesign, the recruiter fit briefs, the campaign manager and the analytics pipeline. Kept as a record; **not an accurate description of the app today**.
+
 **Application URL**: http://localhost:3001
 **Test Date**: January 6, 2026
 **Test Environment**: Local Development
@@ -14,7 +16,7 @@ The portfolio application for Lukáš Hošala is functional with both public por
 ### 1. Admin Panel Functionality
 
 - **Login System**: ✅ Working correctly
-  - Credentials: `lukas.hosala@gmail.com` / `admin123`
+  - Credentials: `lukas.hosala@gmail.com` / `<ADMIN_PASSWORD>`
   - Successfully redirects to `/admin` after authentication
   - Protected routes properly redirect unauthenticated users
 

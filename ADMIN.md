@@ -143,16 +143,25 @@ The main dashboard provides a comprehensive overview with:
 
 #### 4. 📈 Analytics Dashboard (`/admin/analytics`)
 
-- **Purpose**: Comprehensive site analytics and visitor insights
+- **Purpose**: Self-owned visitor analytics, stored in Cloudflare D1 (complements Vercel Web Analytics)
 - **Features**:
-  - **Overview Metrics**: Total views, visitors, projects, and blog posts
-  - **Views Over Time**: 7-day trend analysis with visual charts
-  - **Recent Page Views**: Real-time visitor activity tracking
-  - **Popular Projects**: Most viewed projects with engagement metrics
-  - **Popular Blog Posts**: Top-performing blog content
-  - **Performance Insights**: Page load times and user experience metrics
-  - **Export Functionality**: Data export for external analysis
-  - **Real-time Updates**: Live analytics with automatic refresh
+  - **Header counts**: total views, with _"X of yours hidden"_ and _"Y bots hidden"_ — owner visits and classified bots are excluded by default and revealed with a toggle
+  - **Pages × country × `?ref=`**: per-page breakdown including which tagged recruiter link was opened, plus average dwell and scroll depth
+  - **Sources**: referrer host and UTM parameters, with self-referrals collapsed to `direct`
+  - **Devices**: browser, OS and device type
+  - **Visitors**: unique sessions, pages per visit, new vs returning
+  - **Recent visits**: individual rows badged `you`, `bot: <reason>` or `confirmed`
+- **Notes**: `?ref=` is captured on **any** page, not only fit briefs, and the "Recruiter links" panel totals each ref across all paths — use a unique token per application (`?ref=zalando-li`) for clean attribution. Full detail in **`ANALYTICS.md`**.
+
+#### 4b. 📣 Campaign Manager (`/admin/campaigns`)
+
+- **Purpose**: Start, pause and edit the geo-targeted homepage banners that route recruiters to a fit brief — without a deploy
+- **Features**:
+  - Create, edit, activate/deactivate and delete campaigns stored in the D1 `LocationCampaign` table
+  - Each row reports **Live** (on and in-window), **Paused** (switched off) or **Expired** (on but past the two-month cap)
+  - Preview link `/?campaign=<id>` bypasses geo, dismissal and the time window so copy can be checked before going live
+  - Validation: internal `href` only, `YYYY-MM-DD` dates, duplicate slug rejected
+- **Rules**: one country carries **one** banner (first live match wins), and every campaign auto-retires two months after `startsAt` even if left switched on. Before creating one, check the live list — `curl -s localhost:3000/api/campaigns` — rather than assuming a country is free.
 
 #### 5. 🛠️ Technologies Management
 

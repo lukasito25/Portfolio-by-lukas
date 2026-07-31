@@ -272,19 +272,30 @@ matching, non-dismissed campaign wins.
 - `/?campaign=<id>` — force-preview a specific campaign (bypasses geo, dismissal, **and** the
   time window) — also the way to preview it in production from the wrong country
 
-### Campaigns as of 2026-07-28
+### Campaigns as of 2026-07-31
 
 **`/admin/campaigns` is the source of truth** — this table is a snapshot, not something to
-keep in sync by hand.
+keep in sync by hand. To check the live state without opening the panel:
+`curl -s https://portfolio-by-lukas.vercel.app/api/campaigns`.
 
 | id                    | Country | Links to         | Starts     | Auto-expires | State      |
 | --------------------- | ------- | ---------------- | ---------- | ------------ | ---------- |
-| `qonto-de-es`         | DE, ES  | `/qonto`         | 2026-07-28 | 2026-09-28   | Live       |
+| `zalando-de`          | DE      | `/zalando`       | 2026-07-30 | 2026-09-30   | Live       |
+| `qonto-de-es`         | ES      | `/qonto`         | 2026-07-28 | 2026-09-28   | Live       |
 | `qualcomm-arduino-it` | IT      | `/qualcomm`      | 2026-07-27 | 2026-09-27   | Live       |
 | `launchmetrics-fr`    | FR      | `/launchmetrics` | 2026-07-27 | 2026-09-27   | Live       |
 | `genius-sports-uk`    | GB      | `/genius`        | 2026-07-25 | 2026-09-25   | Live       |
 | `fifa-ch`             | CH      | `/fifa`          | 2026-07-08 | 2026-09-08   | Live       |
 | `archlet-es`          | ES      | `/archlet`       | 2026-07-27 | 2026-09-27   | **Paused** |
+
+> **`qonto-de-es` now serves only `ES`.** Germany was handed to `zalando-de` on 2026-07-31 by
+> editing Qonto's countries rather than pausing it, so Barcelona traffic still reaches
+> `/qonto`. The id keeps its original slug — renaming would mean delete-and-recreate and
+> would un-dismiss the banner for anyone who had closed it.
+>
+> **`/ubp`, `/scandit` and `/rocken` have no campaign**: all three are Swiss-facing and `CH`
+> is held by `fifa-ch` until 2026-09-08. They travel by direct link, which is how most briefs
+> reach a recruiter anyway.
 
 > **Two roles in one country?** The first matching live campaign wins, so one country can
 > only carry one banner. Qonto's offices include Paris and Milan, but `launchmetrics-fr` and

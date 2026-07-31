@@ -43,7 +43,7 @@ Or visit: https://generate-secret.vercel.app/32
 ## Current Development Credentials
 
 - Email: `admin@example.com`
-- Password: `admin123`
+- Password: `<ADMIN_PASSWORD>`
 
 ## How the Production Setup Works
 

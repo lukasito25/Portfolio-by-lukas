@@ -57,7 +57,7 @@ Once deployed, test these endpoints:
 - **Projects**: `https://portfolio-by-lukas.vercel.app/work` (should show project from D1)
 - **Admin Login**: `https://portfolio-by-lukas.vercel.app/admin/login`
   - Email: `admin@example.com`
-  - Password: `admin123`
+  - Password: `<ADMIN_PASSWORD>`
 
 ## 🔄 How the Integration Works
 
@@ -93,7 +93,7 @@ Once deployed, test these endpoints:
 
 The D1 database is pre-populated with:
 
-- **Admin User**: `admin@example.com` / `admin123`
+- **Admin User**: `admin@example.com` / `<ADMIN_PASSWORD>`
 - **Sample Project**: Portfolio Website
 - **Technologies**: React, Next.js, TypeScript, etc.
 - **Blog Post**: Cloudflare D1 tutorial
