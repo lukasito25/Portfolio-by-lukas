@@ -132,6 +132,13 @@ Say the next role is at UEFA — target URL `/uefa`:
 6. **Ship.** No route config, DB, or nav change needed — visit `/uefa`. It stays unlisted
    because nothing links to it and it's absent from the sitemap.
 
+> **Leading in a language other than English?** `/rocken` is the reference: `Locale` is
+> ordered `'de' | 'en'`, `useState<Locale>('de')` sets the default, the `locales` array puts
+> DE first, and the page syncs `document.documentElement.lang` to the active locale in an
+> effect (restoring it on unmount) because `src/app/layout.tsx` hard-codes `lang="en"`.
+> Claim no CEFR level the owner has not stated — say which languages are his and let the
+> page being written in one of them make the point.
+>
 > **Long page? Trade prose for interaction.** `/zalando` is the reference for a senior reader
 > who will not scroll through seven paragraphs: the role map is a card deck on native
 > scroll-snap (`overflow-x-auto snap-x snap-mandatory`, arrows + dot indicators derived from
