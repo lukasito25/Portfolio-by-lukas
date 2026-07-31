@@ -17,6 +17,12 @@ The portfolio includes a comprehensive analytics system that tracks user engagem
 
 Storage is chosen by `NODE_ENV` + presence of `API_SECRET`: **production** → Worker/D1; **local dev** → Prisma/SQLite (so the dashboard works in dev). The only Vercel env var required is `API_SECRET` (matching the Worker's secret); the Worker URL has a built-in fallback. The Worker lives in `cloudflare-api/` (git-ignored) and is deployed with `wrangler` — see **CUSTOM_RECRUITER_PAGES.md §10** for the full flow, the `?ref=` convention, and the `sink` troubleshooting field.
 
+### `?ref=` is captured on every page, not just fit briefs
+
+`middleware.ts` reads the parameter unconditionally — the only exclusions are the general ones (non-`GET`, `/api/*`, `/_next/*`, `/admin/*`, prefetches, non-navigations, opted-out visitors). So `/?ref=x` and `/about?ref=x` are recorded exactly like `/kraken?ref=x`.
+
+The dashboard shows this two ways: the **Recruiter links** panel groups by `ref` alone, **totalling each token across all paths**, while the pages table groups by `path, ref`. Reusing one token across several briefs therefore pools the count — use a unique token per application (`?ref=zalando-li`, `?ref=ubp-email`) if you want per-application attribution. Values are stored verbatim, so a typo creates its own row.
+
 ## Built-in Analytics Features
 
 ### Current Analytics Capabilities

@@ -134,6 +134,16 @@ This document provides a comprehensive overview of all features available in the
 
 ## 🔐 Admin Panel & Content Management
 
+> **Content edits reach visitors.** Public pages read `/content/:section` directly from the Cloudflare Worker; only `/admin` endpoints and content **writes** pass through the session-gated `/api/admin-proxy`. The `homepage`, `about`, `work` and `blog` sections live in the D1 `Content` table and override `defaultContent` in `src/lib/content-config.ts`, which stays as the fallback. Until 2026-07-31 every public read was proxied and 401'd, so the CMS was inert and the site ran entirely on the hardcoded file.
+
+### 📣 Campaign Manager (`/admin/campaigns`)
+
+- **Start and stop banners without a deploy** — geo-targeted homepage campaigns stored in D1
+- **Honest state**: rows show **Live** (on and in-window), **Paused** (off) or **Expired** (on but past the two-month cap), because "active" alone would mislead
+- **Preview** `/?campaign=<id>` bypasses geo, dismissal and the window so copy can be checked first
+- **Guardrails**: internal `href` only, `YYYY-MM-DD` validation, duplicate slug → 409, and a hard two-month auto-expiry so a forgotten banner retires itself
+- **One country, one banner** — the first live match wins; hand a country over by editing or pausing the incumbent
+
 ### 🏛️ Admin Dashboard
 
 - **Overview Statistics**: Real-time content and visitor metrics

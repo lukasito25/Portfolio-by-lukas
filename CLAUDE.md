@@ -39,6 +39,10 @@ All data access goes through `src/lib/data-service.ts` (`DataService` class). Ea
 
 Key rule: **Prisma is server-only.** In the browser the service throws rather than touching Prisma; the API is the only browser data path. When adding data access, add a method to `DataService`, don't call Prisma or the API client directly from components.
 
+Second rule: **only authenticated calls go through the proxy.** `src/lib/api-client.ts` routes a browser request to `/api/admin-proxy` when the endpoint starts with `/admin`, or when it is a `/content` **write**. Everything else — including all public `GET /content/:section` reads — goes straight to the Worker, which serves content without auth and already allows this origin via CORS. Routing public reads through the proxy makes every anonymous visitor 401 and silently fall back to `defaultContent`, which is what happened until 2026-07-31.
+
+**The CMS is live.** `homepage`, `about`, `work` and `blog` are stored in the D1 `Content` table (one row per top-level key) and were synced to match `defaultContent` exactly. Whichever you edit, update the other or they drift.
+
 ### Backend / API layer
 
 - `src/app/api/*` — Next.js route handlers (contact, projects, analytics, health, auth).
@@ -51,7 +55,9 @@ Prisma schema at `prisma/schema.prisma` (SQLite locally, `output = ../src/genera
 
 ### Auth
 
-NextAuth.js with JWT sessions (no DB adapter) at `src/app/api/auth/[...nextauth]/route.ts`, config in `src/lib/auth.ts`. Admin credentials via `ADMIN_EMAIL` / `ADMIN_PASSWORD`. Admin UI lives under `src/app/admin/*`.
+NextAuth.js with JWT sessions (no DB adapter) at `src/app/api/auth/[...nextauth]/route.ts`, config in `src/lib/auth.ts`. Admin UI lives under `src/app/admin/*`.
+
+Credentials are **verified against the database**, not against env vars: `authorize()` → `dataService.verifyAdminCredentials()` → D1 `/auth/verify` in production, bcrypt against Prisma locally. `ADMIN_EMAIL` / `ADMIN_PASSWORD` are only read by the **seed scripts** (`prisma/seed.ts`, `scripts/init-production-db.mjs`) that create that user — and they fall back to a weak default if unset, so set them before seeding any environment.
 
 ### Routes
 

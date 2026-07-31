@@ -97,7 +97,7 @@ This portfolio uses a sophisticated hybrid architecture that seamlessly switches
 
    # Admin Credentials (Required)
    ADMIN_EMAIL="admin@example.com"
-   ADMIN_PASSWORD="admin123"
+   ADMIN_PASSWORD="<choose-a-strong-password>"
 
    # AI Features (Optional)
    OPENAI_API_KEY="your-openai-api-key"
@@ -140,7 +140,7 @@ Visit [http://localhost:3000](http://localhost:3000) to see your portfolio.
 - Navigate to `/admin/login`
 - Use credentials from your `.env` file:
   - **Email**: `admin@example.com`
-  - **Password**: `admin123`
+  - **Password**: `<ADMIN_PASSWORD>`
 
 ### Admin Panel Features
 
@@ -150,11 +150,14 @@ Once logged in, you have access to:
 - **📝 Content Editor** (`/admin/editor`) - Rich text editor for creating/editing content
 - **🗂️ Project Management** (`/admin/projects`) - Full CRUD operations for portfolio projects
 - **📰 Blog Management** (`/admin/blog`) - Complete blog post management system
-- **📈 Analytics Dashboard** (`/admin/analytics`) - Page views by **page × country × recruiter `?ref=` link**, plus new-vs-returning and recent visits (self-owned, stored in Cloudflare D1; complements Vercel Web Analytics). See `ANALYTICS.md`.
+- **📣 Campaign Manager** (`/admin/campaigns`) - Create, edit, pause and delete the geo-targeted homepage banners without a deploy. Rows report **Live / Paused / Expired**, and each campaign auto-expires two months after `startsAt`
+- **📈 Analytics Dashboard** (`/admin/analytics`) - Page views by **page × country × recruiter `?ref=` link**, plus new-vs-returning, device/browser, bot filtering and recent visits (self-owned, stored in Cloudflare D1; complements Vercel Web Analytics). See `ANALYTICS.md`.
+
+**Content edits reach visitors.** Public pages read `/content/:section` straight from the Worker; only `/admin` endpoints and content **writes** go through `/api/admin-proxy` (which requires a session). Sections stored in D1 — `homepage`, `about`, `work`, `blog` — override `defaultContent` in `src/lib/content-config.ts`, which remains the fallback if the Worker is unreachable. Keep the two in step: editing one without the other lets them drift.
 
 ### Private recruiter fit-brief pages
 
-Private, `noindex`, unlisted pages that map experience to a specific job (`/fifa`, `/genius`), with EN/IT/DE and geo-targeted homepage banners that route recruiters to the right one. Tag links per recruiter with `?ref=name` for attribution in the analytics dashboard. Full guide: **`CUSTOM_RECRUITER_PAGES.md`**.
+Private, `noindex`, unlisted pages that map experience to a specific job — currently **`/fifa`, `/genius`, `/qualcomm`, `/archlet`, `/launchmetrics`, `/qonto`, `/kraken`, `/ubp`, `/scandit`, `/zalando`, `/rocken`** — each with an in-page language toggle (one leads in German), and geo-targeted homepage banners that route recruiters to the right one. Tag links per recruiter with `?ref=name` for attribution in the analytics dashboard; the parameter is captured on **any** page, not just briefs. Full guide: **`CUSTOM_RECRUITER_PAGES.md`**.
 
 ### Production
 
@@ -203,16 +206,23 @@ npm run db:init-production # Initialize production database
 │   │   ├── admin/             # Admin panel and authentication
 │   │   │   ├── analytics/     # Analytics dashboard
 │   │   │   ├── blog/          # Blog management
+│   │   │   ├── campaigns/     # Geo-campaign banner manager
 │   │   │   ├── editor/        # Content editor
 │   │   │   ├── login/         # Authentication
 │   │   │   └── projects/      # Project management
 │   │   ├── api/               # API routes
+│   │   │   ├── admin-proxy/   # Session-gated proxy to the Worker (admin + writes)
+│   │   │   ├── analytics/     # Page-view ingest + dashboard summary
+│   │   │   ├── campaigns/     # Public read of live campaigns
 │   │   │   └── auth/          # NextAuth endpoints
 │   │   ├── about/             # About page
 │   │   ├── blog/              # Blog listing
 │   │   ├── contact/           # Contact page
+│   │   ├── privacy/           # Privacy notice + analytics opt-out
 │   │   ├── skills/            # Skills showcase
-│   │   └── work/              # Work experience
+│   │   ├── work/              # Work experience
+│   │   ├── fifa/ genius/ …    # Private recruiter fit briefs (11, noindex)
+│   │   └── r/[slug]/          # Recruiter personalization
 │   ├── components/            # Reusable UI components
 │   │   ├── ui/                # Radix UI components
 │   │   ├── admin/             # Admin-specific components
@@ -261,7 +271,7 @@ npm run db:init-production # Initialize production database
 DATABASE_URL="file:./dev.db"
 NEXTAUTH_SECRET="your-nextauth-secret"
 ADMIN_EMAIL="admin@example.com"
-ADMIN_PASSWORD="admin123"
+ADMIN_PASSWORD="<choose-a-strong-password>"
 ```
 
 **Production (Vercel)**:
@@ -361,10 +371,23 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions for bo
 - [PRODUCTION_SETUP.md](./PRODUCTION_SETUP.md) - Production environment setup
 - [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - Step-by-step deployment instructions
 
+### Job-search subsystems
+
+- [CUSTOM_RECRUITER_PAGES.md](./CUSTOM_RECRUITER_PAGES.md) - Building a fit brief, the geo-campaign banners, and the `?ref=` link convention
+- [ANALYTICS.md](./ANALYTICS.md) - Self-owned analytics: capture, bot filtering, the dashboard, and the Worker deploy step
+
 ### Technical Documentation
 
-- [BUILD_FIX.md](./BUILD_FIX.md) - Build issues and solutions
 - [scripts/setup-d1.md](./scripts/setup-d1.md) - D1 database setup instructions
+
+### Historical — kept as a record, not current
+
+These describe earlier states of the app and each carries a status banner saying so. Do not treat them as a description of how things work today.
+
+- [TEST_REPORT.md](./TEST_REPORT.md) · [QA_TESTING_REPORT.md](./QA_TESTING_REPORT.md) · [ADMIN_PANEL_TEST_REPORT.md](./ADMIN_PANEL_TEST_REPORT.md) - point-in-time test runs (Sep 2025 – Jan 2026)
+- [BUILD_FIX.md](./BUILD_FIX.md) - obsolete build workaround; `npm run build` passes
+- [REDESIGN_REVIEW_PANEL.md](./REDESIGN_REVIEW_PANEL.md) - record of the July 2026 redesign review
+- [enhanced-project-case-studies.md](./enhanced-project-case-studies.md) - draft copy, superseded by `content-config.ts` and the D1 `Content` table
 
 ## 🤝 Contributing
 

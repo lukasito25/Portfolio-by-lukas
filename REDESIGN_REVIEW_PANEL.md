@@ -1,5 +1,7 @@
 # Redesign Review Panel — July 2026
 
+> **Status:** A record of the July 2026 redesign review, not a maintained specification.
+
 The portfolio was redesigned (design system, motion, all public pages), then reviewed by four
 independent agent reviewers. A final reviewer — acting as the candidate himself, an experienced
 Senior PM — had binding decision authority. This document records those interactions and what

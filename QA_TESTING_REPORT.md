@@ -1,5 +1,7 @@
 # Portfolio QA Testing Report
 
+> **Status:** Historical snapshot — QA pass of 29 September 2025. Predates the redesign and every feature added since. Kept as a record; **not an accurate description of the app today**.
+
 _Generated: September 29, 2025_
 
 ## Executive Summary

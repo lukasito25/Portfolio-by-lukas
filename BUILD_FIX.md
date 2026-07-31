@@ -1,5 +1,7 @@
 # Quick Build Fix for Deployment
 
+> **Status:** Obsolete — this described a build failure that no longer occurs; `npm run build` passes. Kept only for the history of what was stripped out.
+
 The portfolio has some missing validation schemas and optional dependencies that are preventing the build. Here's a quick fix to get it deployed:
 
 ## Current Status
