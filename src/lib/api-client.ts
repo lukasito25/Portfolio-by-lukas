@@ -64,19 +64,27 @@ class ApiClient {
       throw ErrorFactory.createOfflineError()
     }
 
-    // Use admin proxy for admin routes when running in browser
     const method = options.method || 'GET'
-    const isAdminRoute =
-      endpoint.startsWith('/admin') || endpoint.startsWith('/content') // All content routes should use admin proxy when authenticated
-
     const isBrowser = typeof window !== 'undefined'
 
+    /* The admin proxy adds the API secret, but it also requires a NextAuth
+       session — so anything routed through it 401s for a public visitor.
+       Reading content is public (the Worker serves GET /content/:section
+       without auth, with CORS already allowing this origin), so only
+       /admin endpoints and content *writes* go through the proxy. Routing
+       public content reads through it made every visitor fall back to
+       defaultContent, which silently disabled the CMS. */
+    const needsProxy =
+      isBrowser &&
+      (endpoint.startsWith('/admin') ||
+        (endpoint.startsWith('/content') && method !== 'GET'))
+
     let url: string
-    if (isAdminRoute && isBrowser) {
-      // Use the Next.js admin proxy for authenticated routes
+    if (needsProxy) {
+      // Authenticated route: let the Next.js proxy attach the secret
       url = `/api/admin-proxy${endpoint}`
     } else {
-      // Use direct Cloudflare API for public routes or server-side calls
+      // Public route, or a server-side call that carries its own credentials
       url = `${this.baseUrl}${endpoint}`
     }
 
