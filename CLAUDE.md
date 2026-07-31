@@ -102,3 +102,17 @@ Copy `.env.example` → `.env`. Key vars: `DATABASE_URL`, `NEXT_PUBLIC_USE_API`,
 ## Reference docs
 
 Deeper topic docs exist at the repo root: `README.md`, `API.md`, `ADMIN.md`, `ANALYTICS.md`, `BACKEND_SETUP.md`, `DEPLOYMENT.md`, `FEATURES.md`, `AI_FEATURES_SETUP.md`.
+
+## Credentials
+
+The admin user lives in the database (D1 in production, Prisma locally) with a bcrypt hash — `ADMIN_EMAIL` / `ADMIN_PASSWORD` only seed it. **The seed scripts now refuse to run without `ADMIN_PASSWORD`** rather than falling back to a shared default, and they no longer print the password back to the console.
+
+To rotate the production admin password:
+
+```bash
+node -e "console.log(require('bcryptjs').hashSync(process.argv[1], 12))" '<new-password>'
+cd cloudflare-api && npx wrangler d1 execute portfolio-db --remote \
+  --command "UPDATE User SET password='<hash>', updatedAt=CURRENT_TIMESTAMP WHERE role='ADMIN'"
+```
+
+Then confirm with `POST /auth/verify` (200 for the new password, 401 for the old) and update `ADMIN_PASSWORD` in `.env` and in Vercel so future seeds match. Never commit a password or paste one into a doc.

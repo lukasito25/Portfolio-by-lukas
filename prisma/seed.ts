@@ -8,7 +8,13 @@ async function main() {
 
   // Create admin user
   const adminEmail = process.env.ADMIN_EMAIL || 'lukas.hosala@gmail.com'
-  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
+  const adminPassword = process.env.ADMIN_PASSWORD
+  if (!adminPassword) {
+    throw new Error(
+      'ADMIN_PASSWORD is not set. Seeding refuses to fall back to a shared default — ' +
+        'set it in .env (or the CI environment) before seeding.'
+    )
+  }
   const hashedPassword = await bcrypt.hash(adminPassword, 12)
 
   const admin = await prisma.user.upsert({
@@ -1621,7 +1627,7 @@ The goal isn't to eliminate uncertainty—it's to make better decisions under un
 
 🔑 Admin credentials:
 Email: ${adminEmail}
-Password: ${adminPassword}
+Password: (the value of ADMIN_PASSWORD)
 
 Make sure to change the admin password in production!
   `)

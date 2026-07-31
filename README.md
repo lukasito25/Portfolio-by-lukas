@@ -380,14 +380,7 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions for bo
 
 - [scripts/setup-d1.md](./scripts/setup-d1.md) - D1 database setup instructions
 
-### Historical — kept as a record, not current
-
-These describe earlier states of the app and each carries a status banner saying so. Do not treat them as a description of how things work today.
-
-- [TEST_REPORT.md](./TEST_REPORT.md) · [QA_TESTING_REPORT.md](./QA_TESTING_REPORT.md) · [ADMIN_PANEL_TEST_REPORT.md](./ADMIN_PANEL_TEST_REPORT.md) - point-in-time test runs (Sep 2025 – Jan 2026)
-- [BUILD_FIX.md](./BUILD_FIX.md) - obsolete build workaround; `npm run build` passes
-- [REDESIGN_REVIEW_PANEL.md](./REDESIGN_REVIEW_PANEL.md) - record of the July 2026 redesign review
-- [enhanced-project-case-studies.md](./enhanced-project-case-studies.md) - draft copy, superseded by `content-config.ts` and the D1 `Content` table
+> Six point-in-time documents (test runs from Sep 2025 – Jan 2026, an obsolete build workaround, the redesign review record and a copy draft) were removed on 2026-07-31 — they described states of the app that no longer exist. They remain in git history if ever needed: `git log --diff-filter=D --name-only`.
 
 ## 🤝 Contributing
 
