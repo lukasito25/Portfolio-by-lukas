@@ -15,6 +15,7 @@
  */
 
 import type * as z from 'zod/v4'
+import { sanitizeDeep } from './sanitize'
 
 export interface GenerationAttachment {
   /** e.g. "application/pdf", "image/png" */
@@ -140,5 +141,8 @@ export function validateAgainstSchema<S extends z.ZodType>(
       raw
     )
   }
-  return result.data as z.infer<S>
+  // Every provider funnels through here, which makes it the one place that can
+  // promise no generated text carries hidden characters into a document a
+  // recruiter opens. See sanitize.ts for why that matters more than it sounds.
+  return sanitizeDeep(result.data) as z.infer<S>
 }

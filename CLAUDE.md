@@ -80,8 +80,10 @@ Three linked subsystems for the job hunt — fully documented in **`CUSTOM_RECRU
 Turns one job posting into a fit brief (EN/IT/DE), a tailored CV and a cover
 letter. Documented in **`CUSTOM_RECRUITER_PAGES.md` §11**; admin UI in `ADMIN.md`.
 
-- **Provider**: his own **agent suite** by default (`~/Documents/Antigravity AI apps/agent-suite` — Gemini 2.5 Pro on his own keys, €0 on free tiers, ~$0.005/application). Start it before generating: `python3 -m uvicorn api_production:app --port 8099`. `AI_PROVIDER=anthropic` switches to Claude (needs `ANTHROPIC_API_KEY`). Implementations in `src/lib/ai/`; `getProvider()` is the only selection point.
-- **Two entry points, one pipeline**: `npx tsx scripts/apply.ts <url|file|->` from the terminal (writes .docx to a folder, reaches local services), or `/admin/applications` in the browser. Both write the same rows.
+- **Provider**: his own **agent suite** by default (`~/Documents/Antigravity AI apps/agent-suite` — Gemini 2.5 Pro on his own keys, ~$0.005/application), **deployed on Cloud Run** as service `agent-suite` in project `ai-agent-suite`, region `us-central1`. `AI_PROVIDER=anthropic` switches to Claude (needs `ANTHROPIC_API_KEY`). Implementations in `src/lib/ai/`; `getProvider()` is the only selection point.
+- **Where the suite runs decides how it is authorised.** `AGENT_SUITE_URL` unset → `127.0.0.1:8099`, i.e. `./start-local.sh` in the suite repo, no key needed because only that machine can reach it. Set to the Cloud Run URL → `AGENT_SUITE_KEY` becomes mandatory and must equal the service's `API_SECRET_KEY` (`gcloud secrets versions access latest --secret=agent-suite-api-key --project=ai-agent-suite`). The suite enforces this itself: `/api/v1/auth/session` is open on loopback and keyed whenever `K_SERVICE` is set, so a Cloud Run deploy cannot accidentally ship an open door to the Gemini quota.
+- **Never send a JWT to Cloud Run in the `Authorization` header.** Its front end sometimes tries to verify a bearer JWT as a Google ID token and rejects the request with an HTML 401 _before the container sees it_ (`The access token could not be verified`) — intermittently, so it survives a first test. The client sends the opaque shared key directly instead; the suite accepts it, and it can never be mistaken for a JWT.
+- **Two entry points, one pipeline**: `/admin/applications` in the browser (the normal path, works from Vercel now that the suite is deployed), or `npx tsx scripts/apply.ts <url|file|->` from the terminal (writes .docx to a folder). Both write the same rows.
 - **Two passes are mandatory**: Gemini rejects `response_schema` alongside `google_search` (_"Tool use with a response mime type is unsupported"_), so research runs first and structuring second. Anthropic is treated the same way.
 - **Extraction is deterministic where possible**: Greenhouse, Lever and Ashby return posting JSON (verified); Personio is written but unverified; everything else falls back to grounded research.
 - **Pipeline routes**: four session-gated routes under `src/app/api/admin/brief/` (`extract` → `generate-brief` → `translate` → `generate-documents`), orchestrated in sequence by the client so no single call approaches the function timeout.
@@ -119,7 +121,7 @@ Use the **`ship` skill** (`/ship`) for anything going to production — it runs 
 
 ## Environment
 
-Copy `.env.example` → `.env`. Key vars: `DATABASE_URL`, `NEXT_PUBLIC_USE_API`, `NEXT_PUBLIC_API_URL` (D1 Worker), `NEXTAUTH_SECRET`/`NEXTAUTH_URL`, `ADMIN_EMAIL`/`ADMIN_PASSWORD`, `AI_PROVIDER` + `AGENT_SUITE_URL` (application engine; `ANTHROPIC_API_KEY` only if `AI_PROVIDER=anthropic`), `OPENAI_API_KEY` (unused), `RESEND_API_KEY`/SMTP, `MIXPANEL_TOKEN`.
+Copy `.env.example` → `.env`. Key vars: `DATABASE_URL`, `NEXT_PUBLIC_USE_API`, `NEXT_PUBLIC_API_URL` (D1 Worker), `NEXTAUTH_SECRET`/`NEXTAUTH_URL`, `ADMIN_EMAIL`/`ADMIN_PASSWORD`, `AI_PROVIDER` + `AGENT_SUITE_URL` + `AGENT_SUITE_KEY` (application engine; `ANTHROPIC_API_KEY` only if `AI_PROVIDER=anthropic`), `OPENAI_API_KEY` (unused), `RESEND_API_KEY`/SMTP, `MIXPANEL_TOKEN`.
 
 ## Reference docs
 
