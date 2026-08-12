@@ -35,6 +35,10 @@ Rules:
   rather than inventing detail.
 - brandColorGuess: only fill this in if you actually know the company's brand
   colour. A guess that is wrong is worse than an empty string.
+- companyName: the brand's own casing, not whatever the source hands you. An
+  ATS API returns the URL slug ("qonto", "kraken"), and that name ends up in
+  the filename of a document sent to that company — so write "Qonto", "Kraken",
+  "adidas" (genuinely lowercase), "eBay". Match how the company writes itself.
 `.trim()
 
 export function extractResearchPrompt(url: string): string {
