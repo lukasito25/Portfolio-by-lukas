@@ -995,6 +995,300 @@ class DataService {
 
     throw new Error('Content updates require API connection')
   }
+
+  /* ---------------------------------------------------------------- *
+   * Generated fit briefs (/admin/applications → /brief/[slug])
+   *
+   * These are server-only. Unlike the public content methods they do not go
+   * through `apiClient`: the Worker's /briefs routes are secret-authenticated,
+   * and `apiClient` is the browser-safe client with no secret to send. The
+   * pattern mirrors src/app/api/campaigns/route.ts — read the Worker directly
+   * with API_SECRET on the server, choose Prisma when there is no secret (local
+   * dev), and never let either path reach the browser.
+   * ---------------------------------------------------------------- */
+
+  /**
+   * Development keeps generated briefs in local SQLite; everywhere else they
+   * live in D1.
+   *
+   * Note this deliberately differs from /api/campaigns, which keys on
+   * API_SECRET alone so the admin panel and the live banner can never disagree
+   * about what is running. Briefs have no such cross-environment coupling —
+   * both the panel and the page read the same store — and a brief drafted while
+   * experimenting locally must not land in production D1, where it would be one
+   * click from being published at a real URL.
+   */
+  private briefStore(): 'worker' | 'prisma' {
+    // Explicit override, set by `scripts/apply.ts --production`.
+    //
+    // Generation runs locally (it needs the agent suite on localhost), but a
+    // brief is only useful once it is at a URL a recruiter can open. Without
+    // this the two halves never meet: the draft lands in local SQLite while the
+    // live site reads D1 and returns 404.
+    const forced = process.env.BRIEF_STORE
+    if (forced === 'prisma') return 'prisma'
+    if (forced === 'worker') {
+      if (!process.env.API_SECRET) {
+        throw new Error(
+          'BRIEF_STORE=worker needs API_SECRET set — it is what authorises writes to the live database.'
+        )
+      }
+      return 'worker'
+    }
+
+    if (process.env.NODE_ENV === 'development') return 'prisma'
+    if (!process.env.API_SECRET) {
+      throw new Error(
+        'API_SECRET is required to read or write generated briefs outside development.'
+      )
+    }
+    return 'worker'
+  }
+
+  private async briefFetch(path: string, init?: RequestInit) {
+    const base = (
+      process.env.NEXT_PUBLIC_API_URL ||
+      'https://portfolio-api.hosala-lukas.workers.dev'
+    ).replace(/\/$/, '')
+
+    return fetch(`${base}/briefs${path}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.API_SECRET}`,
+        ...(init?.headers || {}),
+      },
+      cache: 'no-store',
+    })
+  }
+
+  /** Rehydrate a Prisma row (JSON stored as text) into the API's shape. */
+  private briefFromPrisma(row: any) {
+    const parse = (value: string, fallback: unknown) => {
+      try {
+        return JSON.parse(value)
+      } catch {
+        return fallback
+      }
+    }
+    return {
+      id: row.id,
+      slug: row.slug,
+      companyName: row.companyName,
+      roleTitle: row.roleTitle,
+      sourceUrl: row.sourceUrl ?? null,
+      sourceKind: row.sourceKind,
+      status: row.status,
+      previewToken: row.previewToken,
+      jobSpec: parse(row.jobSpec, {}),
+      content: parse(row.content, {}),
+      generatedContent: parse(row.generatedContent ?? '{}', {}),
+      cvContent: parse(row.cvContent, {}),
+      coverLetter: parse(row.coverLetter, {}),
+      brand: parse(row.brand, {}),
+      warnings: parse(row.warnings, []),
+      applicationStatus: row.applicationStatus ?? 'not_sent',
+      sentAt: row.sentAt ?? null,
+      sentVia: row.sentVia ?? null,
+      sentSnapshot: parse(row.sentSnapshot ?? '{}', {}),
+      outcomeNotes: row.outcomeNotes ?? null,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      publishedAt: row.publishedAt ?? null,
+    }
+  }
+
+  private assertServer(what: string) {
+    if (isBrowser) {
+      throw new Error(`${what} is server-only; call it through an API route`)
+    }
+  }
+
+  /**
+   * One brief by slug. Drafts resolve only when `token` matches their
+   * previewToken — enforced here and again in the Worker, so a missing check on
+   * one side cannot expose an unpublished brief.
+   */
+  async getBriefBySlug(slug: string, token?: string) {
+    this.assertServer('getBriefBySlug')
+
+    if (this.briefStore() === 'worker') {
+      const qs = token ? `?token=${encodeURIComponent(token)}` : ''
+      const res = await this.briefFetch(`/${encodeURIComponent(slug)}${qs}`)
+      if (res.status === 404) return null
+      if (!res.ok) throw new Error(`Brief fetch failed: ${res.status}`)
+      const { brief } = await res.json()
+      return brief
+    }
+
+    const row = await prisma.generatedBrief.findUnique({ where: { slug } })
+    if (!row) return null
+    if (row.status !== 'published' && token !== row.previewToken) return null
+    return this.briefFromPrisma(row)
+  }
+
+  /** Admin list. Summaries only — the content JSON is the bulk of a row. */
+  async listBriefs() {
+    this.assertServer('listBriefs')
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.briefFetch('')
+      if (!res.ok) throw new Error(`Brief list failed: ${res.status}`)
+      const { briefs } = await res.json()
+      return briefs
+    }
+
+    const rows = await prisma.generatedBrief.findMany({
+      orderBy: { updatedAt: 'desc' },
+    })
+    return rows.map(row => {
+      const brief = this.briefFromPrisma(row)
+      return {
+        id: brief.id,
+        slug: brief.slug,
+        companyName: brief.companyName,
+        roleTitle: brief.roleTitle,
+        sourceUrl: brief.sourceUrl,
+        sourceKind: brief.sourceKind,
+        status: brief.status,
+        previewToken: brief.previewToken,
+        locales: Object.keys(brief.content as Record<string, unknown>),
+        warningCount: (brief.warnings as unknown[]).length,
+        createdAt: brief.createdAt,
+        updatedAt: brief.updatedAt,
+        publishedAt: brief.publishedAt,
+      }
+    })
+  }
+
+  /** Full record by id, for the admin review screen. */
+  async getBriefById(id: string) {
+    this.assertServer('getBriefById')
+
+    if (this.briefStore() === 'worker') {
+      const list = await this.listBriefs()
+      const match = list.find((b: any) => b.id === id)
+      if (!match) return null
+      const res = await this.briefFetch(
+        `/${encodeURIComponent(match.slug)}?token=${encodeURIComponent(match.previewToken)}`
+      )
+      if (res.status === 404) return null
+      if (!res.ok) throw new Error(`Brief fetch failed: ${res.status}`)
+      const { brief } = await res.json()
+      return brief
+    }
+
+    const row = await prisma.generatedBrief.findUnique({ where: { id } })
+    return row ? this.briefFromPrisma(row) : null
+  }
+
+  async createBrief(data: any) {
+    this.assertServer('createBrief')
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.briefFetch('', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || `Brief create failed: ${res.status}`)
+      }
+      const { brief } = await res.json()
+      return brief
+    }
+
+    const row = await prisma.generatedBrief.create({
+      data: {
+        id: data.id,
+        slug: data.slug,
+        companyName: data.companyName ?? '',
+        roleTitle: data.roleTitle ?? '',
+        sourceUrl: data.sourceUrl ?? null,
+        sourceKind: data.sourceKind ?? 'text',
+        status: data.status ?? 'draft',
+        previewToken: data.previewToken,
+        jobSpec: JSON.stringify(data.jobSpec ?? {}),
+        content: JSON.stringify(data.content ?? {}),
+        generatedContent: JSON.stringify(data.generatedContent ?? {}),
+        cvContent: JSON.stringify(data.cvContent ?? {}),
+        coverLetter: JSON.stringify(data.coverLetter ?? {}),
+        brand: JSON.stringify(data.brand ?? {}),
+        warnings: JSON.stringify(data.warnings ?? []),
+      },
+    })
+    return this.briefFromPrisma(row)
+  }
+
+  async updateBrief(id: string, data: any) {
+    this.assertServer('updateBrief')
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.briefFetch(`/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || `Brief update failed: ${res.status}`)
+      }
+      const { brief } = await res.json()
+      return brief
+    }
+
+    const patch: Record<string, unknown> = {}
+    for (const field of [
+      'slug',
+      'companyName',
+      'roleTitle',
+      'sourceUrl',
+      'sourceKind',
+      'status',
+      'applicationStatus',
+      'sentVia',
+      'outcomeNotes',
+    ]) {
+      if (data[field] !== undefined) patch[field] = data[field]
+    }
+    if (data.sentAt !== undefined) {
+      patch.sentAt = data.sentAt ? new Date(data.sentAt) : null
+    }
+    for (const field of [
+      'jobSpec',
+      'content',
+      'generatedContent',
+      'cvContent',
+      'coverLetter',
+      'brand',
+      'warnings',
+      'sentSnapshot',
+    ]) {
+      if (data[field] !== undefined) patch[field] = JSON.stringify(data[field])
+    }
+    if (data.status === 'published') patch.publishedAt = new Date()
+    if (data.status === 'draft') patch.publishedAt = null
+
+    const row = await prisma.generatedBrief.update({
+      where: { id },
+      data: patch,
+    })
+    return this.briefFromPrisma(row)
+  }
+
+  async deleteBrief(id: string) {
+    this.assertServer('deleteBrief')
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.briefFetch(`/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) throw new Error(`Brief delete failed: ${res.status}`)
+      return { success: true }
+    }
+
+    await prisma.generatedBrief.delete({ where: { id } })
+    return { success: true }
+  }
 }
 
 export const dataService = new DataService()

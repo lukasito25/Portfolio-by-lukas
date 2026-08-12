@@ -16,6 +16,13 @@ echo "🌱 Seeding database..."
 npm run db:seed
 
 echo "🏗️ Building Next.js application..."
-npx next build
+# The script has no `set -e` because the seeding steps above are allowed to be
+# noisy without failing a deploy. The Next build is different: without this
+# check a compile error still exited 0 and printed "success", so `npm run build`
+# — the verification gate before shipping — passed on a broken app.
+if ! npx next build; then
+  echo "❌ Next.js build failed."
+  exit 1
+fi
 
 echo "✅ Build completed successfully!"

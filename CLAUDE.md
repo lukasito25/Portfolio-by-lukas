@@ -21,6 +21,10 @@ npm run db:seed        # tsx prisma/seed.ts
 npm run db:studio      # prisma studio
 npm run db:reset       # migrate reset + reseed
 
+node scripts/build-doc-templates.mjs   # rebuild templates/*.docx (CV + cover letter)
+node scripts/seed-example-brief.mjs    # seed a local /brief/[slug] fixture, prints a preview URL
+npx tsx scripts/apply.ts <url|file|->  # generate an application from the terminal
+
 npm run test:e2e       # Playwright against local (playwright.config.ts)
 npm run test:production # Playwright against production URL (playwright.config.production.ts)
 ```
@@ -61,7 +65,7 @@ Credentials are **verified against the database**, not against env vars: `author
 
 ### Routes
 
-Public: `/` (home), `/about`, `/work`, `/projects/[slug]`, `/blog`, `/skills`, `/contact`, `/privacy`. Private recruiter "fit brief" pages (noindex, unlisted, not in nav/sitemap): `/fifa`, `/genius`, `/qualcomm`, `/archlet`, `/launchmetrics`, `/qonto`, `/kraken`, `/ubp`, `/scandit`, `/zalando`, `/rocken`. Recruiter personalization: `/r/[slug]`. SEO: `sitemap.xml`, `robots.txt`.
+Public: `/` (home), `/about`, `/work`, `/projects/[slug]`, `/blog`, `/skills`, `/contact`, `/privacy`. Private recruiter "fit brief" pages (noindex, unlisted, not in nav/sitemap): `/fifa`, `/genius`, `/qualcomm`, `/archlet`, `/launchmetrics`, `/qonto`, `/kraken`, `/ubp`, `/scandit`, `/zalando`, `/rocken` — all hand-built. `/brief/[slug]` renders **generated** briefs from the database (same privacy rules; drafts 404 without `?preview=<token>`). Recruiter personalization: `/r/[slug]`. SEO: `sitemap.xml`, `robots.txt`.
 
 ### Recruiter fit-brief pages, geo banners & analytics
 
@@ -70,6 +74,24 @@ Three linked subsystems for the job hunt — fully documented in **`CUSTOM_RECRU
 - **Fit-brief pages** (`src/app/fifa/`, `src/app/genius/`) — private, `noindex`, self-contained pages (`page.tsx` + `layout.tsx` + `content.ts`, EN/IT/DE) that map experience to one job. Cloned per role from the `/fifa` template; `/genius` re-themes the accent via a page-scoped `[data-brand]` override in `globals.css`.
 - **Geo campaign banners** — `src/lib/location-campaigns.ts` (config registry, each entry has a required `startsAt` with a hard 2-month auto-expiry) + `src/components/location-campaign-banner.tsx` (bottom-corner banner, homepage only), routing geo-matched visitors to the right fit brief. Geo comes from `middleware.ts` (Vercel edge headers → client-readable cookies).
 - **Analytics** — Vercel Web Analytics (`<Analytics/>` in `layout.tsx`) **plus** self-owned tracking: `middleware.ts` captures geo + `?ref=`/UTM + a 90-day returning-visitor cookie → `POST /api/analytics` → Cloudflare Worker `/analytics` → D1. Dashboard at `/admin/analytics` (admin-only) reads `GET /api/analytics` → Worker `/analytics/summary`. Prod-vs-dev storage keys off `NODE_ENV` + `API_SECRET` (the only required Vercel env var; Worker URL has a built-in fallback). The Worker (`cloudflare-api/`, git-ignored) needs a manual `wrangler deploy` when its analytics code changes.
+
+### Application engine (`/admin/applications`)
+
+Turns one job posting into a fit brief (EN/IT/DE), a tailored CV and a cover
+letter. Documented in **`CUSTOM_RECRUITER_PAGES.md` §11**; admin UI in `ADMIN.md`.
+
+- **Provider**: his own **agent suite** by default (`~/Documents/Antigravity AI apps/agent-suite` — Gemini 2.5 Pro on his own keys, €0 on free tiers, ~$0.005/application). Start it before generating: `python3 -m uvicorn api_production:app --port 8099`. `AI_PROVIDER=anthropic` switches to Claude (needs `ANTHROPIC_API_KEY`). Implementations in `src/lib/ai/`; `getProvider()` is the only selection point.
+- **Two entry points, one pipeline**: `npx tsx scripts/apply.ts <url|file|->` from the terminal (writes .docx to a folder, reaches local services), or `/admin/applications` in the browser. Both write the same rows.
+- **Two passes are mandatory**: Gemini rejects `response_schema` alongside `google_search` (_"Tool use with a response mime type is unsupported"_), so research runs first and structuring second. Anthropic is treated the same way.
+- **Extraction is deterministic where possible**: Greenhouse, Lever and Ashby return posting JSON (verified); Personio is written but unverified; everything else falls back to grounded research.
+- **Pipeline routes**: four session-gated routes under `src/app/api/admin/brief/` (`extract` → `generate-brief` → `translate` → `generate-documents`), orchestrated in sequence by the client so no single call approaches the function timeout.
+- **Edit learning**: `generatedContent` holds the untouched first draft; saving an edit stores the diff, and later generations are shown those pairs. It is the strongest signal of his voice — better than any rule written in advance.
+- **Tracking**: `sentSnapshot` freezes exactly what was sent and is never rewritten.
+- **Honesty layer, and the reason this is usable at all**: `src/lib/career-facts.ts` is the only source the generator may draw on, `guardrails.ts` encodes the standing rules, and `validate.ts` verifies every citation. Blockers (unknown fact id, invented language level) refuse to publish. **When site content changes, update `career-facts.ts` with it.**
+- **Storage**: `GeneratedBrief` — local SQLite in development, D1 elsewhere. Deliberately unlike `/api/campaigns`, which keys on `API_SECRET`: a brief drafted locally must not land in production D1 one click from being published.
+- **Public reads go straight to the Worker**, never through `/api/admin-proxy` — see the rule above.
+- **Documents**: rendered on demand from `templates/*.docx` via docxtemplater. Rebuild the templates with `node scripts/build-doc-templates.mjs`; their placeholders are the contract with `src/lib/documents/schema.ts`.
+- **Generated hero art** is code-drawn and seeded from the slug. Round every computed coordinate — an unrounded `Math.cos` is a hydration mismatch (`/ubp` shipped with one).
 
 ### Other libs (`src/lib/`)
 
@@ -97,7 +119,7 @@ Use the **`ship` skill** (`/ship`) for anything going to production — it runs 
 
 ## Environment
 
-Copy `.env.example` → `.env`. Key vars: `DATABASE_URL`, `NEXT_PUBLIC_USE_API`, `NEXT_PUBLIC_API_URL` (D1 Worker), `NEXTAUTH_SECRET`/`NEXTAUTH_URL`, `ADMIN_EMAIL`/`ADMIN_PASSWORD`, `OPENAI_API_KEY`, `RESEND_API_KEY`/SMTP, `MIXPANEL_TOKEN`.
+Copy `.env.example` → `.env`. Key vars: `DATABASE_URL`, `NEXT_PUBLIC_USE_API`, `NEXT_PUBLIC_API_URL` (D1 Worker), `NEXTAUTH_SECRET`/`NEXTAUTH_URL`, `ADMIN_EMAIL`/`ADMIN_PASSWORD`, `AI_PROVIDER` + `AGENT_SUITE_URL` (application engine; `ANTHROPIC_API_KEY` only if `AI_PROVIDER=anthropic`), `OPENAI_API_KEY` (unused), `RESEND_API_KEY`/SMTP, `MIXPANEL_TOKEN`.
 
 ## Reference docs
 

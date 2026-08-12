@@ -417,3 +417,98 @@ curl -sX POST https://portfolio-by-lukas.vercel.app/api/analytics \
   -H 'content-type: application/json' -d '{"path":"/genius","ref":"probe"}'
 # → {"success":true,"sink":"worker-ok"}
 ```
+
+## 11. Generated briefs — the application engine
+
+Sections 1–8 describe how to build a fit brief **by hand**, which is how all
+eleven existing ones were made. Since August 2026 there is a second route:
+`/admin/applications` takes a job posting and produces the brief, a tailored CV
+and a cover letter in one pass.
+
+Both kinds coexist and neither affects the other.
+
+|          | Hand-built (`/fifa`, `/rocken`, …)          | Generated (`/brief/<slug>`)                                   |
+| -------- | ------------------------------------------- | ------------------------------------------------------------- |
+| Lives in | `src/app/<company>/` — three files          | The `GeneratedBrief` table (D1 in production, SQLite locally) |
+| URL      | `/company`                                  | `/brief/company`                                              |
+| Layout   | Bespoke per page                            | One shared scaffold, `src/components/fit-brief/`              |
+| Hero     | Video, canvas, or a hand-drawn SVG          | Code-drawn motif chosen per company                           |
+| Accent   | A `[data-brand='…']` block in `globals.css` | Inline custom properties, no deploy                           |
+| Ship     | PR → merge → deploy                         | Live the moment you press Publish                             |
+| Best for | A role worth a bespoke page                 | Everything else                                               |
+
+### The flow
+
+1. **Give it the posting** — a URL, a PDF, a screenshot, or pasted text.
+   - URL input goes through the model's own `web_fetch`/`web_search` rather than
+     a server-side fetch, because ATS pages render client-side. A plain fetch is
+     what came back empty on the ABB posting in August.
+2. **It writes the brief** in the posting's own language, then translates into
+   the other two. A German posting gets a German-first page with English as the
+   translation — the `/rocken` precedent, now automatic.
+3. **It writes the CV and cover letter**, reusing the brief's judgement so all
+   three tell one story: the letter's honest limit is the brief's gap section.
+4. **You review**, edit anything, and press **Publish**.
+
+### Privacy — the same guarantees as a hand-built brief
+
+- `robots: { index: false, follow: false }` in `src/app/brief/[slug]/layout.tsx`
+- Absent from `src/data/navigation.ts`, `src/app/sitemap.ts` and
+  `src/lib/seo.ts`'s `generateSitemap()`
+- **Drafts 404** for anyone without `?preview=<token>`, so an unfinished brief
+  cannot be found by guessing the URL
+
+### Traceability — why the output is usable
+
+The engine can only draw on `src/lib/career-facts.ts`. Every stat, role-map
+item, profile-match proof, CV bullet and cover-letter paragraph carries the fact
+ids backing it, and `src/lib/fit-brief/validate.ts` checks them. Anything it
+cannot trace becomes a warning in the review screen.
+
+The rules in `src/lib/fit-brief/guardrails.ts` are the corrections already made
+by hand during the July run, encoded so they do not have to be made again:
+
+- AI work is framed as **building solutions on Google AI Studio and Vertex AI**,
+  never as authoring models
+- The MFK Ružomberok scouting role is omitted from non-football applications
+- **No CEFR level or fluency claim** for any language — a Spanish brief had to be
+  corrected for exactly this
+- Turin is ~3 hours away, never less
+- The gap section is mandatory
+- No personal name in a `?ref=` tag
+
+### Changing the CV template
+
+`templates/cv-template.docx` and `templates/cover-letter-template.docx` are
+built by `node scripts/build-doc-templates.mjs`, so the layout is reviewable as
+code rather than an opaque binary. The placeholder names are the contract with
+`src/lib/documents/schema.ts` — change one and change the other in the same
+commit.
+
+To swap in a different design, either edit the script's layout, or mark up a
+real `.docx` with the same placeholders and drop it in. House style for the
+copy itself lives separately in `src/lib/documents/style-guide.ts`.
+
+### One-time setup
+
+```bash
+# The Worker owns the table in production and is git-ignored, so this runs
+# BEFORE the app is merged — the app writes columns the Worker must already have
+cd cloudflare-api
+npx wrangler d1 execute portfolio-db --remote --file=migrations/add_generated_briefs.sql
+npx wrangler deploy
+```
+
+Then set `ANTHROPIC_API_KEY` in `.env` and in the Vercel project (Production).
+Without it the panel returns a 503 explaining what is missing; nothing else on
+the site is affected.
+
+### Local development
+
+Generated briefs are stored in **local SQLite** during development and in D1
+everywhere else, so drafting an experiment locally cannot put a row in
+production. To exercise the route without spending an API call:
+
+```bash
+node scripts/seed-example-brief.mjs   # prints a preview URL
+```

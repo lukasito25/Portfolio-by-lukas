@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import LogoutButton from '@/components/LogoutButton'
 import { dataService } from '@/lib/data-service'
-import { RefreshCw, Megaphone } from 'lucide-react'
+import { RefreshCw, Megaphone, Sparkles } from 'lucide-react'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -445,6 +445,39 @@ export default function AdminDashboard() {
                     className="font-medium text-red-700 hover:text-red-900"
                   >
                     View Dashboard →
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Applications Card */}
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-indigo-500 rounded-md flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">
+                        Applications
+                      </dt>
+                      <dd className="text-lg font-medium text-gray-900">
+                        Brief, CV & cover letter
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-5 py-3">
+                <div className="text-sm">
+                  <Link
+                    href="/admin/applications"
+                    className="font-medium text-indigo-700 hover:text-indigo-900"
+                  >
+                    Generate from a posting →
                   </Link>
                 </div>
               </div>
