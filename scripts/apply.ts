@@ -86,12 +86,37 @@ const amber = (s: string) => `\x1b[33m${s}\x1b[0m`
 const red = (s: string) => `\x1b[31m${s}\x1b[0m`
 
 let stepNumber = 0
+let ticker: NodeJS.Timeout | null = null
+let startedAt = 0
+
+/**
+ * Steps take 20-90 seconds each. Without a visible clock a slow step and a
+ * hung one look identical from the terminal, which is exactly how a working
+ * run gets killed halfway through.
+ */
 function step(label: string) {
   stepNumber += 1
-  process.stdout.write(`${dim(`[${stepNumber}]`)} ${label}… `)
+  startedAt = Date.now()
+  const prefix = `${dim(`[${stepNumber}]`)} ${label}`
+  process.stdout.write(`${prefix}… `)
+
+  if (process.stdout.isTTY) {
+    ticker = setInterval(() => {
+      const secs = Math.round((Date.now() - startedAt) / 1000)
+      process.stdout.write(`\r${prefix}… ${dim(`${secs}s`)} `)
+    }, 1000)
+  }
 }
+
 function done(detail = '') {
-  process.stdout.write(`${green('done')}${detail ? dim(` ${detail}`) : ''}\n`)
+  if (ticker) {
+    clearInterval(ticker)
+    ticker = null
+  }
+  const secs = Math.round((Date.now() - startedAt) / 1000)
+  process.stdout.write(
+    `${green('done')}${dim(` ${secs}s`)}${detail ? dim(` · ${detail}`) : ''}\n`
+  )
 }
 
 /* ------------------------------------------------------------------ *
@@ -156,6 +181,23 @@ async function main() {
   console.log(
     `\n${bold('Application engine')} ${dim(`· provider: ${provider.name} · saving to ${toProduction ? 'LIVE database' : 'local database'}`)}\n`
   )
+
+  // Fail in seconds if the suite is not up, rather than partway through a
+  // multi-minute run.
+  if (provider.healthCheck) {
+    const health = await provider.healthCheck()
+    if (!health.ok) {
+      console.error(
+        `${red('The agent suite is not reachable')} — ${health.detail}.\n`
+      )
+      console.error(dim('  Start it in another terminal window:\n'))
+      console.error(
+        '    cd "/Users/lukashosala/Documents/Antigravity AI apps/agent-suite"'
+      )
+      console.error('    ./start-local.sh\n')
+      process.exit(1)
+    }
+  }
 
   /* -- 1. Read the posting ------------------------------------------ */
 
@@ -237,6 +279,33 @@ async function main() {
     ? (jobSpec.postingLanguage as Locale)
     : 'en'
 
+  // Create the draft NOW rather than at the end. Generation runs for minutes,
+  // and until the row exists /admin/applications shows nothing at all — which
+  // is indistinguishable from the run having died.
+  step('Creating the draft')
+  const slug = await uniqueSlug(slugify(jobSpec.companyName))
+  const token = previewToken()
+  const briefId = createId()
+
+  await dataService.createBrief({
+    id: briefId,
+    slug,
+    companyName: jobSpec.companyName,
+    roleTitle: jobSpec.roleTitle,
+    sourceUrl,
+    sourceKind,
+    status: 'draft',
+    previewToken: token,
+    jobSpec,
+    content: {},
+    generatedContent: {},
+    cvContent: {},
+    coverLetter: {},
+    brand: {},
+    warnings: [],
+  })
+  done(`visible in the admin panel as "${slug}"`)
+
   const editLearning = buildEditLearningPrompt(await recentEdits())
   if (editLearning) {
     console.log(
@@ -265,6 +334,15 @@ async function main() {
     ...checkBrand(briefResult.brand),
   ]
 
+  // Save after each stage. A run interrupted at any point leaves a usable
+  // draft rather than nothing.
+  await dataService.updateBrief(briefId, {
+    content,
+    generatedContent: content,
+    brand: briefResult.brand,
+    warnings: sortWarnings(warnings),
+  })
+
   /* -- 3. Translate -------------------------------------------------- */
 
   if (!onlyPrimaryLocale) {
@@ -280,6 +358,11 @@ async function main() {
       usage = addUsage(usage, tUsage)
       content[locale] = translated
       warnings = [...warnings, ...validateBriefContent(translated, locale)]
+      await dataService.updateBrief(briefId, {
+        content,
+        generatedContent: content,
+        warnings: sortWarnings(warnings),
+      })
       done()
     }
   }
@@ -336,29 +419,6 @@ async function main() {
   }
 
   /* -- 5. Store ------------------------------------------------------ */
-
-  step('Saving the draft')
-  const slug = await uniqueSlug(slugify(jobSpec.companyName))
-  const token = previewToken()
-
-  const brief = await dataService.createBrief({
-    id: createId(),
-    slug,
-    companyName: jobSpec.companyName,
-    roleTitle: jobSpec.roleTitle,
-    sourceUrl,
-    sourceKind,
-    status: 'draft',
-    previewToken: token,
-    jobSpec,
-    content,
-    generatedContent: content,
-    cvContent,
-    coverLetter,
-    brand: briefResult.brand,
-    warnings: sortWarnings(warnings),
-  })
-  done()
 
   if (!skipDocs) {
     mkdirSync(outDir, { recursive: true })
