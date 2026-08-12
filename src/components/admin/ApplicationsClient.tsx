@@ -175,6 +175,24 @@ export default function ApplicationsClient() {
     load()
   }, [load])
 
+  /**
+   * Every hook must run before the auth guards below.
+   *
+   * These two sat after the `status === 'loading'` early return, so the first
+   * render ran 20 hooks and the authenticated render ran 22. React counts
+   * hooks per render and refuses to reconcile a change, which crashed the whole
+   * page with error #310 the moment the session resolved — invisible to a curl
+   * check, because the failure is client-side after hydration.
+   */
+  const blockers = useMemo(
+    () => (selected?.warnings ?? []).filter(w => w.severity === 'blocker'),
+    [selected]
+  )
+  const reviews = useMemo(
+    () => (selected?.warnings ?? []).filter(w => w.severity !== 'blocker'),
+    [selected]
+  )
+
   const openBrief = useCallback(async (id: string) => {
     setError(null)
     setCampaignNote(null)
@@ -468,15 +486,6 @@ export default function ApplicationsClient() {
   const previewUrl = selected
     ? `/brief/${selected.slug}?preview=${selected.previewToken}`
     : ''
-
-  const blockers = useMemo(
-    () => (selected?.warnings ?? []).filter(w => w.severity === 'blocker'),
-    [selected]
-  )
-  const reviews = useMemo(
-    () => (selected?.warnings ?? []).filter(w => w.severity !== 'blocker'),
-    [selected]
-  )
 
   return (
     <div className="min-h-screen bg-gray-50">
