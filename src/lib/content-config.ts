@@ -134,10 +134,10 @@ export interface SiteContent {
 export const defaultContent: SiteContent = {
   homepage: {
     hero: {
-      badge: 'Senior Product Manager & Founder • 8+ Years • Italy, EU',
-      headline: ['Product Manager.', 'Team Builder.', 'Occasional Founder.'],
+      badge: 'Senior Product Manager • 8+ Years • Italy, EU',
+      headline: ['Product Manager.', 'Team Builder.', 'Platform Owner.'],
       subheadline:
-        "I've spent 8+ years at adidas helping teams ship digital products that actually work. Led teams of up to 13 people across three countries, managed products used by over 165 million people, and recently started building my own things on the side.",
+        "I've spent 8+ years at adidas helping teams ship digital products that actually work. Led teams of up to 13 people across three countries, managed products used by over 165 million people, and stayed close enough to the build to be useful in the detail.",
       metrics: [
         { value: '8+', label: 'Years in product' },
         { value: '165M+', label: 'Users on products I owned' },
@@ -185,9 +185,9 @@ export const defaultContent: SiteContent = {
   },
   about: {
     hero: {
-      title: 'Eight years at adidas. Now building my own things.',
+      title: 'Eight years at adidas. Now running product in fintech.',
       description:
-        "I'm Lukáš — a product manager based in Volterra, Italy. Most of my career has been at adidas, where I worked across digital sports, social commerce, and internal tools. I managed teams of up to 13 people across three countries and worked on products that reached over 165 million users. I hold an MBA from the University of Derby and a UEFA A coaching licence, which led me to building PlayerGrade — a scouting platform for football clubs. I care about clear thinking, honest communication, and shipping things that actually solve problems.",
+        "I'm Lukáš — a product manager based in Volterra, Italy. Most of my career has been at adidas, where I worked across digital sports, social commerce, and internal tools. I managed teams of up to 13 people across three countries and worked on products that reached over 165 million users. Today I run product for an algorithmic trading platform aimed at institutional investors. I hold an MBA from the University of Derby, and I build things on the side to stay close to how software actually gets made. I care about clear thinking, honest communication, and shipping things that solve problems.",
       quickStats: [
         { label: 'Years in product', value: '8+' },
         { label: 'Users on products I owned', value: '165M+' },
@@ -221,20 +221,6 @@ export const defaultContent: SiteContent = {
       title: 'Work history',
       positions: [
         {
-          title: 'Founder & Head of Product',
-          company: 'PlayerGrade | Football Scouting SaaS',
-          period: '2026 - Present',
-          location: 'Remote',
-          description:
-            "Built and launched PlayerGrade as sole founder — a scouting platform for football clubs that scores and compares players using a position-calibrated engine. Currently in beta with 4 clubs across Central & Eastern Europe, 395 players profiled. My UEFA A coaching licence made this feel like a natural project: I know what scouts actually need because I've done the work.",
-          metrics: [
-            { label: 'Live club tenants', value: '4' },
-            { label: 'Players profiled', value: '395' },
-            { label: 'Scoring engine version', value: 'v6' },
-            { label: 'Status', value: 'Beta' },
-          ],
-        },
-        {
           title: 'Senior Product Manager',
           company: 'StagStrat | Algorithmic Trading Startup',
           period: '2025 - Present',
@@ -244,6 +230,20 @@ export const defaultContent: SiteContent = {
           metrics: [
             { label: 'Feature lead time reduction', value: '80%' },
             { label: 'Organic traffic growth', value: '+40%' },
+          ],
+        },
+        {
+          title: 'Side project — Product Owner',
+          company: 'PlayerGrade | Football Scouting SaaS',
+          period: '2026 - Present',
+          location: 'Evenings and weekends',
+          description:
+            'A scouting tool I built on the side, which scores and compares players using a position-calibrated engine. It came out of holding a UEFA A coaching licence and knowing how badly smaller clubs are served: most were working from spreadsheets and gut feel. In beta with 4 clubs across Central & Eastern Europe, 395 players profiled. It keeps me close to the build, which makes me better at the day job.',
+          metrics: [
+            { label: 'Live club tenants', value: '4' },
+            { label: 'Players profiled', value: '395' },
+            { label: 'Scoring engine version', value: 'v6' },
+            { label: 'Status', value: 'Beta' },
           ],
         },
         {
@@ -387,7 +387,7 @@ export const defaultContent: SiteContent = {
     hero: {
       title: "Things I've built and shipped",
       description:
-        'Eight years of product work, mostly at adidas, plus two ventures I started myself. Some of it was at scale, some of it was figuring things out from scratch.',
+        'Eight years of product work, mostly at adidas, plus a couple of things I built myself on the side. Some of it was at scale, some of it was figuring things out from scratch.',
     },
     featured: {
       title:
@@ -402,9 +402,9 @@ export const defaultContent: SiteContent = {
     playergrade: {
       title: 'PlayerGrade',
       tagline:
-        'Football scouting platform for clubs in Central & Eastern Europe',
+        'A side project — football scouting for clubs in Central & Eastern Europe',
       description:
-        'I built PlayerGrade because I hold a UEFA A coaching licence and spent time doing performance analysis at club level — and I knew how broken the scouting workflow was for smaller clubs. Most teams were using spreadsheets and gut feel. PlayerGrade gives scouts a structured way to grade, compare, and shortlist players using a position-calibrated scoring engine. Currently in beta with 4 clubs across CEE.',
+        'A side project, built in evenings and weekends. I hold a UEFA A coaching licence and spent time doing performance analysis at club level, so I knew how broken the scouting workflow was for smaller clubs — most were working from spreadsheets and gut feel. PlayerGrade gives scouts a structured way to grade, compare and shortlist players using a position-calibrated scoring engine. In beta with 4 clubs across CEE.',
       status: 'Beta',
       url: 'https://playergrade.app/',
       challenge:
