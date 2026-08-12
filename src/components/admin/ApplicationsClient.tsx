@@ -18,6 +18,7 @@ import {
   RefreshCw,
   Send,
   Sparkles,
+  Terminal,
   Trash2,
   Upload,
 } from 'lucide-react'
@@ -153,6 +154,17 @@ export default function ApplicationsClient() {
   const [campaignNote, setCampaignNote] = useState<string | null>(null)
   const [sentVia, setSentVia] = useState('email')
 
+  /**
+   * Whether THIS environment can generate.
+   *
+   * Generation needs the agent suite on localhost. Deployed on Vercel that is
+   * unreachable, so the Generate button used to POST and come back 503 — which
+   * reads as a broken feature rather than a environment limitation. Ask the
+   * server first and show the terminal command instead.
+   */
+  const [canGenerate, setCanGenerate] = useState<boolean | null>(null)
+  const [genDetail, setGenDetail] = useState('')
+
   const load = useCallback(async () => {
     try {
       setLoading(true)
@@ -174,6 +186,16 @@ export default function ApplicationsClient() {
   useEffect(() => {
     load()
   }, [load])
+
+  useEffect(() => {
+    fetch('/api/admin/brief/health')
+      .then(r => r.json())
+      .then(d => {
+        setCanGenerate(Boolean(d.canGenerate))
+        setGenDetail(d.detail ?? '')
+      })
+      .catch(() => setCanGenerate(false))
+  }, [])
 
   /**
    * Every hook must run before the auth guards below.
@@ -524,137 +546,193 @@ export default function ApplicationsClient() {
         )}
 
         {/* ============ GENERATE ============ */}
-        <Card className="mb-8 p-6">
-          <h2 className="mb-1 text-lg font-semibold text-gray-900">
-            New application
-          </h2>
-          <p className="mb-4 text-sm text-gray-600">
-            A link, a PDF or a screenshot of the posting — whichever you have.
-          </p>
+        {canGenerate === false ? (
+          <Card className="mb-8 border-amber-200 bg-amber-50/40 p-6">
+            <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold text-gray-900">
+              <Terminal className="h-4 w-4" />
+              Generation runs on your Mac
+            </h2>
+            <p className="mb-4 max-w-2xl text-sm text-gray-700">
+              Writing a brief needs the agent suite, which runs locally. This
+              page is served from Vercel and cannot reach it, so generate from a
+              terminal instead — the draft appears here within seconds and you
+              review and publish it on this page as usual.
+            </p>
 
-          <div className="mb-4 inline-flex rounded-lg border border-gray-200 bg-white p-1">
-            {(
-              [
-                ['url', 'Link', Link2],
-                ['file', 'PDF or image', Upload],
-                ['text', 'Paste text', FileText],
-              ] as const
-            ).map(([value, label, Icon]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setMode(value)}
-                className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  mode === value
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {mode === 'url' && (
-            <input
-              type="url"
-              value={url}
-              onChange={e => setUrl(e.target.value)}
-              placeholder="https://careers.example.com/job/12345"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            />
-          )}
-
-          {mode === 'file' && (
-            <div>
-              <input
-                ref={fileInput}
-                type="file"
-                accept="application/pdf,image/png,image/jpeg,image/webp,image/gif"
-                onChange={e => setFile(e.target.files?.[0] ?? null)}
-                className="w-full text-sm"
-              />
-              <p className="mt-2 text-xs text-gray-500">
-                Up to 4 MB. A screenshot of the posting works as well as a PDF.
-              </p>
-            </div>
-          )}
-
-          {mode === 'text' && (
-            <textarea
-              value={pasted}
-              onChange={e => setPasted(e.target.value)}
-              rows={8}
-              placeholder="Paste the full job posting…"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs"
-            />
-          )}
-
-          <label className="mt-4 flex items-center gap-2 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              checked={allLocaleDocs}
-              onChange={e => setAllLocaleDocs(e.target.checked)}
-            />
-            Also write the CV and cover letter in all three languages
-            <span className="text-xs text-gray-500">
-              (off = the posting&apos;s language only, and roughly half the
-              cost)
-            </span>
-          </label>
-
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <Button onClick={generate} disabled={generating}>
-              <Sparkles className="mr-2 h-4 w-4" />
-              {generating ? 'Generating…' : 'Generate'}
-            </Button>
-            {spend > 0 && (
-              <span className="text-xs text-gray-500">
-                ≈ ${spend.toFixed(2)} so far
-              </span>
-            )}
-          </div>
-
-          {steps.length > 0 && (
-            <ol className="mt-5 space-y-1.5 border-t border-gray-100 pt-4">
-              {steps.map(step => (
-                <li key={step.key} className="flex items-center gap-2 text-sm">
-                  <span
-                    className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-xs ${
-                      step.state === 'done'
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : step.state === 'running'
-                          ? 'bg-blue-100 text-blue-700'
-                          : step.state === 'failed'
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-gray-100 text-gray-400'
-                    }`}
-                  >
-                    {step.state === 'done' ? (
-                      <Check className="h-3 w-3" />
-                    ) : step.state === 'running' ? (
-                      <RefreshCw className="h-3 w-3 animate-spin" />
-                    ) : step.state === 'failed' ? (
-                      '!'
-                    ) : (
-                      '·'
-                    )}
-                  </span>
-                  <span
-                    className={
-                      step.state === 'pending'
-                        ? 'text-gray-400'
-                        : 'text-gray-800'
-                    }
-                  >
-                    {step.label}
-                  </span>
-                </li>
+            <div className="space-y-3">
+              {[
+                {
+                  label: '1. Start the agent suite (leave it running)',
+                  cmd: 'cd "/Users/lukashosala/Documents/Antigravity AI apps/agent-suite" && ./start-local.sh',
+                },
+                {
+                  label: '2. Generate, in a second terminal',
+                  cmd: 'cd "/Users/lukashosala/Documents/Claude AI apps/Portfolio by Lukas" && npm run apply -- "<posting-url>" --production',
+                },
+              ].map(({ label, cmd }) => (
+                <div key={label}>
+                  <p className="mb-1 text-xs font-semibold text-gray-600">
+                    {label}
+                  </p>
+                  <div className="flex items-start gap-2">
+                    <code className="flex-1 overflow-x-auto rounded bg-gray-900 px-3 py-2 text-xs text-gray-100">
+                      {cmd}
+                    </code>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigator.clipboard.writeText(cmd)}
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                </div>
               ))}
-            </ol>
-          )}
-        </Card>
+            </div>
+
+            {genDetail && (
+              <p className="mt-4 text-xs text-gray-500">
+                Provider check: {genDetail}
+              </p>
+            )}
+          </Card>
+        ) : (
+          <Card className="mb-8 p-6">
+            <h2 className="mb-1 text-lg font-semibold text-gray-900">
+              New application
+            </h2>
+            <p className="mb-4 text-sm text-gray-600">
+              A link, a PDF or a screenshot of the posting — whichever you have.
+            </p>
+
+            <div className="mb-4 inline-flex rounded-lg border border-gray-200 bg-white p-1">
+              {(
+                [
+                  ['url', 'Link', Link2],
+                  ['file', 'PDF or image', Upload],
+                  ['text', 'Paste text', FileText],
+                ] as const
+              ).map(([value, label, Icon]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setMode(value)}
+                  className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    mode === value
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {mode === 'url' && (
+              <input
+                type="url"
+                value={url}
+                onChange={e => setUrl(e.target.value)}
+                placeholder="https://careers.example.com/job/12345"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              />
+            )}
+
+            {mode === 'file' && (
+              <div>
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept="application/pdf,image/png,image/jpeg,image/webp,image/gif"
+                  onChange={e => setFile(e.target.files?.[0] ?? null)}
+                  className="w-full text-sm"
+                />
+                <p className="mt-2 text-xs text-gray-500">
+                  Up to 4 MB. A screenshot of the posting works as well as a
+                  PDF.
+                </p>
+              </div>
+            )}
+
+            {mode === 'text' && (
+              <textarea
+                value={pasted}
+                onChange={e => setPasted(e.target.value)}
+                rows={8}
+                placeholder="Paste the full job posting…"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs"
+              />
+            )}
+
+            <label className="mt-4 flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={allLocaleDocs}
+                onChange={e => setAllLocaleDocs(e.target.checked)}
+              />
+              Also write the CV and cover letter in all three languages
+              <span className="text-xs text-gray-500">
+                (off = the posting&apos;s language only, and roughly half the
+                cost)
+              </span>
+            </label>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <Button onClick={generate} disabled={generating}>
+                <Sparkles className="mr-2 h-4 w-4" />
+                {generating ? 'Generating…' : 'Generate'}
+              </Button>
+              {spend > 0 && (
+                <span className="text-xs text-gray-500">
+                  ≈ ${spend.toFixed(2)} so far
+                </span>
+              )}
+            </div>
+
+            {steps.length > 0 && (
+              <ol className="mt-5 space-y-1.5 border-t border-gray-100 pt-4">
+                {steps.map(step => (
+                  <li
+                    key={step.key}
+                    className="flex items-center gap-2 text-sm"
+                  >
+                    <span
+                      className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-xs ${
+                        step.state === 'done'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : step.state === 'running'
+                            ? 'bg-blue-100 text-blue-700'
+                            : step.state === 'failed'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-gray-100 text-gray-400'
+                      }`}
+                    >
+                      {step.state === 'done' ? (
+                        <Check className="h-3 w-3" />
+                      ) : step.state === 'running' ? (
+                        <RefreshCw className="h-3 w-3 animate-spin" />
+                      ) : step.state === 'failed' ? (
+                        '!'
+                      ) : (
+                        '·'
+                      )}
+                    </span>
+                    <span
+                      className={
+                        step.state === 'pending'
+                          ? 'text-gray-400'
+                          : 'text-gray-800'
+                      }
+                    >
+                      {step.label}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Card>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-[22rem_1fr]">
           {/* ============ LIST ============ */}
