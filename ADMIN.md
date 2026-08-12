@@ -163,6 +163,24 @@ The main dashboard provides a comprehensive overview with:
   - Validation: internal `href` only, `YYYY-MM-DD` dates, duplicate slug rejected
 - **Rules**: one country carries **one** banner (first live match wins), and every campaign auto-retires two months after `startsAt` even if left switched on. Before creating one, check the live list — `curl -s localhost:3000/api/campaigns` — rather than assuming a country is free.
 
+#### 4c. ✨ Applications (`/admin/applications`)
+
+- **Purpose**: Turn one job posting into a fit brief, a tailored CV and a cover letter, without hand-writing any of them
+- **Input**: a posting URL, a PDF, a screenshot (PNG/JPEG/WebP/GIF, up to 4 MB), or pasted text
+- **Output**:
+  - A fit brief in **EN, IT and DE**, rendered by the shared scaffold at `/brief/<slug>`
+  - A CV and cover letter as **.docx** downloads, rendered on demand from `templates/*.docx`
+  - A shareable URL with a `?ref=` tag
+- **Flow**: Generate → review → **Publish**. A brief starts as a `draft`, and a draft URL **404s** for everyone; only `/brief/<slug>?preview=<token>` renders it. Nothing is public until you press Publish.
+- **Checks**: every claim on the page and every CV bullet must cite a fact id from `src/lib/career-facts.ts`. The review screen lists:
+  - **Blockers** (red) — an unknown fact id, or an invented language-proficiency claim. Publishing is refused until they are resolved, with a deliberate "Publish anyway" escape hatch
+  - **Review** (amber) — an uncited claim, an accent colour failing WCAG AA, or use of the €1M Sprinklr figure
+- **Editing**: the fit-brief copy is editable per locale and re-validated on save, so an edit cannot bypass the checks
+- **Cost**: roughly **$1–1.50** per application at list prices, across ~7 generation calls and 2–4 minutes. Unticking "all three languages" for the documents roughly halves it
+- **Geo banner**: "Check geo banner slot" queries the **live** `/api/campaigns` list and says whether the posting's country is already taken — one country carries one banner
+
+> The eleven hand-built briefs (`/fifa`, `/genius`, `/qualcomm`, …) are **not** in this system. They are compiled pages with their own code and are untouched by it.
+
 #### 5. 🛠️ Technologies Management
 
 - **Purpose**: Skills and technology stack management

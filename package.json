@@ -27,6 +27,7 @@
     "db:init-production": "node scripts/init-production-db.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.116.0",
     "@auth/prisma-adapter": "^2.10.0",
     "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^5.2.2",
@@ -48,6 +49,8 @@
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "docxtemplater": "^3.69.3",
+    "dotenv": "^17.4.2",
     "gsap": "^3.15.0",
     "lucide-react": "^0.544.0",
     "mixpanel-browser": "^2.70.0",
@@ -57,6 +60,7 @@
     "nodemailer": "^6.10.1",
     "openai": "^5.21.0",
     "pg": "^8.16.3",
+    "pizzip": "^3.2.0",
     "prisma": "^6.16.2",
     "rate-limiter-flexible": "^7.3.1",
     "react": "19.1.0",

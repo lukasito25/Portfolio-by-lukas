@@ -232,6 +232,81 @@ model LocationCampaign {
   @@index([isActive])
 }
 
+/// Fit briefs produced by the application engine (/admin/applications) and
+/// rendered by the data-driven /brief/[slug] route. The eleven hand-built
+/// briefs (/fifa, /genius, …) are compiled pages and are NOT stored here.
+///
+/// Mirrors cloudflare-api/migrations/add_generated_briefs.sql — production
+/// reads and writes D1; this model is the local-dev equivalent. JSON columns
+/// are stored as strings because SQLite has no JSON type; the app validates
+/// them with zod on both sides.
+model GeneratedBrief {
+  id           String    @id @default(cuid())
+  slug         String    @unique
+  companyName  String
+  roleTitle    String
+  sourceUrl    String?
+  sourceKind   String    @default("text") // url | pdf | image | text
+  status       String    @default("draft") // draft | published | archived
+  /// Random per-brief token. A draft renders only at ?preview=<token>.
+  previewToken String
+  jobSpec      String    @default("{}")
+  content      String    @default("{}") // { en, it, de }
+  /// Immutable first-generation copy. Never edited — it is the baseline the
+  /// edit-learning loop diffs against to work out how he rewrites things.
+  generatedContent String @default("{}")
+  cvContent    String    @default("{}")
+  coverLetter  String    @default("{}")
+  brand        String    @default("{}")
+  warnings     String    @default("[]")
+
+  /// Application pipeline, separate from `status` (which is page publication).
+  /// not_sent | sent | acknowledged | interview | rejected | offer | withdrawn
+  applicationStatus String  @default("not_sent")
+  sentAt            DateTime?
+  /// email | portal | linkedin | referral | other
+  sentVia           String?
+  /// Frozen copy of exactly what was sent. Later edits must not rewrite history.
+  sentSnapshot      String   @default("{}")
+  outcomeNotes      String?
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  publishedAt  DateTime?
+
+  edits        ApplicationEdit[]
+
+  @@index([status])
+  @@index([applicationStatus])
+  @@index([updatedAt])
+}
+
+/// One field he rewrote by hand before sending.
+///
+/// This is the highest-value training signal in the whole system: the diff
+/// between what was generated and what he was willing to put his name on is the
+/// most direct evidence of his actual voice. Recent pairs are fed back into
+/// generation, and periodically distilled into durable style rules.
+model ApplicationEdit {
+  id        String   @id @default(cuid())
+  briefId   String
+  brief     GeneratedBrief @relation(fields: [briefId], references: [id], onDelete: Cascade)
+  /// brief | cv | letter
+  kind      String
+  locale    String
+  /// Dotted path into the content, e.g. "hero.description".
+  path      String
+  before    String
+  after     String
+  /// Set once a distillation run has folded this into the style rules.
+  distilled Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([briefId])
+  @@index([distilled])
+  @@index([createdAt])
+}
+
 model Analytics {
   id          String   @id @default(cuid())
 
