@@ -499,9 +499,72 @@ npx wrangler d1 execute portfolio-db --remote --file=migrations/add_generated_br
 npx wrangler deploy
 ```
 
-Then set `ANTHROPIC_API_KEY` in `.env` and in the Vercel project (Production).
-Without it the panel returns a 503 explaining what is missing; nothing else on
-the site is affected.
+Then point the app at a generator — see below. Without one the panel replaces
+the Generate form with an explanation; nothing else on the site is affected.
+
+### Where the generator runs
+
+The engine calls the agent suite (`~/Documents/Antigravity AI apps/agent-suite`),
+a FastAPI app wrapping Gemini 2.5 Pro. It is **deployed on Cloud Run**, which is
+what makes `/admin/applications` usable from the deployed site at all: before
+that, the Generate button ran on Vercel, `127.0.0.1:8099` was the serverless
+container's own loopback, and every attempt returned 503 no matter how healthy
+the suite was at home.
+
+|                       | Local                                | Cloud Run                                     |
+| --------------------- | ------------------------------------ | --------------------------------------------- |
+| `AGENT_SUITE_URL`     | unset → `http://127.0.0.1:8099`      | `https://agent-suite-736pn2fxha-uc.a.run.app` |
+| `AGENT_SUITE_KEY`     | not needed                           | **required**                                  |
+| Start it              | `./start-local.sh` in the suite repo | always up, scales to zero                     |
+| Reachable from Vercel | no                                   | yes                                           |
+
+Two things about it are worth knowing before changing anything:
+
+**The session endpoint is keyed whenever the service is public.** `/api/v1/auth/session`
+hands out a 24-hour token that unlocks generation, so on a public URL it is the
+front door to the Gemini quota. The suite requires the shared key whenever
+`K_SERVICE` is set — Cloud Run sets that itself, so the protection cannot be
+forgotten on a deploy — and stays open on loopback, where nothing outside the
+machine can reach it. It also refuses to issue sessions at all if no
+`API_SECRET_KEY` is configured, rather than falling back to a guessable default.
+
+**Never put a JWT in the `Authorization` header of a Cloud Run request.** Its
+front end sometimes tries to verify a bearer JWT as a Google-issued ID token and
+rejects the request before the container sees it:
+
+```
+The request was not authorized to invoke this service.
+The access token could not be verified.
+```
+
+It arrives as an HTML 401 that no part of the app can produce, and it is
+_intermittent_ — it appeared once during deployment verification and not on
+retry. `src/lib/ai/agent-suite.ts` therefore sends the opaque shared key
+directly instead of exchanging it for a session JWT. The key has no dots, so
+nothing upstream can mistake it for a token, and it removes a round trip per
+pipeline step.
+
+### Redeploying the suite
+
+`cloudflare-api/` is not the only sub-project outside the app's git diff — this
+one is too. After changing anything in the agent-suite repo:
+
+```bash
+cd "/Users/lukashosala/Documents/Antigravity AI apps/agent-suite"
+gcloud run deploy agent-suite --project ai-agent-suite --source . --region us-central1 \
+  --allow-unauthenticated --memory 2Gi --cpu 1 --timeout 900 --concurrency 10 \
+  --min-instances 0 --max-instances 3 \
+  --set-env-vars GCP_PROJECT_ID=ai-agent-suite \
+  --set-secrets GOOGLE_API_KEY=agent-suite-google-api-key:latest,API_SECRET_KEY=agent-suite-api-key:latest
+```
+
+Secrets live in Secret Manager and never enter the image — `.gcloudignore` and
+`.dockerignore` both exclude every `.env`. Rotating the shared key means adding a
+Secret Manager version, redeploying, and updating `AGENT_SUITE_KEY` in Vercel and
+in `.env`; the app will report `rejected AGENT_SUITE_KEY` until all three agree.
+
+Cold start is ~12s (eighteen agents plus the Firestore client), which is why the
+health check retries with a longer budget rather than declaring the service down.
 
 ### Local development
 
@@ -512,3 +575,34 @@ production. To exercise the route without spending an API call:
 ```bash
 node scripts/seed-example-brief.mjs   # prints a preview URL
 ```
+
+### No hidden text in anything generated
+
+Every document leaves under his name, so text that carries invisible characters
+is a real risk: an ATS or AI-detection tool that finds zero-width characters or
+Unicode tag characters does not conclude "a model wrote this", it concludes
+"someone is hiding something" — a worse outcome than being thought to have used
+AI at all.
+
+`src/lib/ai/sanitize.ts` runs inside `validateAgainstSchema`, so **every**
+structured generation is cleaned regardless of provider, before it is stored:
+
+- zero-width spaces and joiners, soft hyphens, stray BOMs, bidi overrides
+- **Unicode tag characters** (`U+E0000–U+E007F`) — the standard watermarking
+  vector, since an entire message encodes into them and no renderer shows it
+- Cyrillic/Greek homoglyphs, mapped back to Latin rather than deleted, because
+  `Prоduct` with a Cyrillic _о_ defeats a recruiter's search for "Product"
+- non-breaking and exotic spaces, normalised to a plain space
+
+Em dashes, en dashes, curly quotes and accents are deliberately **kept** — they
+are visible, correct typography, and stripping them would damage real prose to
+chase a stylistic heuristic.
+
+The first real application (aspaara, ~40k characters across CV, cover letter and
+brief) was audited by hand and was already clean: no invisible codepoints, no
+homoglyphs, no hidden or white or sub-4pt text in the `.docx`, no `docProps`
+metadata at all (the templates carry no creator/company field), and none of the
+18 banned AI phrases. Its em dashes appear only in structural separators —
+education lines, the language list — and never in a bullet or a sentence, which
+is where the tell would matter. The sanitizer exists because one clean sample
+says nothing about the next generation.

@@ -164,6 +164,8 @@ export default function ApplicationsClient() {
    */
   const [canGenerate, setCanGenerate] = useState<boolean | null>(null)
   const [genDetail, setGenDetail] = useState('')
+  /** Where the generator lives — decides which recovery advice is honest. */
+  const [genRemote, setGenRemote] = useState(true)
 
   const load = useCallback(async () => {
     try {
@@ -193,6 +195,7 @@ export default function ApplicationsClient() {
       .then(d => {
         setCanGenerate(Boolean(d.canGenerate))
         setGenDetail(d.detail ?? '')
+        setGenRemote(d.remote !== false)
       })
       .catch(() => setCanGenerate(false))
   }, [])
@@ -550,26 +553,39 @@ export default function ApplicationsClient() {
           <Card className="mb-8 border-amber-200 bg-amber-50/40 p-6">
             <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold text-gray-900">
               <Terminal className="h-4 w-4" />
-              Generation runs on your Mac
+              {genRemote
+                ? 'The generator is not answering'
+                : 'Generation runs on your Mac'}
             </h2>
             <p className="mb-4 max-w-2xl text-sm text-gray-700">
-              Writing a brief needs the agent suite, which runs locally. This
-              page is served from Vercel and cannot reach it, so generate from a
-              terminal instead — the draft appears here within seconds and you
-              review and publish it on this page as usual.
+              {genRemote
+                ? 'Writing a brief needs the agent suite on Cloud Run, and it did not respond to this page. Check the service, or fall back to the terminal — a draft made there appears here within seconds and you review and publish it as usual.'
+                : 'Writing a brief needs the agent suite, which is configured to run on this machine and is not currently up. Start it, or generate from a terminal — the draft appears here within seconds and you review and publish it on this page as usual.'}
             </p>
 
             <div className="space-y-3">
-              {[
-                {
-                  label: '1. Start the agent suite (leave it running)',
-                  cmd: 'cd "/Users/lukashosala/Documents/Antigravity AI apps/agent-suite" && ./start-local.sh',
-                },
-                {
-                  label: '2. Generate, in a second terminal',
-                  cmd: 'cd "/Users/lukashosala/Documents/Claude AI apps/Portfolio by Lukas" && npm run apply -- "<posting-url>" --production',
-                },
-              ].map(({ label, cmd }) => (
+              {(genRemote
+                ? [
+                    {
+                      label: '1. Check the service',
+                      cmd: 'gcloud run services describe agent-suite --region us-central1 --project ai-agent-suite --format="value(status.url,status.conditions[0].message)"',
+                    },
+                    {
+                      label: '2. Read the last errors',
+                      cmd: 'gcloud run services logs read agent-suite --region us-central1 --project ai-agent-suite --limit 30',
+                    },
+                  ]
+                : [
+                    {
+                      label: '1. Start the agent suite (leave it running)',
+                      cmd: 'cd "/Users/lukashosala/Documents/Antigravity AI apps/agent-suite" && ./start-local.sh',
+                    },
+                    {
+                      label: '2. Generate, in a second terminal',
+                      cmd: 'cd "/Users/lukashosala/Documents/Claude AI apps/Portfolio by Lukas" && npm run apply -- "<posting-url>" --production',
+                    },
+                  ]
+              ).map(({ label, cmd }) => (
                 <div key={label}>
                   <p className="mb-1 text-xs font-semibold text-gray-600">
                     {label}
