@@ -50,6 +50,8 @@ export interface AIProvider {
   isConfigured(): boolean
   /** Explains what is missing when `isConfigured()` is false. */
   configurationHint(): string
+  /** Optional fast reachability probe, for a CLI preflight. */
+  healthCheck?(): Promise<{ ok: boolean; detail: string }>
   /** A schema-constrained generation. Throws on malformed output. */
   generateStructured<S extends z.ZodType>(
     options: StructuredOptions<S>

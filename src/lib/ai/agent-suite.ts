@@ -33,6 +33,7 @@ const AGENT_ID = 'application-writer'
 /** Grounded research uses the general assistant — it has search enabled. */
 const RESEARCH_AGENT_ID = 'general'
 const USER_ID = 'portfolio_engine'
+const CALL_TIMEOUT_MS = 300_000
 
 function baseUrl(): string {
   return (process.env.AGENT_SUITE_URL || DEFAULT_URL).replace(/\/$/, '')
@@ -57,10 +58,19 @@ let cached: CachedToken | null = null
 async function sessionToken(): Promise<string> {
   if (cached && cached.expiresAt > Date.now() + 60_000) return cached.token
 
-  const res = await fetch(`${baseUrl()}/api/v1/auth/session`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  })
+  let res: Response
+  try {
+    res = await fetch(`${baseUrl()}/api/v1/auth/session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(10_000),
+    })
+  } catch {
+    throw new ProviderUnavailableError(
+      'agent-suite',
+      `Nothing is listening at ${baseUrl()}. Start it with:\n    cd "/Users/lukashosala/Documents/Antigravity AI apps/agent-suite" && ./start-local.sh`
+    )
+  }
 
   if (!res.ok) {
     throw new ProviderUnavailableError(
@@ -115,11 +125,20 @@ async function call(body: GenerateBody): Promise<GenerateResult> {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(body),
+      // A generation on gemini-2.5-pro runs 20-90s; five minutes is generous.
+      // Without a ceiling a stalled call hangs the pipeline indefinitely, which
+      // looks exactly like a crash from the terminal.
+      signal: AbortSignal.timeout(CALL_TIMEOUT_MS),
     })
   } catch (error) {
+    if ((error as Error)?.name === 'TimeoutError') {
+      throw new Error(
+        `The agent suite did not respond within ${CALL_TIMEOUT_MS / 1000}s. It is running but the model call stalled — check its terminal window, then retry.`
+      )
+    }
     throw new ProviderUnavailableError(
       'agent-suite',
-      `Could not reach ${baseUrl()}. Start it with: cd "Antigravity AI apps/agent-suite" && python3 -m uvicorn api_production:app --port 8099`
+      `Could not reach ${baseUrl()}. Start it with:\n    cd "/Users/lukashosala/Documents/Antigravity AI apps/agent-suite" && ./start-local.sh`
     )
   }
 
@@ -163,6 +182,21 @@ export const agentSuiteProvider: AIProvider = {
     // No API key of its own — availability is whether the service answers,
     // which `call` reports with an actionable message when it does not.
     return true
+  },
+
+  /** Fast preflight so the CLI fails in seconds, not minutes. */
+  async healthCheck(): Promise<{ ok: boolean; detail: string }> {
+    try {
+      const res = await fetch(`${baseUrl()}/api/v1/health`, {
+        signal: AbortSignal.timeout(5_000),
+      })
+      if (!res.ok) {
+        return { ok: false, detail: `responded HTTP ${res.status}` }
+      }
+      return { ok: true, detail: baseUrl() }
+    } catch {
+      return { ok: false, detail: `nothing listening at ${baseUrl()}` }
+    }
   },
 
   configurationHint() {
