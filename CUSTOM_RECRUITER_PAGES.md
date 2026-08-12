@@ -606,3 +606,30 @@ metadata at all (the templates carry no creator/company field), and none of the
 education lines, the language list — and never in a bullet or a sentence, which
 is where the tell would matter. The sanitizer exists because one clean sample
 says nothing about the next generation.
+
+### Edit learning storage
+
+Edits follow the brief they came from: local SQLite in development, D1
+everywhere else, chosen by the same `briefStore()` used for briefs. Splitting
+them would put the training signal in one database and the material it
+describes in another.
+
+This was Prisma-only until the generator moved to Cloud Run. Generation then ran
+on Vercel, where `file:./dev.db` does not exist, and the pipeline died on
+`prisma.applicationEdit.findMany()` with **SQLite error 14: unable to open the
+database file** — a feature that had never run outside a laptop, in a code path
+every generation crosses three times.
+
+Two changes, and the second matters more than the first:
+
+- Worker routes `GET /briefs/edits/recent|undistilled|count`,
+  `POST /briefs/:id/edits`, `POST /briefs/edits/distilled`, reached through
+  `DataService`. Recording replaces any previous row for the same path rather
+  than appending — the interesting comparison is always "generated → what he
+  settled on".
+- **Reads are non-fatal.** Edit learning improves a draft; it is not required to
+  produce one. A generation that runs for minutes must never die because an
+  optional prompt enrichment could not be fetched. `recentEdits()` logs and
+  returns `[]`, and the draft is written as if it were the first ever run.
+  Writes still throw, because losing an edit silently would degrade the model's
+  picture of his voice with nothing to show why.

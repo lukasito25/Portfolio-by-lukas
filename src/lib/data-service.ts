@@ -1289,6 +1289,127 @@ class DataService {
     await prisma.generatedBrief.delete({ where: { id } })
     return { success: true }
   }
+
+  /* ---------------------------------------------------------------- *
+   * Edit learning
+   *
+   * Same store selection as briefs, for the same reason: an edit belongs
+   * next to the brief it came from. Splitting them would put the training
+   * signal in one database and the material it describes in another.
+   *
+   * These were Prisma-only until the generator moved to Cloud Run. Every
+   * pipeline step then ran on Vercel, where `file:./dev.db` does not exist,
+   * and generation died on `prisma.applicationEdit.findMany()` with SQLite
+   * error 14 — a feature that had never run outside a laptop.
+   * ---------------------------------------------------------------- */
+
+  async recentApplicationEdits(limit = 12): Promise<ApplicationEditRecord[]> {
+    if (this.briefStore() === 'worker') {
+      const res = await this.briefFetch(`/edits/recent?limit=${limit}`)
+      if (!res.ok) throw new Error(`Edit fetch failed: ${res.status}`)
+      const data = (await res.json()) as { edits: ApplicationEditRecord[] }
+      return data.edits ?? []
+    }
+
+    const rows = await prisma.applicationEdit.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    })
+    return rows.map(row => ({
+      id: row.id,
+      kind: row.kind,
+      locale: row.locale,
+      path: row.path,
+      before: row.before,
+      after: row.after,
+    }))
+  }
+
+  async recordApplicationEdits(
+    briefId: string,
+    pairs: Omit<ApplicationEditRecord, 'id'>[]
+  ): Promise<number> {
+    if (!pairs.length) return 0
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.briefFetch(`/${briefId}/edits`, {
+        method: 'POST',
+        body: JSON.stringify({ pairs }),
+      })
+      if (!res.ok) throw new Error(`Edit record failed: ${res.status}`)
+      return pairs.length
+    }
+
+    await prisma.$transaction([
+      prisma.applicationEdit.deleteMany({
+        where: { briefId, path: { in: pairs.map(p => p.path) } },
+      }),
+      prisma.applicationEdit.createMany({
+        data: pairs.map(pair => ({ briefId, ...pair })),
+      }),
+    ])
+    return pairs.length
+  }
+
+  async undistilledApplicationEdits(): Promise<ApplicationEditRecord[]> {
+    if (this.briefStore() === 'worker') {
+      const res = await this.briefFetch('/edits/undistilled')
+      if (!res.ok) throw new Error(`Edit fetch failed: ${res.status}`)
+      const data = (await res.json()) as { edits: ApplicationEditRecord[] }
+      return data.edits ?? []
+    }
+
+    const rows = await prisma.applicationEdit.findMany({
+      where: { distilled: false },
+      orderBy: { createdAt: 'asc' },
+    })
+    return rows.map(row => ({
+      id: row.id,
+      kind: row.kind,
+      locale: row.locale,
+      path: row.path,
+      before: row.before,
+      after: row.after,
+    }))
+  }
+
+  async markApplicationEditsDistilled(ids: string[]): Promise<void> {
+    if (!ids.length) return
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.briefFetch('/edits/distilled', {
+        method: 'POST',
+        body: JSON.stringify({ ids }),
+      })
+      if (!res.ok) throw new Error(`Edit update failed: ${res.status}`)
+      return
+    }
+
+    await prisma.applicationEdit.updateMany({
+      where: { id: { in: ids } },
+      data: { distilled: true },
+    })
+  }
+
+  async applicationEditCount(): Promise<number> {
+    if (this.briefStore() === 'worker') {
+      const res = await this.briefFetch('/edits/count')
+      if (!res.ok) throw new Error(`Edit count failed: ${res.status}`)
+      const data = (await res.json()) as { count: number }
+      return data.count ?? 0
+    }
+
+    return prisma.applicationEdit.count()
+  }
+}
+
+export interface ApplicationEditRecord {
+  id?: string
+  kind: string
+  locale: string
+  path: string
+  before: string
+  after: string
 }
 
 export const dataService = new DataService()
