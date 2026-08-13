@@ -92,9 +92,20 @@ export async function POST(request: NextRequest) {
       ...validateDocuments(value.cv, value.coverLetter, locale),
     ] as never)
 
+    // The generation is written twice: once as the working copy he edits, and
+    // once frozen. The frozen copy is what every later hand edit is diffed
+    // against, so the training pair stays "what the model wrote → what he
+    // actually sends" however many passes he makes over a sentence.
+    const baselineCv =
+      (brief.generatedCvContent as Record<string, unknown>) ?? {}
+    const baselineLetter =
+      (brief.generatedCoverLetter as Record<string, unknown>) ?? {}
+
     const updated = await dataService.updateBrief(id, {
       cvContent: { ...existingCv, [locale]: value.cv },
       coverLetter: { ...existingLetter, [locale]: value.coverLetter },
+      generatedCvContent: { ...baselineCv, [locale]: value.cv },
+      generatedCoverLetter: { ...baselineLetter, [locale]: value.coverLetter },
       warnings,
     })
 

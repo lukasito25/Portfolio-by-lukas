@@ -1084,9 +1084,12 @@ class DataService {
       content: parse(row.content, {}),
       generatedContent: parse(row.generatedContent ?? '{}', {}),
       cvContent: parse(row.cvContent, {}),
+      generatedCvContent: parse(row.generatedCvContent ?? '{}', {}),
+      generatedCoverLetter: parse(row.generatedCoverLetter ?? '{}', {}),
       coverLetter: parse(row.coverLetter, {}),
       brand: parse(row.brand, {}),
       warnings: parse(row.warnings, []),
+      dismissedWarnings: parse(row.dismissedWarnings ?? '[]', []),
       applicationStatus: row.applicationStatus ?? 'not_sent',
       sentAt: row.sentAt ?? null,
       sentVia: row.sentVia ?? null,
@@ -1259,8 +1262,11 @@ class DataService {
       'generatedContent',
       'cvContent',
       'coverLetter',
+      'generatedCvContent',
+      'generatedCoverLetter',
       'brand',
       'warnings',
+      'dismissedWarnings',
       'sentSnapshot',
     ]) {
       if (data[field] !== undefined) patch[field] = JSON.stringify(data[field])
@@ -1322,6 +1328,7 @@ class DataService {
       path: row.path,
       before: row.before,
       after: row.after,
+      instruction: row.instruction,
     }))
   }
 
@@ -1370,6 +1377,7 @@ class DataService {
       path: row.path,
       before: row.before,
       after: row.after,
+      instruction: row.instruction,
     }))
   }
 
@@ -1410,6 +1418,8 @@ export interface ApplicationEditRecord {
   path: string
   before: string
   after: string
+  /** What he asked for, when the edit came from the refine box. */
+  instruction?: string | null
 }
 
 export const dataService = new DataService()

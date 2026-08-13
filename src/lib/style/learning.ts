@@ -25,6 +25,16 @@ export interface EditPair {
   path: string
   before: string
   after: string
+  /**
+   * What he asked for, when the change came from the refine box rather than
+   * from typing into a field.
+   *
+   * Strictly more informative than the diff. "Cut the hedging" and "make this
+   * shorter" produce similar before/after pairs and mean different things, and
+   * the stated intent is the part that transfers to the next application —
+   * a diff shows one sentence changing, an instruction shows a preference.
+   */
+  instruction?: string
 }
 
 /** Fields worth learning from — prose, not labels. */
@@ -119,12 +129,34 @@ export function buildEditLearningPrompt(pairs: EditPair[], limit = 12): string {
 
   const recent = pairs.slice(0, limit)
 
+  const where = (pair: EditPair) => {
+    const kind =
+      pair.kind === 'cv'
+        ? 'CV'
+        : pair.kind === 'letter'
+          ? 'cover letter'
+          : 'brief'
+    return `[${kind} · ${pair.path}]`
+  }
+
   const examples = recent
-    .map(
-      (pair, index) =>
-        `${index + 1}. You wrote:\n   "${pair.before.trim()}"\n   He rewrote it as:\n   "${pair.after.trim()}"`
-    )
+    .map((pair, index) => {
+      const lines = [
+        `${index + 1}. ${where(pair)}`,
+        // The instruction goes first when there is one. It states the intent
+        // that the before/after only implies, and a model reading the pair
+        // afterwards can see which of the many differences was the point.
+        pair.instruction ? `   He asked: "${pair.instruction.trim()}"` : null,
+        `   You wrote:`,
+        `   "${pair.before.trim()}"`,
+        `   He sent:`,
+        `   "${pair.after.trim()}"`,
+      ].filter(Boolean)
+      return lines.join('\n')
+    })
     .join('\n\n')
+
+  const hasInstructions = recent.some(p => p.instruction)
 
   return `HOW HE REWRITES YOUR DRAFTS
 
@@ -134,7 +166,15 @@ most direct evidence of his voice available — closer than any style rule.
 Study what changed and why: what he cuts, what he makes concrete, where he
 shortens, which words he refuses. Then write so the next draft needs fewer of
 these edits. Do not copy these sentences; copy the instincts behind them.
-
+${
+  hasInstructions
+    ? `
+Some carry the instruction he typed. Weight those highest — they are him
+stating a preference directly rather than you inferring one from a diff, and
+the preference applies well beyond the sentence it was aimed at.
+`
+    : ''
+}
 ${examples}`
 }
 

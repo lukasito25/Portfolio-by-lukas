@@ -24,6 +24,10 @@ import {
 } from 'lucide-react'
 import { LOCALES, type Locale } from '@/lib/fit-brief/guardrails'
 import type { BriefWarning, FitBriefContent } from '@/lib/fit-brief/schema'
+import type { CvContent, CoverLetterContent } from '@/lib/documents/schema'
+import { warningKey } from '@/lib/fit-brief/warning-key'
+import { CvEditor, LetterEditor } from './DocumentEditor'
+import { RefinePanel, type RefineProposal } from './RefinePanel'
 
 /**
  * The application engine's control panel.
@@ -91,6 +95,8 @@ interface FullBrief extends BriefSummary {
   coverLetter: Record<string, unknown>
   brand: { accentLight: string; accentDark: string; motif: string }
   warnings: BriefWarning[]
+  /** Checks reviewed and accepted, as stable keys. Never includes blockers. */
+  dismissedWarnings: string[]
   sentVia: string | null
   sentSnapshot: Record<string, unknown>
   outcomeNotes: string | null
@@ -155,6 +161,31 @@ export default function ApplicationsClient() {
   const [sentVia, setSentVia] = useState('email')
 
   /**
+   * Structured editing of the CV and letter.
+   *
+   * Unsaved edits are held per document — keyed by brief, tab and locale —
+   * rather than as one "current draft" object.
+   *
+   * The obvious design (one draft, swapped by an effect when the tab changes)
+   * has a crash in it: effects run *after* render, so the first frame following
+   * a CV → cover letter switch renders LetterEditor with the CV still in the
+   * draft, and `value.paragraphs.map` throws on undefined. Keying the edits
+   * means the displayed document is derived during render and is never briefly
+   * the wrong shape. It also keeps unsaved work when you flick between tabs,
+   * which the single-draft version silently discarded.
+   */
+  const [docEdits, setDocEdits] = useState<
+    Record<string, CvContent | CoverLetterContent>
+  >({})
+  const [docMode, setDocMode] = useState<'fields' | 'json'>('fields')
+  const [docJson, setDocJson] = useState('')
+
+  // Refinement
+  const [refining, setRefining] = useState(false)
+  const [proposal, setProposal] = useState<RefineProposal | null>(null)
+  const [refineError, setRefineError] = useState<string | null>(null)
+
+  /**
    * Whether THIS environment can generate.
    *
    * Generation needs the agent suite on localhost. Deployed on Vercel that is
@@ -189,6 +220,12 @@ export default function ApplicationsClient() {
     load()
   }, [load])
 
+  /** A proposal is about one tab and locale; moving away abandons it. */
+  useEffect(() => {
+    setProposal(null)
+    setRefineError(null)
+  }, [tab, activeLocale])
+
   useEffect(() => {
     fetch('/api/admin/brief/health')
       .then(r => r.json())
@@ -213,9 +250,63 @@ export default function ApplicationsClient() {
     () => (selected?.warnings ?? []).filter(w => w.severity === 'blocker'),
     [selected]
   )
-  const reviews = useMemo(
-    () => (selected?.warnings ?? []).filter(w => w.severity !== 'blocker'),
-    [selected]
+  /**
+   * Review-severity checks he has not already accepted.
+   *
+   * Blockers above are deliberately NOT filtered by dismissals. Dismissing is
+   * for judgement calls — a phrasing the validator flagged that he is happy
+   * with. A blocker is an invented language level or a citation that resolves
+   * to nothing, and the only way past one is to fix it or to press "publish
+   * anyway" with the warning still on screen.
+   */
+  const reviews = useMemo(() => {
+    const dismissed = new Set(selected?.dismissedWarnings ?? [])
+    return (selected?.warnings ?? []).filter(
+      w => w.severity !== 'blocker' && !dismissed.has(warningKey(w))
+    )
+  }, [selected])
+
+  const dismissedCount = useMemo(() => {
+    const dismissed = new Set(selected?.dismissedWarnings ?? [])
+    return (selected?.warnings ?? []).filter(
+      w => w.severity !== 'blocker' && dismissed.has(warningKey(w))
+    ).length
+  }, [selected])
+
+  /**
+   * The document on screen: an unsaved edit if there is one, otherwise what is
+   * stored. Derived, never held — see `docEdits` for why that matters.
+   */
+  const docKey = selected ? `${selected.id}:${tab}:${activeLocale}` : ''
+  const storedDoc = useMemo(() => {
+    if (!selected || tab === 'brief') return null
+    const store =
+      (tab === 'cv' ? selected.cvContent : selected.coverLetter) ?? {}
+    return ((store as Record<string, unknown>)[activeLocale] ?? null) as
+      | CvContent
+      | CoverLetterContent
+      | null
+  }, [selected, tab, activeLocale])
+
+  const docDraft = docEdits[docKey] ?? storedDoc
+  const docDirty = Boolean(docEdits[docKey])
+
+  const setDocDraft = useCallback(
+    (next: CvContent | CoverLetterContent) =>
+      setDocEdits(current => ({ ...current, [docKey]: next })),
+    [docKey]
+  )
+
+  /** Forget the unsaved edit for one document — after saving, or on Revert. */
+  const clearDocDraft = useCallback(
+    (key: string) =>
+      setDocEdits(current => {
+        if (!(key in current)) return current
+        const next = { ...current }
+        delete next[key]
+        return next
+      }),
+    []
   )
 
   const openBrief = useCallback(async (id: string) => {
@@ -403,6 +494,150 @@ export default function ApplicationsClient() {
     } finally {
       setSavingEdit(false)
     }
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Documents
+   * ---------------------------------------------------------------- */
+
+  /** Which stored field the current tab edits. */
+  const docField = tab === 'cv' ? 'cvContent' : 'coverLetter'
+
+  /**
+   * Save the CV or cover letter.
+   *
+   * `instruction` is passed through when the change came from the refine box,
+   * so the server stores it next to the diff. That is the difference between
+   * knowing a sentence changed and knowing why — and the why is what the
+   * generator can act on next time.
+   */
+  const saveDocument = async (
+    body: Record<string, unknown>,
+    successMessage: string
+  ) => {
+    if (!selected) return false
+    setSavingEdit(true)
+    setError(null)
+    try {
+      const res = await fetch(`/api/admin/brief/${selected.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+      setSelected(data.brief)
+      setNotice(
+        data.editsRecorded
+          ? `${successMessage} ${data.editsRecorded} edit${data.editsRecorded === 1 ? '' : 's'} recorded for next time.`
+          : successMessage
+      )
+      await load()
+      return true
+    } catch (e) {
+      setError((e as Error).message)
+      return false
+    } finally {
+      setSavingEdit(false)
+    }
+  }
+
+  const saveDocDraft = async (override?: CvContent | CoverLetterContent) => {
+    if (!selected) return
+    const value = override ?? docDraft
+    if (!value) return
+    const store = (selected[docField] ?? {}) as Record<string, unknown>
+    const key = docKey
+    const ok = await saveDocument(
+      { [docField]: { ...store, [activeLocale]: value } },
+      `Saved the ${LOCALE_LABEL[activeLocale]} ${tab === 'cv' ? 'CV' : 'cover letter'}.`
+    )
+    // The stored copy now matches, so the unsaved-edit entry is stale — keeping
+    // it would make the next render show an "edit" identical to what is saved,
+    // and Revert would appear to do nothing.
+    if (ok) clearDocDraft(key)
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Refinement
+   * ---------------------------------------------------------------- */
+
+  const runRefine = async (instruction: string, warning?: string) => {
+    if (!selected) return
+    setRefining(true)
+    setRefineError(null)
+    try {
+      const res = await fetch(`/api/admin/brief/${selected.id}/refine`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          target: tab,
+          locale: activeLocale,
+          instruction,
+          warning,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+      setProposal(data)
+    } catch (e) {
+      setRefineError((e as Error).message)
+    } finally {
+      setRefining(false)
+    }
+  }
+
+  /**
+   * Apply a proposal.
+   *
+   * Goes through the ordinary PUT rather than saving from the refine route, so
+   * it is re-validated, the checks are recomputed, and the training pair is
+   * recorded exactly as a hand edit would be — with the instruction attached.
+   */
+  const acceptProposal = async () => {
+    if (!selected || !proposal) return
+
+    const field =
+      proposal.target === 'brief'
+        ? 'content'
+        : proposal.target === 'cv'
+          ? 'cvContent'
+          : 'coverLetter'
+
+    const store = (selected[field] ?? {}) as Record<string, unknown>
+    const ok = await saveDocument(
+      {
+        [field]: { ...store, [proposal.locale]: proposal.proposed },
+        instruction: proposal.instruction,
+      },
+      'Applied.'
+    )
+
+    if (ok) {
+      setProposal(null)
+      // The saved record now holds the revision, so any unsaved edit for this
+      // document is stale — dropping it lets the derived draft fall through to
+      // what was actually stored.
+      if (proposal.target === 'brief') {
+        setDraftJson(JSON.stringify(proposal.proposed, null, 2))
+      } else {
+        clearDocDraft(`${selected.id}:${proposal.target}:${proposal.locale}`)
+        setDocJson(JSON.stringify(proposal.proposed, null, 2))
+      }
+    }
+  }
+
+  /** Record that a check has been read and accepted. */
+  const dismissWarning = async (warning: BriefWarning) => {
+    if (!selected) return
+    const key = warningKey(warning)
+    const next = [...new Set([...(selected.dismissedWarnings ?? []), key])]
+    await saveDocument({ dismissedWarnings: next }, 'Check dismissed.')
+  }
+
+  const restoreDismissed = async () => {
+    if (!selected) return
+    await saveDocument({ dismissedWarnings: [] }, 'Dismissed checks restored.')
   }
 
   const setStatus = async (next: 'draft' | 'published', force = false) => {
@@ -1011,30 +1246,121 @@ export default function ApplicationsClient() {
                 </Card>
 
                 {/* Warnings */}
-                {(blockers.length > 0 || reviews.length > 0) && (
+                {(blockers.length > 0 ||
+                  reviews.length > 0 ||
+                  dismissedCount > 0) && (
                   <Card className="p-6">
                     <h3 className="mb-3 flex items-center gap-2 font-semibold text-gray-900">
                       <AlertTriangle className="h-4 w-4 text-amber-600" />
                       Checks
                     </h3>
+
                     <ul className="space-y-2 text-sm">
-                      {[...blockers, ...reviews].map((w, i) => (
-                        <li
-                          key={`${w.path}-${i}`}
-                          className={`rounded border px-3 py-2 ${
-                            w.severity === 'blocker'
-                              ? 'border-red-200 bg-red-50 text-red-800'
-                              : 'border-amber-200 bg-amber-50 text-amber-800'
-                          }`}
-                        >
-                          <span className="font-mono text-xs opacity-70">
-                            {w.locale ? `${w.locale} · ` : ''}
-                            {w.path}
-                          </span>
-                          <p>{w.message}</p>
-                        </li>
-                      ))}
+                      {[...blockers, ...reviews].map((w, i) => {
+                        const target: 'brief' | 'cv' | 'letter' =
+                          w.path?.startsWith('cv.')
+                            ? 'cv'
+                            : w.path?.startsWith('coverLetter.')
+                              ? 'letter'
+                              : 'brief'
+                        const elsewhere =
+                          target !== tab ||
+                          (w.locale && w.locale !== activeLocale)
+
+                        return (
+                          <li
+                            key={`${w.code}-${w.path}-${i}`}
+                            className={`rounded border px-3 py-2 ${
+                              w.severity === 'blocker'
+                                ? 'border-red-200 bg-red-50 text-red-800'
+                                : 'border-amber-200 bg-amber-50 text-amber-800'
+                            }`}
+                          >
+                            <span className="font-mono text-xs opacity-70">
+                              {w.locale ? `${w.locale} · ` : ''}
+                              {w.path}
+                            </span>
+                            <p>{w.message}</p>
+
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              {/*
+                                Fixing runs against whichever document the check
+                                points at, so the buttons switch tabs first
+                                rather than silently refining the wrong one.
+                              */}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={refining}
+                                onClick={() => {
+                                  if (elsewhere) {
+                                    setTab(target)
+                                    if (w.locale)
+                                      setActiveLocale(w.locale as Locale)
+                                    setNotice(
+                                      `Switched to the ${w.locale?.toUpperCase() ?? ''} ${
+                                        target === 'cv'
+                                          ? 'CV'
+                                          : target === 'letter'
+                                            ? 'cover letter'
+                                            : 'fit brief'
+                                      } — press Fix again to resolve it there.`
+                                    )
+                                    return
+                                  }
+                                  runRefine(
+                                    `Resolve this check: ${w.message}`,
+                                    `${w.code} at ${w.path ?? 'unknown path'} — ${w.message}`
+                                  )
+                                }}
+                              >
+                                <Sparkles className="mr-1 h-3.5 w-3.5" />
+                                {elsewhere ? 'Go to it' : 'Fix with AI'}
+                              </Button>
+
+                              {/*
+                                Only review-severity checks can be dismissed. A
+                                blocker is an invented language level or a
+                                citation resolving to nothing; the way past one
+                                is to fix it, or to publish anyway with it still
+                                on screen.
+                              */}
+                              {w.severity !== 'blocker' && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  disabled={savingEdit}
+                                  onClick={() => dismissWarning(w)}
+                                >
+                                  Dismiss
+                                </Button>
+                              )}
+                            </div>
+                          </li>
+                        )
+                      })}
                     </ul>
+
+                    {dismissedCount > 0 && (
+                      <p className="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                        {dismissedCount} check
+                        {dismissedCount === 1 ? '' : 's'} dismissed.
+                        <button
+                          type="button"
+                          onClick={restoreDismissed}
+                          className="underline hover:text-gray-900"
+                        >
+                          Show again
+                        </button>
+                      </p>
+                    )}
+
+                    {blockers.length > 0 && (
+                      <p className="mt-3 text-xs text-gray-500">
+                        Blocking checks cannot be dismissed — they are the ones
+                        that must not reach a recruiter.
+                      </p>
+                    )}
                   </Card>
                 )}
 
@@ -1092,11 +1418,25 @@ export default function ApplicationsClient() {
 
                   {tab === 'brief' && (
                     <div>
-                      <p className="mb-2 text-xs text-gray-500">
+                      <p className="mb-3 text-xs text-gray-500">
                         Edit any wording below and save. It is re-validated on
                         save, so a change that breaks a claim shows up in
                         Checks.
                       </p>
+
+                      <div className="mb-4">
+                        <RefinePanel
+                          target="brief"
+                          locale={activeLocale}
+                          busy={refining}
+                          proposal={proposal}
+                          error={refineError}
+                          onRefine={instruction => runRefine(instruction)}
+                          onAccept={acceptProposal}
+                          onReject={() => setProposal(null)}
+                        />
+                      </div>
+
                       <textarea
                         value={draftJson}
                         onChange={e => setDraftJson(e.target.value)}
@@ -1128,31 +1468,140 @@ export default function ApplicationsClient() {
 
                   {tab !== 'brief' && (
                     <div>
-                      {(
-                        tab === 'cv'
-                          ? selected.cvContent?.[activeLocale]
-                          : selected.coverLetter?.[activeLocale]
-                      ) ? (
+                      {docDraft ? (
                         <>
-                          <Button asChild variant="outline" size="sm">
-                            <a
-                              href={`/api/admin/brief/${selected.id}/document?kind=${
-                                tab === 'cv' ? 'cv' : 'cover-letter'
-                              }&locale=${activeLocale}`}
+                          <div className="mb-4 flex flex-wrap items-center gap-2">
+                            <Button asChild variant="outline" size="sm">
+                              <a
+                                href={`/api/admin/brief/${selected.id}/document?kind=${
+                                  tab === 'cv' ? 'cv' : 'cover-letter'
+                                }&locale=${activeLocale}`}
+                              >
+                                <Download className="mr-2 h-4 w-4" />
+                                Download .docx ({activeLocale.toUpperCase()})
+                              </a>
+                            </Button>
+
+                            <div className="inline-flex rounded-lg border border-gray-200 p-1">
+                              {(['fields', 'json'] as const).map(value => (
+                                <button
+                                  key={value}
+                                  type="button"
+                                  onClick={() => {
+                                    // Carry the current draft across so the two
+                                    // views never disagree about what is saved.
+                                    if (value === 'json') {
+                                      setDocJson(
+                                        JSON.stringify(docDraft, null, 2)
+                                      )
+                                    } else {
+                                      try {
+                                        setDocDraft(JSON.parse(docJson))
+                                      } catch {
+                                        setError(
+                                          'That JSON does not parse — fix it before switching back to fields.'
+                                        )
+                                        return
+                                      }
+                                    }
+                                    setDocMode(value)
+                                  }}
+                                  className={`rounded-md px-3 py-1 text-xs font-medium ${
+                                    docMode === value
+                                      ? 'bg-gray-900 text-white'
+                                      : 'text-gray-600'
+                                  }`}
+                                >
+                                  {value === 'fields' ? 'Fields' : 'JSON'}
+                                </button>
+                              ))}
+                            </div>
+
+                            <span className="text-xs text-gray-400">
+                              The .docx renders from this — editing here changes
+                              what downloads.
+                            </span>
+                          </div>
+
+                          <div className="mb-4">
+                            <RefinePanel
+                              target={tab}
+                              locale={activeLocale}
+                              busy={refining}
+                              proposal={proposal}
+                              error={refineError}
+                              onRefine={instruction => runRefine(instruction)}
+                              onAccept={acceptProposal}
+                              onReject={() => setProposal(null)}
+                            />
+                          </div>
+
+                          {docMode === 'fields' ? (
+                            tab === 'cv' ? (
+                              <CvEditor
+                                value={docDraft as CvContent}
+                                onChange={setDocDraft}
+                              />
+                            ) : (
+                              <LetterEditor
+                                value={docDraft as CoverLetterContent}
+                                onChange={setDocDraft}
+                              />
+                            )
+                          ) : (
+                            <textarea
+                              value={docJson}
+                              onChange={e => setDocJson(e.target.value)}
+                              rows={22}
+                              spellCheck={false}
+                              className="w-full rounded-lg border border-gray-300 p-3 font-mono text-xs"
+                            />
+                          )}
+
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <Button
+                              onClick={() => {
+                                if (docMode === 'json') {
+                                  // Parse first and hand the result straight to
+                                  // the save: setState is asynchronous, so
+                                  // saving "after" it would persist the version
+                                  // from before this click.
+                                  let parsed
+                                  try {
+                                    parsed = JSON.parse(docJson)
+                                  } catch {
+                                    setError(
+                                      'That is not valid JSON — check for a missing comma or quote.'
+                                    )
+                                    return
+                                  }
+                                  setDocDraft(parsed)
+                                  saveDocDraft(parsed)
+                                  return
+                                }
+                                saveDocDraft()
+                              }}
+                              disabled={savingEdit || !docDirty}
                             >
-                              <Download className="mr-2 h-4 w-4" />
-                              Download .docx ({activeLocale.toUpperCase()})
-                            </a>
-                          </Button>
-                          <pre className="mt-4 max-h-[28rem] overflow-auto rounded-lg bg-gray-50 p-3 text-xs">
-                            {JSON.stringify(
-                              tab === 'cv'
-                                ? selected.cvContent?.[activeLocale]
-                                : selected.coverLetter?.[activeLocale],
-                              null,
-                              2
-                            )}
-                          </pre>
+                              {savingEdit
+                                ? 'Saving…'
+                                : docDirty
+                                  ? 'Save changes'
+                                  : 'Saved'}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              disabled={!docDirty}
+                              onClick={() => {
+                                clearDocDraft(docKey)
+                                setDocJson(
+                                  JSON.stringify(storedDoc ?? {}, null, 2)
+                                )
+                              }}
+                            >
+                              Revert
+                            </Button>
+                          </div>
                         </>
                       ) : (
                         <p className="text-sm text-gray-500">

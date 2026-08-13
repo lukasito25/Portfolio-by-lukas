@@ -58,6 +58,7 @@ export async function recordEdits(
       path: pair.path,
       before: pair.before,
       after: pair.after,
+      instruction: pair.instruction,
     }))
   )
 }
@@ -83,6 +84,7 @@ export async function recentEdits(limit = 12): Promise<EditPair[]> {
       path: row.path,
       before: row.before,
       after: row.after,
+      instruction: row.instruction ?? undefined,
     }))
   } catch (error) {
     console.error(
@@ -107,6 +109,7 @@ export async function undistilledEdits(): Promise<
     path: row.path,
     before: row.before,
     after: row.after,
+    instruction: row.instruction ?? undefined,
   }))
 }
 
