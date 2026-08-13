@@ -265,6 +265,11 @@ model GeneratedBrief {
   generatedCoverLetter String @default("{}")
   brand        String    @default("{}")
   warnings     String    @default("[]")
+  /// Whether this application is worth the time: score, band, per-must-have
+  /// status and the arithmetic it was derived from. Stored rather than
+  /// recomputed — it costs a model call and only moves when the posting or the
+  /// brief does.
+  fitAssessment String   @default("{}")
   /// Checks he has reviewed and accepted, as a JSON array of stable keys
   /// (code|locale|path). Warnings are recomputed from the validators on every
   /// save, so a dismissal cannot live in `warnings` — the next edit would

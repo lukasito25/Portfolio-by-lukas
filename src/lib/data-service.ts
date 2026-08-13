@@ -1090,6 +1090,9 @@ class DataService {
       brand: parse(row.brand, {}),
       warnings: parse(row.warnings, []),
       dismissedWarnings: parse(row.dismissedWarnings ?? '[]', []),
+      fitAssessment: parse(row.fitAssessment ?? '{}', {}),
+      fitScore: parse(row.fitAssessment ?? '{}', {}).score ?? null,
+      fitBand: parse(row.fitAssessment ?? '{}', {}).band ?? null,
       applicationStatus: row.applicationStatus ?? 'not_sent',
       sentAt: row.sentAt ?? null,
       sentVia: row.sentVia ?? null,
@@ -1157,6 +1160,16 @@ class DataService {
         previewToken: brief.previewToken,
         locales: Object.keys(brief.content as Record<string, unknown>),
         warningCount: (brief.warnings as unknown[]).length,
+        // Mirrors the Worker's own summary — the list must look the same
+        // whichever store it came from, or the badge appears only in
+        // production and looks like a bug locally.
+        fitScore:
+          (brief.fitAssessment as { score?: number } | undefined)?.score ??
+          null,
+        fitBand:
+          (brief.fitAssessment as { band?: string } | undefined)?.band ?? null,
+        applicationStatus: brief.applicationStatus,
+        sentAt: brief.sentAt,
         createdAt: brief.createdAt,
         updatedAt: brief.updatedAt,
         publishedAt: brief.publishedAt,
@@ -1267,6 +1280,7 @@ class DataService {
       'brand',
       'warnings',
       'dismissedWarnings',
+      'fitAssessment',
       'sentSnapshot',
     ]) {
       if (data[field] !== undefined) patch[field] = JSON.stringify(data[field])

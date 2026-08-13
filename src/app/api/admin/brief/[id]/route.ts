@@ -243,12 +243,31 @@ export async function PUT(request: NextRequest, { params }: Params) {
         ? body.instruction.trim().slice(0, 500)
         : undefined
 
+    /**
+     * Record training pairs — after the save, and never able to undo it.
+     *
+     * `recordEdits` throws on failure, which is right at the store: a caller
+     * saving an edit deserves to know it was not kept. But this caller has
+     * already written the document the user pressed the button for, so letting
+     * the throw through would report a failure for work that succeeded. The
+     * loss is one training example, and it is reported in `editsRecorded`
+     * rather than hidden.
+     */
+    let learningFailed = false
     const learn = async (pairs: ReturnType<typeof diffBriefContent>) => {
       if (!pairs.length) return
-      editsRecorded += await recordEdits(
-        id,
-        instruction ? pairs.map(p => ({ ...p, instruction })) : pairs
-      )
+      try {
+        editsRecorded += await recordEdits(
+          id,
+          instruction ? pairs.map(p => ({ ...p, instruction })) : pairs
+        )
+      } catch (error) {
+        learningFailed = true
+        console.error(
+          '[application-engine] could not record edits; the save itself succeeded.',
+          error
+        )
+      }
     }
 
     if (patch.content) {
@@ -325,11 +344,30 @@ export async function PUT(request: NextRequest, { params }: Params) {
       }
     }
 
+    // Bookkeeping for the learning loop, never a reason to fail the save.
+    //
+    // This threw once — the Worker had not been redeployed with the baseline
+    // columns, so it answered "Nothing to update" — and because it ran after a
+    // successful write, the route returned 500 while the edit was already
+    // persisted. The panel showed "Could not save changes" over a change that
+    // had in fact been saved, which is the worst of both: the user retypes work
+    // that was never lost.
+    //
+    // Third time an auxiliary concern has taken down a primary action here
+    // (edit-learning reads did it to generation). Anything that is not the
+    // thing the user pressed the button for gets caught.
     if (Object.keys(backfill).length) {
-      await dataService.updateBrief(id, backfill)
+      try {
+        await dataService.updateBrief(id, backfill)
+      } catch (error) {
+        console.error(
+          '[application-engine] could not store the document baseline; the edit was saved and future diffs for this locale may be missed.',
+          error
+        )
+      }
     }
 
-    return NextResponse.json({ brief, editsRecorded })
+    return NextResponse.json({ brief, editsRecorded, learningFailed })
   } catch (error) {
     console.error('[application-engine] update failed:', error)
     return NextResponse.json(
