@@ -28,6 +28,11 @@ import type { CvContent, CoverLetterContent } from '@/lib/documents/schema'
 import { warningKey } from '@/lib/fit-brief/warning-key'
 import { CvEditor, LetterEditor } from './DocumentEditor'
 import { RefinePanel, type RefineProposal } from './RefinePanel'
+import {
+  FitScoreCard,
+  FitScoreBadge,
+  type FitAssessmentView,
+} from './FitScoreCard'
 
 /**
  * The application engine's control panel.
@@ -78,6 +83,8 @@ interface BriefSummary {
   previewToken: string
   locales: string[]
   warningCount: number
+  fitScore: number | null
+  fitBand: string | null
   sourceUrl: string | null
   updatedAt: string
   publishedAt: string | null
@@ -97,6 +104,7 @@ interface FullBrief extends BriefSummary {
   warnings: BriefWarning[]
   /** Checks reviewed and accepted, as stable keys. Never includes blockers. */
   dismissedWarnings: string[]
+  fitAssessment: FitAssessmentView | Record<string, never>
   sentVia: string | null
   sentSnapshot: Record<string, unknown>
   outcomeNotes: string | null
@@ -179,6 +187,9 @@ export default function ApplicationsClient() {
   >({})
   const [docMode, setDocMode] = useState<'fields' | 'json'>('fields')
   const [docJson, setDocJson] = useState('')
+
+  // Is this one worth the hour?
+  const [scoring, setScoring] = useState(false)
 
   // Refinement
   const [refining, setRefining] = useState(false)
@@ -627,6 +638,37 @@ export default function ApplicationsClient() {
     }
   }
 
+  /**
+   * Score the application.
+   *
+   * Deliberately on demand rather than part of generation: it costs a model
+   * call, and the answer is only meaningful once the brief exists, because the
+   * brief's own honest requirement markings are what it is computed from.
+   */
+  const runFitScore = async () => {
+    if (!selected) return
+    setScoring(true)
+    setError(null)
+    try {
+      const res = await fetch(`/api/admin/brief/${selected.id}/fit-score`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locale: activeLocale }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
+      setSelected(data.brief)
+      setNotice(
+        `Assessed: ${data.assessment.score}% — ${data.assessment.verdict}`
+      )
+      await load()
+    } catch (e) {
+      setError((e as Error).message)
+    } finally {
+      setScoring(false)
+    }
+  }
+
   /** Record that a check has been read and accepted. */
   const dismissWarning = async (warning: BriefWarning) => {
     if (!selected) return
@@ -1043,6 +1085,10 @@ export default function ApplicationsClient() {
                       {brief.warningCount}
                     </span>
                   )}
+                  <FitScoreBadge
+                    score={brief.fitScore ?? null}
+                    band={brief.fitBand ?? null}
+                  />
                 </div>
               </Card>
             ))}
@@ -1244,6 +1290,19 @@ export default function ApplicationsClient() {
                     className="mt-4 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                   />
                 </Card>
+
+                {/* Worth applying at all? Before anything about polish. */}
+                <FitScoreCard
+                  assessment={
+                    selected.fitAssessment &&
+                    typeof (selected.fitAssessment as FitAssessmentView)
+                      .score === 'number'
+                      ? (selected.fitAssessment as FitAssessmentView)
+                      : null
+                  }
+                  scoring={scoring}
+                  onScore={runFitScore}
+                />
 
                 {/* Warnings */}
                 {(blockers.length > 0 ||

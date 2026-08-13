@@ -633,3 +633,55 @@ Two changes, and the second matters more than the first:
   returns `[]`, and the draft is written as if it were the first ever run.
   Writes still throw, because losing an edit silently would degrade the model's
   picture of his voice with nothing to show why.
+
+### Is this one worth the hour?
+
+The engine made applying cheap, and cheap applying is how a job hunt turns into
+unpaid data entry. `/admin/applications` therefore scores each application on
+its likelihood of reaching a **first interview** — not of getting the job — and
+is calibrated to say no.
+
+Two things stop it being a vanity number.
+
+**Part of it is arithmetic, not judgement.** `coverage()` in
+`src/lib/fit-brief/fit-score.ts` counts, from the brief's own requirement rows,
+how many are marked a direct match rather than transferable. Those markings were
+written under the honesty rules and are shown beneath the score, so the sum is
+auditable: a 70 sitting on 2-of-9 must-haves is self-evidently wrong.
+
+**Hard blockers cap it at 19**, in the prompt and again in the route. Missing
+work authorisation, a required language he has not stated, a two-level seniority
+gap, a mandatory degree or licence. Relocation alone is not a blocker — it goes
+in the risk list.
+
+The bands: **75+** strong (rare by design), **45–74** credible — where most
+worthwhile applications sit, **20–44** stretch, **0–19** long shot.
+
+It is deliberately **not** a gauge or a progress bar. A bar three-tenths full
+reads as failure, and 45% is a perfectly good application; a design that makes a
+realistic score feel like a bad one would push toward applying to everything,
+which is the behaviour this exists to prevent.
+
+First real run, on the aspaara posting: **5%, skip** — the posting's seventh
+must-have is "Fluency in German is required", which he has not stated. Correct,
+and an hour saved.
+
+Scoring runs on demand (`POST /api/admin/brief/[id]/fit-score`) rather than
+during generation: it costs a model call, and the answer only moves when the
+posting or the brief does.
+
+### Anything after the save must not be able to undo it
+
+`PUT /api/admin/brief/[id]` writes the document, then records training pairs and
+backfills the document baseline. Both of those run **after** a successful write,
+and both are wrapped, because a throw there returns 500 over a change that is
+already persisted — the panel says "Could not save changes" and the work gets
+retyped despite never being lost.
+
+That is exactly what happened: the Worker had not been redeployed with the
+baseline columns, answered `Nothing to update`, and every Accept in the refine
+box reported failure while saving correctly.
+
+**`cloudflare-api/` is git-ignored, so a stale Worker never shows up in a diff
+or a build.** When a change touches Worker fields, deploy it and verify the new
+field round-trips before assuming the app is at fault.
