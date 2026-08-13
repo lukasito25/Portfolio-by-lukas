@@ -257,8 +257,19 @@ model GeneratedBrief {
   generatedContent String @default("{}")
   cvContent    String    @default("{}")
   coverLetter  String    @default("{}")
+  /// Frozen first-generation copies, the document equivalents of
+  /// `generatedContent`. A hand edit is diffed against the generation, not
+  /// against the previous save — the pair worth learning from is "what the
+  /// model wrote → what he actually sends", not the last increment.
+  generatedCvContent   String @default("{}")
+  generatedCoverLetter String @default("{}")
   brand        String    @default("{}")
   warnings     String    @default("[]")
+  /// Checks he has reviewed and accepted, as a JSON array of stable keys
+  /// (code|locale|path). Warnings are recomputed from the validators on every
+  /// save, so a dismissal cannot live in `warnings` — the next edit would
+  /// overwrite it. The recompute filters against this instead.
+  dismissedWarnings String @default("[]")
 
   /// Application pipeline, separate from `status` (which is page publication).
   /// not_sent | sent | acknowledged | interview | rejected | offer | withdrawn
@@ -298,6 +309,11 @@ model ApplicationEdit {
   path      String
   before    String
   after     String
+  /// What he asked for, when the change came from a typed instruction rather
+  /// than a direct hand edit. The diff shows that a sentence changed; this
+  /// shows why, and the why is the part that generalises to the next
+  /// application. Null for hand edits.
+  instruction String?
   /// Set once a distillation run has folded this into the style rules.
   distilled Boolean  @default(false)
   createdAt DateTime @default(now())

@@ -230,3 +230,109 @@ ${JSON.stringify(
   2
 )}`
 }
+
+/* ------------------------------------------------------------------ *
+ * Refining an existing document
+ * ------------------------------------------------------------------ */
+
+export type RefineTarget = 'brief' | 'cv' | 'letter'
+
+const TARGET_LABEL: Record<RefineTarget, string> = {
+  brief: 'fit brief page',
+  cv: 'CV',
+  letter: 'cover letter',
+}
+
+/**
+ * Revising something already written, rather than writing it.
+ *
+ * A different job from generation, and the difference is the whole point: the
+ * document in front of him is mostly right, or he would regenerate it. The
+ * failure mode here is a model that takes "make paragraph two less formal" as
+ * licence to rewrite the letter — he then has to re-read all of it to find what
+ * else moved, which is slower than editing by hand and is why an unconstrained
+ * refine button is worse than none.
+ *
+ * The honesty rules still apply in full. Being asked to make something stronger
+ * is not permission to make it untrue, and "stronger" is exactly the instruction
+ * most likely to pull an invented metric into a CV.
+ */
+export function refineSystem(
+  target: RefineTarget,
+  editLearning?: string
+): string {
+  return buildSystemPrompt(
+    `YOUR TASK
+
+Revise a ${TARGET_LABEL[target]} that has already been written, following one
+specific instruction from its owner.
+
+Return the complete object in the same shape you were given. It is replacing
+what is there, so every field must be present — but the only fields whose
+*values* may differ are the ones the instruction actually calls for.
+
+THE DISCIPLINE THAT MAKES THIS USEFUL
+
+- Change the least that satisfies the instruction. If it names a paragraph,
+  every other paragraph comes back byte-identical. Resist tidying something
+  you would have written differently: he did not ask, and a diff full of
+  unrequested improvements is one he has to audit line by line.
+- If the instruction is already satisfied, return the object unchanged rather
+  than inventing a difference to look responsive.
+- Interpret the instruction as written. "Shorter" means fewer words, not a
+  different argument. "Less formal" means register, not content.
+- Keep every factId exactly as it is unless the sentence it belongs to no
+  longer makes its claim. Never add a factId that was not already there.
+
+WHAT THE INSTRUCTION CANNOT AUTHORISE
+
+The honesty rules above are not relaxed by a request to improve something.
+If following the instruction literally would require a fact that is not in the
+corpus — a metric, a tool, a responsibility, a language level — do not invent
+it. Satisfy as much of the instruction as the facts allow, and leave the rest.
+An impressive line he cannot defend in an interview is the one outcome worse
+than an unremarkable one.`,
+    editLearning
+  )
+}
+
+export function refinePrompt(
+  target: RefineTarget,
+  current: unknown,
+  instruction: string,
+  context?: { spec?: JobSpec; warning?: string }
+): string {
+  const parts = [
+    `Revise this ${TARGET_LABEL[target]} according to the instruction below.`,
+    '',
+    'HIS INSTRUCTION',
+    instruction,
+  ]
+
+  if (context?.warning) {
+    parts.push(
+      '',
+      'THE CHECK THIS IS MEANT TO RESOLVE',
+      context.warning,
+      '',
+      'Resolve it by correcting what it points at. If the only honest way to',
+      'resolve it is to remove the claim, remove the claim.'
+    )
+  }
+
+  if (context?.spec) {
+    parts.push(
+      '',
+      'THE POSTING, for context',
+      JSON.stringify(context.spec, null, 2)
+    )
+  }
+
+  parts.push(
+    '',
+    `THE CURRENT ${TARGET_LABEL[target].toUpperCase()}`,
+    JSON.stringify(current, null, 2)
+  )
+
+  return parts.join('\n')
+}
