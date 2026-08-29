@@ -350,6 +350,24 @@ export default function ApplicationsClient() {
     }
   }, [])
 
+  /**
+   * Bring the review pane into view.
+   *
+   * Deferred a frame: `openBrief` has only just set `selected`, so the pane it
+   * scrolls to does not exist yet at the moment this is called.
+   *
+   * Declared here, above the guards, for the reason spelled out at the top of
+   * this component: React counts hooks per render, and a hook sitting below the
+   * `status === 'loading'` return runs 46 hooks on the first render and 47 once
+   * the session resolves. That is error #310 and it takes the whole page down —
+   * which is exactly what it did.
+   */
+  const revealDraft = useCallback(() => {
+    requestAnimationFrame(() =>
+      reviewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    )
+  }, [])
+
   if (status === 'loading') {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -370,18 +388,6 @@ export default function ApplicationsClient() {
     setSteps(current =>
       current.map(step => (step.key === key ? { ...step, state } : step))
     )
-
-  /**
-   * Bring the review pane into view.
-   *
-   * Deferred a frame: `openBrief` has only just set `selected`, so the pane it
-   * scrolls to does not exist yet at the moment this is called.
-   */
-  const revealDraft = useCallback(() => {
-    requestAnimationFrame(() =>
-      reviewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    )
-  }, [])
 
   const call = async (path: string, body: unknown) => {
     const res = await fetch(path, {
