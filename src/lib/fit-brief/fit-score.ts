@@ -98,14 +98,21 @@ export function coverage(spec: JobSpec, brief: FitBriefContent): Coverage {
 }
 
 /* ------------------------------------------------------------------ *
- * Prompt
+ * Calibration shared with the lead score
  * ------------------------------------------------------------------ */
 
-export const FIT_SYSTEM = `You estimate whether a specific job application is worth a specific person's time.
-
-You are not writing to encourage him. He has a limited number of hours and every application costs one; your job is to protect those hours from applications that were never going to land. A score that says "apply" to everything is useless to him, and telling him something is promising when it is not costs him a week he could have spent on a role he would have got.
-
-## The scale
+/**
+ * The bands and the blocker rules, in one place.
+ *
+ * Two scorers now exist: this one, which reads a finished brief, and
+ * `src/lib/job-search/lead-score.ts`, which reads a search hit before any brief
+ * exists. They answer the same question at different depths, and the moment
+ * their calibrations diverge the numbers stop being comparable — a lead scored
+ * 60 that becomes a brief scored 40 would look like the application got worse,
+ * when in fact only the scale moved. So the anchors are written once and
+ * interpolated into both prompts.
+ */
+export const SCORE_BANDS = `## The scale
 
 The number is the probability of reaching a **first interview** — not of getting the job. Anchor it here:
 
@@ -114,9 +121,9 @@ The number is the probability of reaching a **first interview** — not of getti
 - **20-44 · stretch** — Several must-haves are transferable at best, or the seniority is a step beyond what he has held. Worth doing only if the role is unusually attractive or he has a referral.
 - **0-19 · long-shot** — A hard blocker, or the profile is simply not what they asked for. Say so plainly.
 
-Be strict at the top. **75+ should be rare.** If you find yourself scoring most postings above 60, you are describing his CV rather than his odds against the other applicants for this specific role.
+Be strict at the top. **75+ should be rare.** If you find yourself scoring most postings above 60, you are describing his CV rather than his odds against the other applicants for this specific role.`
 
-## Hard blockers cap the score
+export const HARD_BLOCKER_RULES = `## Hard blockers cap the score
 
 If any of these hold, the score cannot exceed 19 no matter how good the rest of the fit is, and \`hardBlocker\` must name it:
 
@@ -125,7 +132,22 @@ If any of these hold, the score cannot exceed 19 no matter how good the rest of 
 - The role is two or more seniority levels above anything he has held.
 - A specific degree, licence or certification is mandatory and he lacks it.
 
-A relocation requirement is **not** a hard blocker on its own — say where he is based and let the risk list carry it.
+Nothing else is a hard blocker. A relocation requirement, a domain or industry he has not worked in, a tool he has not used, a degree that is merely preferred — none of these qualify, however badly they hurt the odds. They belong in the risk list, where they lower the score without pinning it to the floor. If you find yourself writing a fifth kind of blocker, it is a risk.`
+
+/** The ceiling a hard blocker imposes, enforced in code as well as in prompts. */
+export const HARD_BLOCKER_CEILING = 19
+
+/* ------------------------------------------------------------------ *
+ * Prompt
+ * ------------------------------------------------------------------ */
+
+export const FIT_SYSTEM = `You estimate whether a specific job application is worth a specific person's time.
+
+You are not writing to encourage him. He has a limited number of hours and every application costs one; your job is to protect those hours from applications that were never going to land. A score that says "apply" to everything is useless to him, and telling him something is promising when it is not costs him a week he could have spent on a role he would have got.
+
+${SCORE_BANDS}
+
+${HARD_BLOCKER_RULES}
 
 ## What the evidence is
 

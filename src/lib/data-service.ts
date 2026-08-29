@@ -1423,6 +1423,203 @@ class DataService {
 
     return prisma.applicationEdit.count()
   }
+
+  /* ---------------------------------------------------------------- *
+   * Job leads (/admin/applications → the Search tab)
+   * ---------------------------------------------------------------- *
+   *
+   * The mirror of the brief methods above, and deliberately sharing their
+   * `briefStore()` split rather than inventing a second one: a lead found while
+   * experimenting locally must not land in production D1 any more than a draft
+   * brief may, and the two halves of the panel have to agree about which
+   * database they are looking at. Splitting them would show a lead in the list
+   * whose Generate button writes somewhere else.
+   */
+
+  private async leadFetch(path: string, init?: RequestInit) {
+    const base = (
+      process.env.NEXT_PUBLIC_API_URL ||
+      'https://portfolio-api.hosala-lukas.workers.dev'
+    ).replace(/\/$/, '')
+
+    return fetch(`${base}/leads${path}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.API_SECRET}`,
+        ...(init?.headers || {}),
+      },
+      cache: 'no-store',
+    })
+  }
+
+  /** Rehydrate a Prisma row (JSON stored as text) into the API's shape. */
+  private leadFromPrisma(row: any) {
+    const parse = (value: string, fallback: unknown) => {
+      try {
+        return JSON.parse(value)
+      } catch {
+        return fallback
+      }
+    }
+    return {
+      ...row,
+      requirements: parse(row.requirements, []),
+      scoreDetail: parse(row.scoreDetail, {}),
+      criteria: parse(row.criteria, {}),
+    }
+  }
+
+  async listJobLeads(options?: { states?: string[]; limit?: number }) {
+    this.assertServer('listJobLeads')
+    const limit = options?.limit ?? 200
+
+    if (this.briefStore() === 'worker') {
+      const query = new URLSearchParams({ limit: String(limit) })
+      if (options?.states?.length) query.set('states', options.states.join(','))
+      const res = await this.leadFetch(`?${query}`)
+      if (!res.ok) throw new Error(`Lead list failed: ${res.status}`)
+      const { leads } = await res.json()
+      return leads
+    }
+
+    const rows = await prisma.jobLead.findMany({
+      where: options?.states?.length
+        ? { state: { in: options.states } }
+        : undefined,
+      orderBy: [{ leadScore: 'desc' }, { foundAt: 'desc' }],
+      take: limit,
+    })
+    return rows.map(row => this.leadFromPrisma(row))
+  }
+
+  /**
+   * Store a batch of leads, keyed on url.
+   *
+   * Upsert rather than insert because the same posting resurfaces on every
+   * search that matches it. Re-running a search must not multiply the list, and
+   * — more importantly — must not resurrect something already dismissed, so
+   * `state` and `briefId` are preserved on an existing row while the scoring
+   * and the posting details are refreshed.
+   */
+  async upsertJobLeads(leads: JobLeadInput[]) {
+    this.assertServer('upsertJobLeads')
+    if (leads.length === 0) return []
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.leadFetch('', {
+        method: 'POST',
+        body: JSON.stringify({ leads }),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || `Lead upsert failed: ${res.status}`)
+      }
+      const { leads: stored } = await res.json()
+      return stored
+    }
+
+    const stored = []
+    for (const lead of leads) {
+      const shared = {
+        title: lead.title,
+        companyName: lead.companyName,
+        location: lead.location ?? '',
+        workModel: lead.workModel ?? 'unspecified',
+        salaryText: lead.salaryText ?? '',
+        postedText: lead.postedText ?? '',
+        postedIso: lead.postedIso ?? '',
+        source: lead.source ?? '',
+        summary: lead.summary ?? '',
+        requirements: JSON.stringify(lead.requirements ?? []),
+        liveness: lead.liveness ?? 'unverified',
+        leadScore: lead.leadScore ?? 0,
+        band: lead.band ?? 'long-shot',
+        recommendation: lead.recommendation ?? 'apply-if-time',
+        hardBlocker: lead.hardBlocker ?? '',
+        scoreDetail: JSON.stringify(lead.scoreDetail ?? {}),
+        criteria: JSON.stringify(lead.criteria ?? {}),
+      }
+
+      const row = await prisma.jobLead.upsert({
+        where: { url: lead.url },
+        // `state` and `briefId` are absent here on purpose — see the doc above.
+        update: shared,
+        create: { url: lead.url, ...shared },
+      })
+      stored.push(this.leadFromPrisma(row))
+    }
+    return stored
+  }
+
+  async updateJobLead(id: string, data: Partial<JobLeadInput>) {
+    this.assertServer('updateJobLead')
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.leadFetch(`/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+      if (res.status === 404) return null
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || `Lead update failed: ${res.status}`)
+      }
+      const { lead } = await res.json()
+      return lead
+    }
+
+    const patch: Record<string, unknown> = {}
+    if (data.state !== undefined) patch.state = data.state
+    if (data.briefId !== undefined) patch.briefId = data.briefId
+    if (data.liveness !== undefined) patch.liveness = data.liveness
+    if (Object.keys(patch).length === 0) return null
+
+    const row = await prisma.jobLead
+      .update({ where: { id }, data: patch })
+      .catch(() => null)
+    return row ? this.leadFromPrisma(row) : null
+  }
+
+  async deleteJobLead(id: string) {
+    this.assertServer('deleteJobLead')
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.leadFetch(`/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok && res.status !== 404) {
+        throw new Error(`Lead delete failed: ${res.status}`)
+      }
+      return
+    }
+
+    await prisma.jobLead.delete({ where: { id } }).catch(() => undefined)
+  }
+}
+
+/** What `upsertJobLeads` accepts. Mirrors the JobLead columns. */
+export interface JobLeadInput {
+  url: string
+  title: string
+  companyName: string
+  location?: string
+  workModel?: string
+  salaryText?: string
+  postedText?: string
+  postedIso?: string
+  source?: string
+  summary?: string
+  requirements?: string[]
+  liveness?: string
+  leadScore?: number
+  band?: string
+  recommendation?: string
+  hardBlocker?: string
+  scoreDetail?: unknown
+  criteria?: unknown
+  state?: string
+  briefId?: string | null
 }
 
 export interface ApplicationEditRecord {

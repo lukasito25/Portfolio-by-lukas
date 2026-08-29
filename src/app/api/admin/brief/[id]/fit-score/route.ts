@@ -20,6 +20,7 @@ import {
   fitPrompt,
   coverage,
   bandFor,
+  HARD_BLOCKER_CEILING,
 } from '@/lib/fit-brief/fit-score'
 import { LOCALES, type Locale } from '@/lib/fit-brief/guardrails'
 import { requireAdmin, generationError } from '@/lib/fit-brief/server'
@@ -85,7 +86,9 @@ export async function POST(request: NextRequest, { params }: Params) {
 
     // A named hard blocker caps the score — the prompt says so, and saying so
     // twice is cheaper than a 60 sitting above "requires German (C1)".
-    const capped = value.hardBlocker.trim() ? Math.min(score, 19) : score
+    const capped = value.hardBlocker.trim()
+      ? Math.min(score, HARD_BLOCKER_CEILING)
+      : score
 
     const assessment = {
       ...value,

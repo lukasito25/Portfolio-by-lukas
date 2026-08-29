@@ -179,6 +179,24 @@ The main dashboard provides a comprehensive overview with:
 - **Cost**: roughly **$1–1.50** per application at list prices, across ~7 generation calls and 2–4 minutes. Unticking "all three languages" for the documents roughly halves it
 - **Geo banner**: "Check geo banner slot" queries the **live** `/api/campaigns` list and says whether the posting's country is already taken — one country carries one banner
 
+#### 4d. 🔎 Search for jobs (`/admin/applications` → Search tab)
+
+- **Purpose**: find the postings in the first place, instead of trawling LinkedIn and StepStone by hand
+- **Input**: one or more **job titles** (the only required field), optional **locations**, an optional **salary floor**, **work model** and **seniority**
+- **Salary is a preference, not a filter** — most postings state nothing about pay, so filtering on it would discard most of the real openings. It surfaces in a lead's risk list when a stated range falls below it
+- **Output**: scored lead cards, best first, each with the company, location, work model, salary _as the posting words it_, and the requirements the search could see
+- **Cost**: three model calls, roughly **$0.005** and **two to four minutes** a search
+- **Badges**, all of them checked rather than claimed:
+  - **Verified live** — an ATS returned the posting, or the URL answered 2xx
+  - **Posting gone** — 404 or 410; the posting was taken down
+  - **Could not verify** — a timeout or a bot wall. Its own answer, never collapsed into "gone", because LinkedIn and Indeed refuse server-side requests as a matter of course
+  - **Already applied here** — a `GeneratedBrief` exists for that URL or company
+- **The lead score is not the fit score.** It is a triage number computed before anything is written, from what the search could see, and it is biased toward "skip". The real fit score still runs on demand after generation. Both use the same bands and the same hard-blocker cap
+- **Actions**: Generate application (runs the identical four-step pipeline) · Save · Dismiss · Open posting
+- **"Only postings still open"** is ticked by default and hides postings the liveness check found had been taken down — typically half to two-thirds of a sweep. It hides `gone` only: `Could not verify` stays visible, because a board blocking a server request is not a closed role
+- **Dismissed leads persist.** A repeat search does not put them back in front of you — they collapse into a "Dismissed (n)" disclosure. Nothing is deduplicated away silently
+- Full detail, including why the research pass must not quote a posting verbatim, in **`CUSTOM_RECRUITER_PAGES.md` §12**
+
 > The eleven hand-built briefs (`/fifa`, `/genius`, `/qualcomm`, …) are **not** in this system. They are compiled pages with their own code and are untouched by it.
 
 #### 5. 🛠️ Technologies Management

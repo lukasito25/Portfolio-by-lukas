@@ -19,8 +19,8 @@ export function Footer() {
               Lukáš Hošala<span className="text-(--accent)">.</span>
             </p>
             <p className="mt-1 text-sm text-tertiary-fg">
-              Senior Product Manager · Based in Italy, working everywhere · ©{' '}
-              {new Date().getFullYear()} ·{' '}
+              Senior Product Manager · Based in Italy, working internationally ·
+              © {new Date().getFullYear()} ·{' '}
               <Link
                 href="/privacy"
                 className="underline transition-colors hover:text-foreground"
