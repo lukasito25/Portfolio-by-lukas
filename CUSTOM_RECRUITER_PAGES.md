@@ -685,3 +685,152 @@ box reported failure while saving correctly.
 **`cloudflare-api/` is git-ignored, so a stale Worker never shows up in a diff
 or a build.** When a change touches Worker fields, deploy it and verify the new
 field round-trips before assuming the app is at fault.
+
+---
+
+## 12. Finding the postings — the automatic search
+
+Section 11 describes an engine that only works **backwards**: you must already
+have found a posting, and you hand it a URL, a PDF or pasted text. Finding it
+was still a matter of trawling LinkedIn, StepStone and careers pages by hand,
+which is the part of a job hunt that costs the most hours for the least
+judgement.
+
+The **Search** tab in `/admin/applications` is the missing front half. Say what
+you are looking for; get back real postings, checked and scored. Anything worth
+an hour goes into the same pipeline as before, unchanged.
+
+### The pipeline
+
+```
+criteria { titles[], locations[], salaryMin?, workModel?, seniority? }
+   ↓  research    provider.research()  — grounded, prose out
+   ↓  structure   JobHitListSchema     — prose into rows
+   ↓  verify      a real request to every URL
+   ↓  dedupe      on the normalised url, and against briefs already written
+   ↓  score       one triage call for the whole set
+   ↓  persist     JobLead, upserted on url
+```
+
+Three model calls, about **$0.005** a search on the agent suite, and **two to
+four minutes** — the research sweep alone runs 40–110s. The route's
+`maxDuration` is 300s, which a wide search does not comfortably clear by much;
+if it ever times out, narrow the titles rather than raising the ceiling.
+
+Research and structuring are two calls for the same reason the extract route
+splits them: Gemini rejects `response_schema` alongside `google_search`.
+
+### The score is not the fit score
+
+Two numbers now exist and they are deliberately different depths:
+
+|          | Lead score                                  | Fit score                                            |
+| -------- | ------------------------------------------- | ---------------------------------------------------- |
+| Runs     | during a search, before anything is written | on demand, after the brief exists                    |
+| Reads    | what the search could see of the posting    | the posting **and** the brief's own requirement rows |
+| Costs    | one call for all results                    | one call per application                             |
+| Lives in | `src/lib/job-search/lead-score.ts`          | `src/lib/fit-brief/fit-score.ts`                     |
+| Answers  | is this worth opening?                      | is this worth an hour?                               |
+
+They share their calibration on purpose: `SCORE_BANDS`, `HARD_BLOCKER_RULES`
+and `HARD_BLOCKER_CEILING` are exported from `fit-score.ts` and interpolated
+into both prompts. The moment the two drift, a lead scored 60 that becomes a
+brief scored 40 looks like the application got worse when only the scale moved.
+
+The lead score is biased toward "skip", because a false skip costs a posting he
+does not apply to and a false apply costs an hour and a generation. The panel
+labels it as a triage number and says the real one runs later.
+
+### The badges are checked, not claimed
+
+The whole saving here is not opening twenty tabs, and it evaporates the moment
+a badge cannot be trusted. So `src/lib/job-search/verify.ts` makes a real
+request to every URL and reports one of three answers:
+
+- **Verified live** — an ATS returned the posting (reusing `fetchAtsPosting()`,
+  the same lookup the extract route runs), or the URL answered 2xx.
+- **Posting gone** — 404 or 410. Common: four of eight results in a German
+  sweep were stale index entries, all four confirmed dead by hand.
+- **Could not verify** — anything else. A timeout, a 403, a bot wall. This is
+  its own answer and never becomes "gone": LinkedIn and Indeed refuse
+  server-side requests as a matter of course, and calling a live posting dead
+  would send him past the best result on the page.
+
+Two filters run before a badge can be earned, both written against URLs that
+actually came back from real searches:
+
+- `isPostingUrl()` rejects a bare origin, a listing index (`/de/stellenangebote?term=`
+  — a search page with an empty query, which answers 200), and domain-parking
+  hosts. A sweep returned `hugedomains.com/domain_profile.cfm?d=primaindustries.com`
+  for a real company: it answers 200, so a liveness check alone would have
+  stamped it live.
+- `isRedirector()` lets Gemini's grounding redirects through the _pre-fetch_
+  filter, because their destination is the posting. They are judged again,
+  strictly, on the resolved URL.
+
+### Do not ask the research pass to quote a posting
+
+`SEARCH_SYSTEM` asks for requirements **condensed, not quoted**, and that reads
+like a style preference. It is not. Asking Gemini to reproduce a posting's
+requirements verbatim reliably returns an empty response: the recitation guard
+fires, the candidate comes back with no text part, and the agent suite surfaces
+it as `object of type 'NoneType' has no len()` — a Python error from `len(None)`
+that says nothing about what happened.
+
+Measured, not guessed. Same criteria, same system prompt:
+
+| Prompt asks for                          | Result            |
+| ---------------------------------------- | ----------------- |
+| a plain list of postings + URLs          | OK, 8–15s         |
+| one line each: company, location, salary | OK, 15s           |
+| **the stated requirements**              | **empty, 18–70s** |
+| requirements _condensed_                 | OK, 30–46s        |
+
+This is the opposite of the extract prompt, which does insist on verbatim
+`sourceQuotes` — and the difference is safe because these lines only feed the
+triage score. Anything he applies to is re-read from the posting itself by
+`/api/admin/brief/extract` before a word of the brief is written.
+
+### Storage
+
+`JobLead` — local SQLite in development, D1 elsewhere, chosen by the same
+`briefStore()` as briefs. Splitting them would show a lead in a list whose
+Generate button writes to a different database.
+
+Upsert is keyed on the normalised URL, and **`state` and `briefId` are never
+overwritten**. The same posting resurfaces on every search that matches it; a
+re-run must not multiply the list and must not resurrect something already
+dismissed. Everything else is refreshed, because a posting and its score can
+genuinely move.
+
+Dismissed leads collapse into a disclosure rather than vanishing, so it is
+visible that a repeat search did not put them back.
+
+### Handing a lead to the generator
+
+`generate()` in `ApplicationsClient` takes an optional handoff. Everything after
+the payload is built is identical for both entry points on purpose: a lead is
+not a second kind of application, it is the same application with the finding
+step done for you, and the moment the two paths diverge they start drifting.
+
+Two details:
+
+- The lead carries a **fallback text** of what the search captured. A posting
+  can be taken down between the search and the click, and a dead URL would
+  otherwise waste a four-minute run — so extraction falls back to the captured
+  summary, and says so, because a brief written from a summary is thinner than
+  one written from the posting.
+- Linking the lead to the brief it became runs **last and wrapped**. The brief
+  is written by that point, and a throw there would report failure over work
+  that is already saved — the same shape of mistake the brief PUT route had to
+  fix.
+
+### One-time setup
+
+```bash
+# The Worker owns the table in production and is git-ignored, so this runs
+# BEFORE the app is merged.
+cd cloudflare-api
+npx wrangler d1 execute portfolio-db --remote --file=migrations/add_job_leads.sql
+npx wrangler deploy
+```

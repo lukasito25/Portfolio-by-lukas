@@ -16,6 +16,7 @@ import {
   Globe,
   Link2,
   RefreshCw,
+  Search,
   Send,
   Sparkles,
   Terminal,
@@ -33,6 +34,7 @@ import {
   FitScoreBadge,
   type FitAssessmentView,
 } from './FitScoreCard'
+import { JobSearchPanel, type LeadHandoff } from './JobSearchPanel'
 
 /**
  * The application engine's control panel.
@@ -110,7 +112,7 @@ interface FullBrief extends BriefSummary {
   outcomeNotes: string | null
 }
 
-type InputMode = 'url' | 'file' | 'text'
+type InputMode = 'url' | 'file' | 'text' | 'search'
 
 interface Step {
   key: string
@@ -156,6 +158,8 @@ export default function ApplicationsClient() {
   const [allLocaleDocs, setAllLocaleDocs] = useState(true)
   const [steps, setSteps] = useState<Step[]>([])
   const [generating, setGenerating] = useState(false)
+  /** The lead whose generation is in flight, so its card can show progress. */
+  const [busyLeadId, setBusyLeadId] = useState<string | null>(null)
   const [spend, setSpend] = useState(0)
   const fileInput = useRef<HTMLInputElement>(null)
 
@@ -372,11 +376,20 @@ export default function ApplicationsClient() {
     return data
   }
 
-  const generate = async () => {
+  /**
+   * Run the pipeline.
+   *
+   * `lead` is the handoff from the Search tab. Everything after the payload is
+   * built is identical for both entry points on purpose: a lead is not a second
+   * kind of application, it is the same application with the finding step done
+   * for you, and the moment the two paths diverge they start drifting.
+   */
+  const generate = async (lead?: LeadHandoff) => {
     setError(null)
     setNotice(null)
     setSpend(0)
     setGenerating(true)
+    setBusyLeadId(lead?.leadId ?? null)
 
     const plan: Step[] = [
       { key: 'extract', label: 'Reading the posting', state: 'pending' },
@@ -399,7 +412,9 @@ export default function ApplicationsClient() {
       setStep('extract', 'running')
       let payload: Record<string, unknown>
 
-      if (mode === 'url') {
+      if (lead) {
+        payload = { kind: 'url', url: lead.url }
+      } else if (mode === 'url') {
         if (!url.trim()) throw new Error('Paste the job posting URL first.')
         payload = { kind: 'url', url: url.trim() }
       } else if (mode === 'file') {
@@ -423,7 +438,24 @@ export default function ApplicationsClient() {
         payload = { kind: 'text', text: pasted }
       }
 
-      const extracted = await call('/api/admin/brief/extract', payload)
+      let extracted
+      try {
+        extracted = await call('/api/admin/brief/extract', payload)
+      } catch (e) {
+        // A posting can be taken down between the search and the click, and a
+        // dead URL would otherwise waste the whole run. The search kept enough
+        // of the posting to write from, so fall back to it rather than failing
+        // — and say so, because a brief written from a summary is thinner than
+        // one written from the posting and he should know which he has.
+        if (!lead?.fallbackText) throw e
+        setNotice(
+          'That URL would not read — writing from what the search captured instead. Check the requirements against the posting before you send it.'
+        )
+        extracted = await call('/api/admin/brief/extract', {
+          kind: 'text',
+          text: lead.fallbackText,
+        })
+      }
       setStep('extract', 'done')
 
       // 2. Write the brief in the posting's own language.
@@ -462,6 +494,27 @@ export default function ApplicationsClient() {
       setNotice(
         'Draft ready. Review it, then publish when you are happy — the URL 404s until you do.'
       )
+
+      // Link the lead to the application it became.
+      //
+      // Wrapped, and last, because the brief is written by this point. A throw
+      // here would report failure over four minutes of work that is already
+      // saved — the same shape of mistake the brief PUT route had to fix when a
+      // stale Worker made every Accept report failure over a successful save.
+      if (lead) {
+        try {
+          await fetch(`/api/admin/leads/${lead.leadId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ state: 'applied', briefId: id }),
+          })
+        } catch (linkError) {
+          console.error(
+            '[applications] could not link lead to brief',
+            linkError
+          )
+        }
+      }
     } catch (e) {
       setSteps(current =>
         current.map(step =>
@@ -471,6 +524,7 @@ export default function ApplicationsClient() {
       setError((e as Error).message)
     } finally {
       setGenerating(false)
+      setBusyLeadId(null)
     }
   }
 
@@ -896,6 +950,7 @@ export default function ApplicationsClient() {
             </h2>
             <p className="mb-4 text-sm text-gray-600">
               A link, a PDF or a screenshot of the posting — whichever you have.
+              Or search for postings you have not found yet.
             </p>
 
             <div className="mb-4 inline-flex rounded-lg border border-gray-200 bg-white p-1">
@@ -904,6 +959,7 @@ export default function ApplicationsClient() {
                   ['url', 'Link', Link2],
                   ['file', 'PDF or image', Upload],
                   ['text', 'Paste text', FileText],
+                  ['search', 'Search for jobs', Search],
                 ] as const
               ).map(([value, label, Icon]) => (
                 <button
@@ -958,6 +1014,14 @@ export default function ApplicationsClient() {
               />
             )}
 
+            {mode === 'search' && (
+              <JobSearchPanel
+                onGenerate={generate}
+                generating={generating}
+                busyLeadId={busyLeadId}
+              />
+            )}
+
             <label className="mt-4 flex items-center gap-2 text-sm text-gray-700">
               <input
                 type="checkbox"
@@ -972,10 +1036,14 @@ export default function ApplicationsClient() {
             </label>
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <Button onClick={generate} disabled={generating}>
-                <Sparkles className="mr-2 h-4 w-4" />
-                {generating ? 'Generating…' : 'Generate'}
-              </Button>
+              {/* In search mode each lead carries its own Generate button, so a
+                  second one here would have no posting to act on. */}
+              {mode !== 'search' && (
+                <Button onClick={() => generate()} disabled={generating}>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  {generating ? 'Generating…' : 'Generate'}
+                </Button>
+              )}
               {spend > 0 && (
                 <span className="text-xs text-gray-500">
                   ≈ ${spend.toFixed(2)} so far

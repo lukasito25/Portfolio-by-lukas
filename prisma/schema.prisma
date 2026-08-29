@@ -328,6 +328,68 @@ model ApplicationEdit {
   @@index([createdAt])
 }
 
+/// One job posting found by the automatic search in /admin/applications.
+///
+/// The search half of the engine is the mirror of `GeneratedBrief`: that table
+/// holds applications he decided to write, this one holds postings he has not
+/// decided about yet. Keeping them separate matters — a lead is disposable and
+/// re-found on every search, a brief is a piece of work with his name on it.
+///
+/// Rows persist so a repeat search can be honest about what is genuinely new.
+/// A dismissed posting must come back dismissed rather than as a fresh
+/// suggestion, or the second search costs as much attention as the first and
+/// the feature stops saving anything.
+model JobLead {
+  id           String   @id @default(cuid())
+  /// Normalised posting URL — the dedupe key. One posting, one row, however
+  /// many searches surface it.
+  url          String   @unique
+  title        String
+  companyName  String
+  location     String   @default("")
+  /// onsite | hybrid | remote | unspecified
+  workModel    String   @default("unspecified")
+  /// Compensation exactly as the posting words it. Empty when it says nothing —
+  /// never an inference, because a salary he was shown and not offered is worse
+  /// than no number at all.
+  salaryText   String   @default("")
+  postedText   String   @default("")
+  /// The board or careers-site host the posting sits on.
+  source       String   @default("")
+  summary      String   @default("")
+  /// JSON string[] — the requirements the search could see, which is what the
+  /// lead score was computed from and all it may be held to.
+  requirements String   @default("[]")
+  /// live | gone | unverified. Set by an actual request to the URL, never by
+  /// the model that reported it. `unverified` is its own answer: a board that
+  /// blocks server requests is not a posting that has been taken down.
+  liveness     String   @default("unverified")
+  /// The cheap pre-generation score, 0-100. Deliberately NOT the fit score in
+  /// `GeneratedBrief.fitAssessment`: that one reads the brief's own requirement
+  /// rows and cannot exist before the brief does.
+  leadScore    Int      @default(0)
+  band         String   @default("long-shot")
+  recommendation String @default("apply-if-time")
+  /// Named when something makes this near-impossible regardless of fit. A
+  /// non-empty value caps the score at 19, enforced in the route as well as in
+  /// the prompt.
+  hardBlocker  String   @default("")
+  /// { verdict, drivers[], risks[] }
+  scoreDetail  String   @default("{}")
+  /// new | saved | dismissed | applied
+  state        String   @default("new")
+  /// Set once this lead became an application.
+  briefId      String?
+  /// The search criteria that found it, for "why am I being shown this".
+  criteria     String   @default("{}")
+  foundAt      DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([state])
+  @@index([leadScore])
+  @@index([foundAt])
+}
+
 model Analytics {
   id          String   @id @default(cuid())
 
