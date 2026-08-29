@@ -78,11 +78,30 @@ Rules, in the order they matter:
 5. NO AGENCY REPOSTS OF THE SAME ROLE. Where a posting appears both on an
    agency listing and on the employer's own site, report the employer's.
 
-6. SAY WHAT YOU COULD NOT SEE. If a board would not load, or a region returned
+6. RECENT POSTINGS ONLY. A vacancy older than two months is usually filled or
+   abandoned, and applying to one wastes the hour it costs. Do not report a
+   posting you can see is older than that. Give each one's date as YYYY-MM-DD
+   as well as in the posting's own words, working out relative dates ("3 days
+   ago") against today. If a posting states no date, say so — an invented date
+   is worse than a missing one, because the caller drops anything it can read
+   as stale.
+
+7. SAY WHAT YOU COULD NOT SEE. If a board would not load, or a region returned
    nothing, say so plainly at the end. An empty result that means "nothing
    matched" and an empty result that means "the search could not see anything"
    need to be told apart.
 `.trim()
+
+/**
+ * Today, as the model must be told it.
+ *
+ * Left to itself it dates "5 days ago" against its training cutoff — a run
+ * resolved two postings from this week to May 2024. Every prompt that touches a
+ * date carries this line.
+ */
+function todayLine(): string {
+  return `Today's date is ${new Date().toISOString().slice(0, 10)}. Use it for any date arithmetic; do not rely on your own sense of the current date.`
+}
 
 export function searchResearchPrompt(criteria: JobSearchCriteria): string {
   const lines: string[] = []
@@ -90,6 +109,8 @@ export function searchResearchPrompt(criteria: JobSearchCriteria): string {
   lines.push(
     `Find currently open job postings matching the following. Search widely and report everything that genuinely fits.`
   )
+  lines.push('')
+  lines.push(todayLine())
   lines.push('')
   lines.push(
     `TITLES (any of these, or a close variant)\n${criteria.titles.map(t => `- ${t}`).join('\n')}`
@@ -125,7 +146,8 @@ For each posting you find, report in plain prose:
 - the hiring company
 - the location and whether it is onsite, hybrid or remote
 - the stated salary, or "not stated"
-- when it was posted, or "not stated"
+- when it was posted, both as YYYY-MM-DD and in the posting's own words, or
+  "not stated" if it gives no date
 - where you found it (the board or host)
 - two or three sentences on what the role involves
 - the stated requirements, condensed one per line, keeping their language and
@@ -142,13 +164,18 @@ sees.`)
   return lines.join('\n')
 }
 
-export const STRUCTURE_HITS_PROMPT = `Turn the postings described below into structured rows.
+export function structureHitsPrompt(research: string): string {
+  return `${STRUCTURE_HITS_PROMPT}\n\n${todayLine()}\n${research}`
+}
+
+const STRUCTURE_HITS_PROMPT = `Turn the postings described below into structured rows.
 
 Copy the URLs exactly as reported — do not tidy, shorten or reconstruct them.
 Drop any posting that has no direct URL, and any that is a duplicate of another
 row. Where a field was reported as "not stated", the field is an empty string:
 do not fill it in from what a role like this usually pays or how recent it
-probably is.
+probably is. That applies to postedIso above all — leave it empty rather than
+estimating, because a date is acted on.
 
 POSTINGS`
 

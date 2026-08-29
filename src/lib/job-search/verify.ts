@@ -304,3 +304,128 @@ export async function verifyHits(hits: JobHit[]): Promise<VerifiedHit[]> {
   )
   return out
 }
+
+/**
+ * A company name that is really an apology.
+ *
+ * One run returned `[Company Not Stated]` for two postings it had named
+ * correctly on a previous sweep. A placeholder in that field is worse than a
+ * rough answer: it is the first thing read on the card, it sorts and dedupes
+ * against nothing, and it makes a real posting look like a broken row. The
+ * careers domain is always known — `cembra.ch` says more than "not stated".
+ */
+export function cleanCompanyName(name: string, url: string): string {
+  const trimmed = (name ?? '')
+    .trim()
+    .replace(/^\[|\]$/g, '')
+    .trim()
+
+  const isPlaceholder =
+    !trimmed ||
+    /^(company\s+)?(not\s+stated|unknown|n\/?a|unspecified|none|undisclosed|confidential)$/i.test(
+      trimmed
+    )
+
+  if (!isPlaceholder) return trimmed
+
+  const host = hostOf(url)
+  if (!host) return 'Unnamed company'
+
+  // A board host says nothing about the employer, so do not dress it up as one.
+  return host
+}
+
+/* ------------------------------------------------------------------ *
+ * Recency
+ * ------------------------------------------------------------------ */
+
+/** A vacancy older than this is usually filled or abandoned. */
+export const MAX_POSTING_AGE_DAYS = 62
+
+/**
+ * How long ago the posting says it was published, in days, or null.
+ *
+ * Read from the posting's own words rather than from a resolved date, and that
+ * ordering is the whole point. Asked to turn "5 days ago" into YYYY-MM-DD, the
+ * model returned **2024-05-20** — it resolved the relative date against its own
+ * training cutoff rather than against today. Trusting that would have thrown
+ * away the freshest postings in the sweep as two years stale, which is a worse
+ * failure than the one the filter exists to fix.
+ *
+ * "5 days ago" is the model quoting the page. That is reliable. The arithmetic
+ * on top of it is not, so it is done here.
+ */
+function relativeAgeDays(postedText: string): number | null {
+  const text = postedText.trim().toLowerCase()
+  if (!text) return null
+
+  if (/\b(today|just posted|just now|new)\b/.test(text)) return 0
+  if (/\byesterday\b/.test(text)) return 1
+
+  const match = text.match(
+    /(\d+)\+?\s*(hour|hr|day|week|month|year)s?\s*(ago|old)?/
+  )
+  if (!match) return null
+
+  const amount = Number(match[1])
+  if (!Number.isFinite(amount)) return null
+
+  switch (match[2]) {
+    case 'hour':
+    case 'hr':
+      return 0
+    case 'day':
+      return amount
+    case 'week':
+      return amount * 7
+    case 'month':
+      return amount * 30
+    case 'year':
+      return amount * 365
+    default:
+      return null
+  }
+}
+
+/** Days since an absolute YYYY-MM-DD date, or null when it is not one. */
+function absoluteAgeDays(postedIso: string, now: Date): number | null {
+  const trimmed = postedIso?.trim()
+  if (!trimmed || !/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return null
+
+  const posted = new Date(`${trimmed}T00:00:00Z`)
+  if (Number.isNaN(posted.getTime())) return null
+
+  return (now.getTime() - posted.getTime()) / 86_400_000
+}
+
+/**
+ * Is this posting old enough to be worth dropping?
+ *
+ * Answers only when it can. Most postings state no date at all — a sweep that
+ * discarded those would throw away the majority of real openings to enforce a
+ * rule it has no evidence for. So the test is deliberately one-sided: drop a
+ * posting only when it carries a date that reads as genuinely old. Silence, an
+ * unparseable date, and a date in the future all mean "keep".
+ *
+ * The rule exists because a sweep for Zurich returned two postings from August
+ * 2024 sitting near the top of the results, still indexed and still scoring.
+ *
+ * The posting's own words win over the resolved date — see `relativeAgeDays`
+ * for the run where believing the resolved date would have deleted everything
+ * fresh.
+ */
+export function isStale(
+  postedIso: string,
+  postedText = '',
+  now: Date = new Date()
+): boolean {
+  const relative = relativeAgeDays(postedText)
+  const ageDays = relative ?? absoluteAgeDays(postedIso, now)
+
+  if (ageDays === null) return false
+  // A future date is a model error, not a fresh posting — but it is not
+  // evidence of staleness either, so it survives to be judged by liveness.
+  if (ageDays < 0) return false
+
+  return ageDays > MAX_POSTING_AGE_DAYS
+}

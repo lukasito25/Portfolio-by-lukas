@@ -1528,6 +1528,7 @@ class DataService {
         workModel: lead.workModel ?? 'unspecified',
         salaryText: lead.salaryText ?? '',
         postedText: lead.postedText ?? '',
+        postedIso: lead.postedIso ?? '',
         source: lead.source ?? '',
         summary: lead.summary ?? '',
         requirements: JSON.stringify(lead.requirements ?? []),
@@ -1606,6 +1607,7 @@ export interface JobLeadInput {
   workModel?: string
   salaryText?: string
   postedText?: string
+  postedIso?: string
   source?: string
   summary?: string
   requirements?: string[]

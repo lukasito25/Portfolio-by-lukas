@@ -33,7 +33,7 @@ import {
 import {
   SEARCH_SYSTEM,
   searchResearchPrompt,
-  STRUCTURE_HITS_PROMPT,
+  structureHitsPrompt,
 } from '@/lib/job-search/prompts'
 import {
   verifyHits,
@@ -41,6 +41,8 @@ import {
   hostOf,
   isPostingUrl,
   isRedirector,
+  isStale,
+  cleanCompanyName,
 } from '@/lib/job-search/verify'
 import { scoreLeads } from '@/lib/job-search/lead-score'
 import { withAlreadyApplied } from '@/lib/job-search/leads'
@@ -73,7 +75,12 @@ function dedupe(hits: JobHit[]): JobHit[] {
     if (!isPostingUrl(url) && !isRedirector(url)) continue
     if (seen.has(url)) continue
     seen.add(url)
-    out.push({ ...hit, url, source: hit.source || hostOf(url) })
+    out.push({
+      ...hit,
+      url,
+      source: hit.source || hostOf(url),
+      companyName: cleanCompanyName(hit.companyName, url),
+    })
   }
   return out
 }
@@ -109,12 +116,20 @@ export async function POST(request: NextRequest) {
     const structured = await provider.generateStructured({
       schema: JobHitListSchema,
       system: SEARCH_SYSTEM,
-      prompt: `${STRUCTURE_HITS_PROMPT}\n${research.text}`,
+      prompt: structureHitsPrompt(research.text),
       maxTokens: 16000,
     })
     usage = addUsage(usage, structured.usage)
 
-    const hits = dedupe(structured.value.hits)
+    const all = dedupe(structured.value.hits)
+
+    // A vacancy older than two months is usually filled. The prompt asks for
+    // recent postings and is mostly obeyed; this enforces it, because a Zurich
+    // sweep returned two August-2024 postings that were still indexed and
+    // still scored well. Counted rather than silently dropped — the panel says
+    // how many went, so an over-eager filter is visible rather than mysterious.
+    const hits = all.filter(hit => !isStale(hit.postedIso, hit.postedText))
+    const droppedStale = all.length - hits.length
 
     if (hits.length === 0) {
       // An empty result has two very different causes and the panel has to be
@@ -122,6 +137,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         leads: [],
         coverageNote: structured.value.coverageNote,
+        droppedStale,
         usage,
         costUsd: estimateCostUsd(usage),
         provider: provider.name,
@@ -157,6 +173,7 @@ export async function POST(request: NextRequest) {
         workModel: hit.workModel,
         salaryText: hit.salaryText,
         postedText: hit.postedText,
+        postedIso: hit.postedIso,
         source: hit.source,
         summary: hit.summary,
         requirements: hit.requirements,
@@ -187,6 +204,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       leads,
       coverageNote: structured.value.coverageNote,
+      droppedStale,
       usage,
       costUsd: estimateCostUsd(usage),
       provider: provider.name,

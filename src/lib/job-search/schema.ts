@@ -56,7 +56,7 @@ export const JobHitSchema = z.object({
   companyName: z
     .string()
     .describe(
-      'The hiring company\'s own casing — "Qonto", "adidas", "eBay". Not an agency, unless the agency is the employer.'
+      'The hiring company\'s own casing — "Qonto", "adidas", "eBay". Not an agency, unless the agency is the employer. Always name it: if the posting does not, use the company whose careers domain the URL belongs to. Never a placeholder such as "not stated" - it is the first thing read on the card.'
     ),
   location: z
     .string()
@@ -71,6 +71,11 @@ export const JobHitSchema = z.object({
     .string()
     .describe(
       'How the posting dates itself, e.g. "3 days ago", "Posted 12 August". Empty string when it does not say.'
+    ),
+  postedIso: z
+    .string()
+    .describe(
+      'The posting date as YYYY-MM-DD, resolved from postedText against today where it is relative ("3 days ago"). Empty string when the posting gives no date at all — do NOT guess one, an invented date silently discards the posting or keeps a stale one.'
     ),
   source: z
     .string()
@@ -161,6 +166,7 @@ export interface JobLeadView {
   workModel: string
   salaryText: string
   postedText: string
+  postedIso: string
   source: string
   summary: string
   requirements: string[]

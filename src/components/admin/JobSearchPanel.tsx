@@ -409,6 +409,21 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
   const [spend, setSpend] = useState(0)
   const [showDismissed, setShowDismissed] = useState(false)
 
+  /**
+   * The urls this session's most recent search returned.
+   *
+   * Without this the panel showed the whole stored pool ranked by score, and a
+   * fresh search that returned four leads scoring 5-10 dropped them to the
+   * bottom of thirty rows with nothing marking them as new. The search had
+   * worked; it was indistinguishable from a search that had not. Whatever the
+   * ranking, "what did the thing I just pressed actually find" has to be
+   * answerable.
+   */
+  const [latestUrls, setLatestUrls] = useState<string[]>([])
+  const [view, setView] = useState<'latest' | 'all' | 'saved'>('all')
+  const [page, setPage] = useState(1)
+  const [droppedStale, setDroppedStale] = useState(0)
+
   const load = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/leads')
@@ -453,6 +468,10 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
 
       if (typeof data.costUsd === 'number') setSpend(data.costUsd)
       setCoverageNote(data.coverageNote ?? '')
+      setDroppedStale(data.droppedStale ?? 0)
+      setLatestUrls((data.leads ?? []).map((lead: JobLeadView) => lead.url))
+      setView('latest')
+      setPage(1)
 
       // Re-read rather than trusting the response alone: the search returns
       // what it just found, the list is everything, and a lead saved from an
@@ -490,8 +509,25 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
     }
   }
 
-  const active = leads.filter(lead => lead.state !== 'dismissed')
+  const notDismissed = leads.filter(lead => lead.state !== 'dismissed')
   const dismissed = leads.filter(lead => lead.state === 'dismissed')
+
+  const latestSet = new Set(latestUrls)
+  const latest = notDismissed.filter(lead => latestSet.has(lead.url))
+  const saved = notDismissed.filter(lead => lead.state === 'saved')
+
+  const active =
+    view === 'latest' ? latest : view === 'saved' ? saved : notDismissed
+
+  const PER_PAGE = 5
+  const pageCount = Math.max(1, Math.ceil(active.length / PER_PAGE))
+  const safePage = Math.min(page, pageCount)
+  const visible = active.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
+
+  const changeView = (next: 'latest' | 'all' | 'saved') => {
+    setView(next)
+    setPage(1)
+  }
 
   return (
     <div>
@@ -606,29 +642,90 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
         </p>
       )}
 
-      {active.length > 0 && (
+      {droppedStale > 0 && (
+        <p className="mt-1 text-xs text-gray-500">
+          {droppedStale} posting{droppedStale === 1 ? '' : 's'} older than two
+          months {droppedStale === 1 ? 'was' : 'were'} left out.
+        </p>
+      )}
+
+      {notDismissed.length > 0 && (
         <div className="mt-6">
-          <div className="mb-3 flex items-baseline justify-between">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-              {active.length} {active.length === 1 ? 'lead' : 'leads'}
-            </h3>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1">
+              {(
+                [
+                  ['latest', 'This search', latest.length],
+                  ['all', 'All leads', notDismissed.length],
+                  ['saved', 'Saved', saved.length],
+                ] as const
+              ).map(([value, label, count]) => (
+                <button
+                  key={value}
+                  type="button"
+                  // "This search" is meaningless before one has been run.
+                  disabled={value === 'latest' && latestUrls.length === 0}
+                  onClick={() => changeView(value)}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-40 ${
+                    view === value
+                      ? 'bg-gray-900 text-white'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {label} ({count})
+                </button>
+              ))}
+            </div>
             <p className="text-xs text-gray-500">
               Triage scores, best first. The real fit score runs after
               generation.
             </p>
           </div>
-          <div className="space-y-3">
-            {active.map(lead => (
-              <LeadCard
-                key={lead.id}
-                lead={lead}
-                onGenerate={onGenerate}
-                onState={setState}
-                generating={generating}
-                busy={busyLeadId === lead.id}
-              />
-            ))}
-          </div>
+
+          {active.length === 0 ? (
+            <p className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+              {view === 'latest'
+                ? 'That search returned nothing new — everything it found was already in your list.'
+                : 'Nothing here yet.'}
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {visible.map(lead => (
+                <LeadCard
+                  key={lead.id}
+                  lead={lead}
+                  onGenerate={onGenerate}
+                  onState={setState}
+                  generating={generating}
+                  busy={busyLeadId === lead.id}
+                />
+              ))}
+            </div>
+          )}
+
+          {pageCount > 1 && (
+            <div className="mt-4 flex items-center justify-between">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={safePage === 1}
+                onClick={() => setPage(safePage - 1)}
+              >
+                Previous
+              </Button>
+              <span className="text-xs text-gray-500">
+                Page {safePage} of {pageCount} · {active.length} leads
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={safePage === pageCount}
+                onClick={() => setPage(safePage + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

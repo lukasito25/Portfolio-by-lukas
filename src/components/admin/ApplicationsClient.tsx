@@ -160,6 +160,15 @@ export default function ApplicationsClient() {
   const [generating, setGenerating] = useState(false)
   /** The lead whose generation is in flight, so its card can show progress. */
   const [busyLeadId, setBusyLeadId] = useState<string | null>(null)
+  /**
+   * The review pane, so a finished draft can be scrolled to.
+   *
+   * It sits below the input card, and the search results live inside that
+   * card — so generating from a lead left the finished draft several screens
+   * down, behind every posting the search had found. Four minutes of waiting
+   * should not end with a scroll hunt.
+   */
+  const reviewRef = useRef<HTMLDivElement | null>(null)
   const [spend, setSpend] = useState(0)
   const fileInput = useRef<HTMLInputElement>(null)
 
@@ -362,6 +371,18 @@ export default function ApplicationsClient() {
       current.map(step => (step.key === key ? { ...step, state } : step))
     )
 
+  /**
+   * Bring the review pane into view.
+   *
+   * Deferred a frame: `openBrief` has only just set `selected`, so the pane it
+   * scrolls to does not exist yet at the moment this is called.
+   */
+  const revealDraft = useCallback(() => {
+    requestAnimationFrame(() =>
+      reviewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    )
+  }, [])
+
   const call = async (path: string, body: unknown) => {
     const res = await fetch(path, {
       method: 'POST',
@@ -494,6 +515,7 @@ export default function ApplicationsClient() {
       setNotice(
         'Draft ready. Review it, then publish when you are happy — the URL 404s until you do.'
       )
+      revealDraft()
 
       // Link the lead to the application it became.
       //
@@ -874,8 +896,13 @@ export default function ApplicationsClient() {
           </div>
         )}
         {notice && (
-          <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            {notice}
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <span>{notice}</span>
+            {selected && (
+              <Button size="sm" variant="outline" onClick={revealDraft}>
+                Go to the draft
+              </Button>
+            )}
           </div>
         )}
 
@@ -1163,7 +1190,7 @@ export default function ApplicationsClient() {
           </div>
 
           {/* ============ DETAIL ============ */}
-          <div>
+          <div ref={reviewRef} className="scroll-mt-6">
             {!selected && (
               <Card className="p-8 text-center text-sm text-gray-500">
                 Select an application to review it.

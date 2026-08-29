@@ -354,6 +354,10 @@ model JobLead {
   /// than no number at all.
   salaryText   String   @default("")
   postedText   String   @default("")
+  /// The posting date as YYYY-MM-DD when it could be determined, else empty.
+  /// Kept alongside `postedText` because the words are what he reads and the
+  /// date is what the staleness filter acts on.
+  postedIso    String   @default("")
   /// The board or careers-site host the posting sits on.
   source       String   @default("")
   summary      String   @default("")
