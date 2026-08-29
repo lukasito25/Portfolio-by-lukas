@@ -423,6 +423,18 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
   const [view, setView] = useState<'latest' | 'all' | 'saved'>('all')
   const [page, setPage] = useState(1)
   const [droppedStale, setDroppedStale] = useState(0)
+  /**
+   * Seconds since Search was pressed.
+   *
+   * A sweep is three Gemini calls and runs 100-140s; measured, the phases are
+   * research ~30s, structuring ~30s and triage ~40s, and none of them is under
+   * this code's control — trimming the scoring prompt by 19% moved the total by
+   * three seconds. So the wait cannot be fixed, only made legible. A spinner
+   * that says nothing for two minutes reads as a hang, and the honest fix is a
+   * clock and a stated expectation rather than a staged progress bar pretending
+   * to know which phase is running.
+   */
+  const [elapsed, setElapsed] = useState(0)
 
   const load = useCallback(async () => {
     try {
@@ -439,6 +451,17 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (!searching) return
+    const started = Date.now()
+    setElapsed(0)
+    const id = setInterval(
+      () => setElapsed(Math.round((Date.now() - started) / 1000)),
+      1000
+    )
+    return () => clearInterval(id)
+  }, [searching])
 
   const search = async () => {
     if (titles.length === 0) {
@@ -620,8 +643,21 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
           {searching ? 'Searching…' : 'Search'}
         </Button>
         <span className="text-xs text-gray-500">
-          Sweeps the boards and company careers pages, checks every link, and
-          scores what it finds. About a minute.
+          {searching ? (
+            <>
+              Sweeping the boards, then reading and scoring what it finds —{' '}
+              <span className="font-medium tabular-nums text-gray-700">
+                {Math.floor(elapsed / 60)}:
+                {String(elapsed % 60).padStart(2, '0')}
+              </span>{' '}
+              elapsed. These usually take one to two minutes.
+            </>
+          ) : (
+            <>
+              Sweeps the boards and company careers pages, checks every link,
+              and scores what it finds. One to two minutes.
+            </>
+          )}
         </span>
         {spend > 0 && (
           <span className="text-xs text-gray-500">

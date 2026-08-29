@@ -712,9 +712,32 @@ criteria { titles[], locations[], salaryMin?, workModel?, seniority? }
    ↓  persist     JobLead, upserted on url
 ```
 
-Three model calls, about **$0.005** a search on the agent suite, and **two to
-four minutes** — the research sweep alone runs 40–110s. The route's
-`maxDuration` is 300s, which a wide search does not comfortably clear by much;
+Three model calls, about **$0.005** a search on the agent suite, and **100–140
+seconds**. Measured, on a Milan sweep:
+
+| Phase               | Time | Share |
+| ------------------- | ---- | ----- |
+| research (grounded) | ~30s | 30%   |
+| structure           | ~30s | 30%   |
+| verify (all URLs)   | ~1s  | 1%    |
+| triage score        | ~40s | 40%   |
+
+**Essentially all of it is model time, and it does not respond to tuning.**
+Two things were tried and measured rather than assumed:
+
+- Halving the scoring prompt (16.6k → 8.7k characters, −19% tokens) moved the
+  total from 106s to 103s. Latency is Gemini's thinking time, not input size.
+  The smaller prompt was kept anyway — it costs less and loses nothing, since
+  triage cites no fact ids.
+- Merging the structure and triage passes into one call — legal, since neither
+  needs search — made it **slower**: 79s for the combined call against 65s for
+  the two split, because each row has to carry twice the output. The split
+  stays.
+
+So the wait is irreducible and the panel shows an elapsed clock rather than a
+staged progress bar, which would have to invent which phase it was in.
+
+The route's `maxDuration` is 300s. A wide search does not clear that by much;
 if it ever times out, narrow the titles rather than raising the ceiling.
 
 Research and structuring are two calls for the same reason the extract route

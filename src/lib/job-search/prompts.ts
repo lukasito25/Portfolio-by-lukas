@@ -26,7 +26,7 @@
  * `/api/admin/brief/extract` before a word of the brief is written.
  */
 
-import { serializeFactsForPrompt, roles } from '@/lib/career-facts'
+import { roles, usableFacts } from '@/lib/career-facts'
 import { HONESTY_RULES } from '@/lib/fit-brief/guardrails'
 import { SCORE_BANDS, HARD_BLOCKER_RULES } from '@/lib/fit-brief/fit-score'
 import type { JobSearchCriteria, JobHit } from './schema'
@@ -188,15 +188,33 @@ POSTINGS`
  *
  * The full `serializeFactsForPrompt()` output rides in every *generation* call
  * because a brief cites individual fact ids and needs all of them available.
- * Scoring cites nothing — it only needs to know what he has done — and it
- * carries up to thirty postings in the same request, so the compact form buys
- * headroom for the part that varies.
+ * Triage cites nothing — it only needs to know what he has done — so the ids,
+ * the provenance notes and the corpus's own roles section are dead weight here.
+ * They were not free: the profile was 16.6k characters, the scoring call was
+ * the slowest phase of a search at 42s, and it was re-sending a citation index
+ * to a step that never cites.
+ *
+ * Claims only, grouped by category, plus the roles once. Half the size, same
+ * information for the question being asked.
  */
 export function candidateProfile(): string {
   const roleLines = roles.map(
-    r =>
-      `- ${r.title}, ${r.company} (${r.location}, ${r.period})\n  ${r.summary}\n  tools: ${r.technologies.join(', ')}`
+    role =>
+      `- ${role.title}, ${role.company} (${role.location}, ${role.period})\n  ${role.summary}\n  tools: ${role.technologies.join(', ')}`
   )
+
+  const byCategory = new Map<string, string[]>()
+  for (const fact of usableFacts) {
+    const list = byCategory.get(fact.category) ?? []
+    list.push(fact.claim)
+    byCategory.set(fact.category, list)
+  }
+  const claims = [...byCategory]
+    .map(
+      ([category, list]) =>
+        `${category.toUpperCase()}\n${list.map(claim => `  - ${claim}`).join('\n')}`
+    )
+    .join('\n\n')
 
   return `WHO IS BEING SCORED
 
@@ -210,8 +228,8 @@ working in Vienna — treat German as unstated.
 ROLES
 ${roleLines.join('\n')}
 
-FULL FACT CORPUS, for detail
-${serializeFactsForPrompt()}`
+WHAT HE CAN CLAIM
+${claims}`
 }
 
 export const LEAD_SCORE_SYSTEM = `You triage job postings for one person, before any application is written.
