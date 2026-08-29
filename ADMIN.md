@@ -193,6 +193,7 @@ The main dashboard provides a comprehensive overview with:
   - **Already applied here** — a `GeneratedBrief` exists for that URL or company
 - **The lead score is not the fit score.** It is a triage number computed before anything is written, from what the search could see, and it is biased toward "skip". The real fit score still runs on demand after generation. Both use the same bands and the same hard-blocker cap
 - **Actions**: Generate application (runs the identical four-step pipeline) · Save · Dismiss · Open posting
+- **"Only postings still open"** is ticked by default and hides postings the liveness check found had been taken down — typically half to two-thirds of a sweep. It hides `gone` only: `Could not verify` stays visible, because a board blocking a server request is not a closed role
 - **Dismissed leads persist.** A repeat search does not put them back in front of you — they collapse into a "Dismissed (n)" disclosure. Nothing is deduplicated away silently
 - Full detail, including why the research pass must not quote a posting verbatim, in **`CUSTOM_RECRUITER_PAGES.md` §12**
 

@@ -829,6 +829,18 @@ genuinely move.
 Dismissed leads collapse into a disclosure rather than vanishing, so it is
 visible that a repeat search did not put them back.
 
+**"Only postings still open" is on by default**, and it filters `gone` only.
+That distinction is the whole point: `gone` is a 404, while `unverified` is
+usually LinkedIn or Indeed refusing a server-side request for a posting that is
+perfectly live, so folding the two together would quietly hide the boards with
+the most postings on them. The checkbox names how many it is hiding rather than
+shrinking the list silently.
+
+It earns its place — of 31 stored leads, 19 were dead, which is seven pages of
+results cut to three. That ratio is worth watching: a grounded sweep reports
+what an index knows, and job boards expire postings faster than they are
+reindexed.
+
 ### Handing a lead to the generator
 
 `generate()` in `ApplicationsClient` takes an optional handoff. Everything after

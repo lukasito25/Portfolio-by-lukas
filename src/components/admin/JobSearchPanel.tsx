@@ -435,6 +435,20 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
    * to know which phase is running.
    */
   const [elapsed, setElapsed] = useState(0)
+  /**
+   * Hide postings the liveness check found had been taken down.
+   *
+   * On by default: a dead posting cannot be applied to, so showing it costs
+   * attention and returns nothing. Four of eight results in one German sweep
+   * were stale index entries, all four confirmed 404 by hand.
+   *
+   * It filters `gone` only, never `unverified`. Those two look similar on a
+   * card and are completely different facts: `gone` is a 404, while
+   * `unverified` is usually LinkedIn or Indeed refusing a server-side request
+   * for a posting that is perfectly live. Folding them together would quietly
+   * hide the boards with the most postings on them.
+   */
+  const [hideGone, setHideGone] = useState(true)
 
   const load = useCallback(async () => {
     try {
@@ -532,8 +546,14 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
     }
   }
 
-  const notDismissed = leads.filter(lead => lead.state !== 'dismissed')
+  const undismissed = leads.filter(lead => lead.state !== 'dismissed')
   const dismissed = leads.filter(lead => lead.state === 'dismissed')
+
+  // Applied to the base set so the tab counts and the list cannot disagree.
+  const goneCount = undismissed.filter(lead => lead.liveness === 'gone').length
+  const notDismissed = hideGone
+    ? undismissed.filter(lead => lead.liveness !== 'gone')
+    : undismissed
 
   const latestSet = new Set(latestUrls)
   const latest = notDismissed.filter(lead => latestSet.has(lead.url))
@@ -549,6 +569,12 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
 
   const changeView = (next: 'latest' | 'all' | 'saved') => {
     setView(next)
+    setPage(1)
+  }
+
+  const toggleHideGone = (next: boolean) => {
+    setHideGone(next)
+    // The list just got shorter or longer; page 3 of 3 may no longer exist.
     setPage(1)
   }
 
@@ -712,11 +738,33 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
                 </button>
               ))}
             </div>
-            <p className="text-xs text-gray-500">
-              Triage scores, best first. The real fit score runs after
-              generation.
-            </p>
+            <label className="flex items-center gap-2 text-xs text-gray-600">
+              <input
+                type="checkbox"
+                checked={hideGone}
+                onChange={e => toggleHideGone(e.target.checked)}
+              />
+              Only postings still open
+              {goneCount > 0 && (
+                <span className="text-gray-400">
+                  ({goneCount} taken down{hideGone ? ' hidden' : ''})
+                </span>
+              )}
+            </label>
           </div>
+
+          <p className="mb-3 text-xs text-gray-500">
+            Triage scores, best first. The real fit score runs after generation.
+            {hideGone && (
+              <>
+                {' '}
+                Postings marked{' '}
+                <span className="font-medium">Could not verify</span> are still
+                shown — a board that blocks server requests is not a closed
+                role.
+              </>
+            )}
+          </p>
 
           {active.length === 0 ? (
             <p className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
