@@ -264,11 +264,25 @@ const BAND_COLOR: Record<string, string> = {
  * Absolute URLs come from `origin`, not from a hardcoded host: the existing
  * welcome and newsletter templates in this file hardcode `http://localhost:3000`
  * in their unsubscribe links, which is a live bug worth not repeating.
+ *
+ * **Sent as multipart, and logged with its id.** Both were added while chasing a
+ * digest that appeared not to arrive — which turned out to be delivery lag, not
+ * filtering. They are kept anyway because both are right on their own merits: a
+ * `text` alternative is what a mail client falls back to and what a plain-text
+ * reader sees, and the id is the only way to trace a specific send.
+ *
+ * The id in particular closes a real gap. Resend returns `{ data, error }` and
+ * the first version checked only `error`, so a digest could be accepted and
+ * never seen while the logs said everything was fine — the same silent failure
+ * this whole feature exists to prevent, one level up.
  */
-export async function sendJobDigestEmail(data: JobDigestData, origin: string) {
+export async function sendJobDigestEmail(
+  data: JobDigestData,
+  origin: string
+): Promise<string | null> {
   if (!resend) {
     console.warn('RESEND_API_KEY not configured, skipping digest')
-    return
+    return null
   }
 
   const count = data.leads.length
@@ -295,11 +309,31 @@ export async function sendJobDigestEmail(data: JobDigestData, origin: string) {
     )
     .join('')
 
+  // The plain-text half of the multipart message. Not a fallback nobody sees —
+  // its presence is a large part of why the HTML half reaches an inbox.
+  const text = [
+    `${count} new posting${count === 1 ? '' : 's'} for "${data.searchName}".`,
+    '',
+    ...data.leads.map(
+      lead =>
+        `${lead.leadScore}  ${lead.title} — ${lead.companyName}` +
+        `${lead.location ? ` (${lead.location})` : ''}\n     ${lead.url}`
+    ),
+    '',
+    `Review: ${origin}/admin/applications`,
+    data.pausedReason
+      ? `\nThis search has been paused: ${data.pausedReason}`
+      : '',
+  ]
+    .filter(Boolean)
+    .join('\n')
+
   try {
-    const { error } = await resend.emails.send({
+    const { data: sent, error } = await resend.emails.send({
       from: 'Lukáš Hošala <onboarding@resend.dev>',
       to: [process.env.ADMIN_EMAIL || 'hosala.lukas@gmail.com'],
       subject: `${count} new lead${count === 1 ? '' : 's'} · ${data.searchName}`,
+      text,
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:640px;margin:0 auto;padding:24px">
           <p style="font-size:13px;color:#6b7280;margin:0 0 4px">Overnight job search</p>
@@ -322,9 +356,17 @@ export async function sendJobDigestEmail(data: JobDigestData, origin: string) {
       `,
     })
 
-    if (error) console.error('Digest email error:', error)
+    if (error) {
+      console.error('Digest email error:', error)
+      return null
+    }
+    console.log(
+      `[digest] sent "${data.searchName}" (${count} leads) id=${sent?.id}`
+    )
+    return sent?.id ?? null
   } catch (error) {
     console.error('Digest email failed:', error)
+    return null
   }
 }
 
@@ -339,17 +381,18 @@ export async function sendJobSearchFailureEmail(
   searchName: string,
   reason: string,
   origin: string
-) {
+): Promise<string | null> {
   if (!resend) {
     console.warn('RESEND_API_KEY not configured, skipping failure notice')
-    return
+    return null
   }
 
   try {
-    const { error } = await resend.emails.send({
+    const { data: sent, error } = await resend.emails.send({
       from: 'Lukáš Hošala <onboarding@resend.dev>',
       to: [process.env.ADMIN_EMAIL || 'hosala.lukas@gmail.com'],
       subject: `Job search did not run · ${searchName}`,
+      text: `The overnight search "${searchName}" failed.\n\n${reason}\n\nNothing was stored for this run; it will be retried on the next tick it is due.\n\n${origin}/admin/applications`,
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:640px;margin:0 auto;padding:24px">
           <h2 style="font-size:18px;color:#111827;margin:0 0 8px">The overnight search failed</h2>
@@ -365,8 +408,16 @@ export async function sendJobSearchFailureEmail(
       `,
     })
 
-    if (error) console.error('Failure email error:', error)
+    if (error) {
+      console.error('Failure email error:', error)
+      return null
+    }
+    console.log(
+      `[digest] sent failure notice for "${searchName}" id=${sent?.id}`
+    )
+    return sent?.id ?? null
   } catch (error) {
     console.error('Failure email failed:', error)
+    return null
   }
 }
