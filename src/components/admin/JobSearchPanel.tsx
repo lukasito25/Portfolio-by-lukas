@@ -37,7 +37,12 @@ import {
   Sparkles,
   X,
 } from 'lucide-react'
-import type { JobLeadView, LeadState } from '@/lib/job-search/schema'
+import type {
+  JobLeadView,
+  LeadState,
+  JobSearchCriteria,
+} from '@/lib/job-search/schema'
+import { SavedSearches } from './SavedSearches'
 
 export interface LeadHandoff {
   leadId: string
@@ -477,8 +482,27 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
     return () => clearInterval(id)
   }, [searching])
 
+  /**
+   * What is currently in the form, or null when it is not yet a valid search.
+   *
+   * Built in one place so the Search button and "Save these criteria" cannot
+   * ever send different things — a saved search that quietly differs from what
+   * was on screen when it was saved would be very hard to notice.
+   */
+  const currentCriteria: JobSearchCriteria | null =
+    titles.length > 0
+      ? {
+          titles,
+          locations,
+          salaryMin: salaryMin ? Number(salaryMin) : undefined,
+          salaryCurrency: currency,
+          workModel: workModel as JobSearchCriteria['workModel'],
+          seniority,
+        }
+      : null
+
   const search = async () => {
-    if (titles.length === 0) {
+    if (!currentCriteria) {
       setError('Give at least one job title to search for.')
       return
     }
@@ -491,14 +515,7 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
       const res = await fetch('/api/admin/job-search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          titles,
-          locations,
-          salaryMin: salaryMin ? Number(salaryMin) : undefined,
-          salaryCurrency: currency,
-          workModel,
-          seniority,
-        }),
+        body: JSON.stringify(currentCriteria),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`)
@@ -580,6 +597,8 @@ export function JobSearchPanel({ onGenerate, generating, busyLeadId }: Props) {
 
   return (
     <div>
+      <SavedSearches criteria={currentCriteria} />
+
       <div className="grid gap-4 sm:grid-cols-2">
         <ChipInput
           label="Job titles"

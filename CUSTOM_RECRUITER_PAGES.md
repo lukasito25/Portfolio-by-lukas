@@ -712,8 +712,50 @@ criteria { titles[], locations[], salaryMin?, workModel?, seniority? }
    ↓  persist     JobLead, upserted on url
 ```
 
-Three model calls, about **$0.005** a search on the agent suite, and **100–140
-seconds**. Measured, on a Milan sweep:
+### Depth: one sweep per title × location
+
+The first version asked a single grounded call to cover every title across every
+location, and returned 3–10 postings of which roughly 60% were already taken
+down — perhaps four roles worth opening. The model was not failing; it was
+answering a broad question broadly.
+
+`src/lib/job-search/sweeps.ts` splits the criteria into one sweep per title ×
+location pair, capped at 8, and runs them concurrently. Measured on the same
+Milan/remote-Italy criteria:
+
+|                       | Before | After  |
+| --------------------- | ------ | ------ |
+| Raw hits              | 4      | 21     |
+| Surviving the filters | 0      | 20     |
+| **Applicable**        | **0**  | **12** |
+| Wall-clock            | 91s    | 160s   |
+| Cost                  | $0.002 | $0.009 |
+
+Concurrency is 8 — enough that the widest search still fits in one wave, because
+two waves of four put a wide search near the 300s function ceiling. Raising it
+does **not** raise the 429 risk: the suite's limit is a _daily call cap_, and
+fanning out changes when calls happen, not how many.
+
+Two failure rules earn their place, both learned from the first version:
+
+- **One sweep failing must not lose the others.** With eight in flight the odds
+  that one misbehaves are eight times what they were, and failing the whole
+  search over one bad sweep would make the deeper version less reliable than the
+  shallow one it replaces. Failures are counted and named in the coverage note.
+- **When every sweep fails, the original error is re-thrown, not a summary.** A
+  first attempt replaced it with "the generator is reachable but not
+  answering" — which, against a dead port, was an actively wrong diagnosis.
+  `ProviderUnavailableError` already names the URL and the command that fixes
+  it, and `generationError()` turns it into a 503 rather than a 500.
+
+Sweeps also have a **start deadline** of 170s: a sweep launched after that
+cannot finish inside the budget, and a run killed mid-flight loses the sweeps
+that did succeed. Late ones are abandoned, counted and reported.
+
+### Cost and timing
+
+Three model calls per sweep pair, about **$0.005–0.03** a search on the agent
+suite, and **100–160 seconds**. Measured, on a Milan sweep:
 
 | Phase               | Time | Share |
 | ------------------- | ---- | ----- |
@@ -868,4 +910,127 @@ Two details:
 cd cloudflare-api
 npx wrangler d1 execute portfolio-db --remote --file=migrations/add_job_leads.sql
 npx wrangler deploy
+```
+
+---
+
+## 13. The overnight scheduler
+
+§12 describes a search you press a button for. That still competes with the part
+of the day he could spend writing applications, so a saved search runs itself
+and the morning starts with results instead of a two-minute wait.
+
+### Why the cron lives on Cloudflare and not on Vercel
+
+The account is on the Vercel **Hobby** plan, which allows **two cron jobs at
+once-a-day granularity**. That collapses a per-search frequency into "on or
+off", and puts every search in the same nightly batch.
+
+A Worker cron trigger is free, ticks as often as it likes, and the Worker
+already owns the D1 database. So:
+
+```
+Cloudflare Worker, hourly tick
+  └─ POST {APP_URL}/api/cron/job-search
+       Authorization: Bearer <API_SECRET>
+          └─ the app decides what is actually due
+```
+
+**Hourly is the tick, not the frequency.** Each saved search carries its own
+`frequency` and `hourUtc`, and `isDue()` in `src/lib/job-search/schedule.ts`
+decides. That split is the whole reason a real frequency choice is possible.
+
+The Worker stays deliberately dumb — no schedule logic, no database read, it
+does not even read the response. Everything requiring judgement lives in the app
+next to the pipeline it drives, because splitting that across two deploys would
+let the scheduler and the thing it schedules disagree, and only one of them
+appears in a PR diff. Failures are the app's to report by email; a Worker cannot
+send mail and should not learn how.
+
+### The first inbound secret gate in the repo
+
+Every other `/api/admin/*` route is NextAuth session-gated, and `API_SECRET` has
+only ever authenticated Next → Worker. The cron tick has no session and cannot
+get one, so `requireCronSecret()` in `src/lib/fit-brief/server.ts` compares a
+`Bearer` token against `API_SECRET` — the same shape as the Worker's own
+`requireAuth`, so there is one idiom in both directions.
+
+It **refuses when no secret is configured**. Treating an unset secret as "no
+check needed" would leave the route that spends the Gemini quota open to anyone
+who guessed the path.
+
+### One pipeline, two entry points
+
+`src/lib/job-search/run-search.ts` holds the search. The manual route and the
+cron route both call it and differ only in what happens to the result — the
+panel renders it, the scheduler emails it. A scheduled run that quietly diverged
+from the button would be the worst kind of bug here: plausible output nobody is
+watching.
+
+### What counts as "new"
+
+`digestLeads()` applies four conditions, each of which exists because its
+absence sends a mail he should not get:
+
+- **Genuinely new** — `foundAt` is set on first discovery and left alone by the
+  upsert, so a posting re-found tonight keeps its original timestamp. Without
+  this every run emails everything.
+- **Still `new`** — saved, dismissed or applied is a decision he has made.
+- **Not `gone`** — a 404 cannot be applied to. `unverified` is kept.
+- **At or above `minScore`** (default 45, the bottom of "credible").
+
+`isDue()` allows an hour of slack on the interval. A run that started at
+03:00:04 yesterday is not "24 hours old" at 03:00:01 today, so without the slack
+the search would skip to the next day and drift later every time until it ran
+weekly by accident.
+
+### Guard rails
+
+| Rail              | Behaviour                                                                                                                                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Auto-pause        | 5 consecutive runs with nothing new switches the search off and records `pausedReason`. Resuming from the panel clears the counter — leaving it at the ceiling would re-pause after one quiet night. |
+| Monthly spend cap | `JOB_SEARCH_MONTHLY_CAP_USD` (default $5), summed from the `ScheduledRun` log rather than a counter so it cannot drift. Over the line, runs are recorded as `skipped`.                               |
+| Failure email     | Sent instead of silence, because a broken scheduler and a quiet job market look identical from outside — and the quiet one is the story you tell yourself.                                           |
+| Per-tick limits   | At most 2 searches, and none started after 150s of the 300s budget. The rest roll to the next hour.                                                                                                  |
+
+**A failed run does not advance `lastRunAt`**, so it retries on the next tick it
+is due rather than counting as having happened.
+
+**Nothing after the leads are written may throw.** The digest, the run record
+and the counter updates all run after `runSearch()` has persisted, each wrapped
+separately — the same rule the brief PUT route and the search route follow.
+
+### Email
+
+`sendJobDigestEmail()` in `src/lib/email.ts`, in that file's existing idiom
+(Resend, inline HTML) rather than a template system for one mail. Two things it
+does that the older templates in that file get wrong:
+
+- Absolute URLs come from `PORTFOLIO_ORIGIN`, not a hardcoded host. The welcome
+  and newsletter templates hardcode `http://localhost:3000` in their unsubscribe
+  links — a live bug worth not repeating.
+- Posting text is HTML-escaped. It comes from job boards, not from us.
+
+The sender is the Resend sandbox (`onboarding@resend.dev`), which **only
+delivers to the account owner's own address**. The recipient is `ADMIN_EMAIL`,
+so this works — but the digest cannot be sent anywhere else without verifying a
+domain first.
+
+### One-time setup
+
+```bash
+cd cloudflare-api
+npx wrangler d1 execute portfolio-db --remote --file=migrations/add_saved_searches.sql
+npx wrangler deploy          # also registers the cron trigger
+```
+
+`wrangler.toml` needs `APP_URL` pointing at the deployed app, and the app needs
+`API_SECRET` — `briefStore()` throws without it outside development, so the cron
+route cannot store anything if it is missing.
+
+Testing the tick locally:
+
+```bash
+npx wrangler dev --local --test-scheduled --var APP_URL:http://localhost:3000
+curl "http://localhost:8799/__scheduled"
 ```

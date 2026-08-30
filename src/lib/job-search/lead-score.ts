@@ -87,20 +87,63 @@ function clamp(
   }
 }
 
+/**
+ * Postings per scoring call.
+ *
+ * The fan-out turned a typical result set from five postings into twenty or
+ * forty, and scoring was already the slowest phase of a search at ~40s for
+ * five. One call over forty would be slower still and more likely to come back
+ * truncated, so the set is split and the batches run at the same time — the
+ * same trade the sweeps themselves make.
+ *
+ * Twenty is chosen because the profile prompt is fixed overhead paid per batch:
+ * smaller batches mean more copies of it for no benefit.
+ */
+const BATCH_SIZE = 20
+
+/** Score one batch. Returns the raw entries, keyed later by url. */
+async function scoreBatch(
+  batch: VerifiedHit[],
+  provider: AIProvider
+): Promise<{ scores: LeadScore[]; usage: Usage }> {
+  const { value, usage } = await provider.generateStructured({
+    schema: LeadScoreListSchema,
+    system: LEAD_SCORE_SYSTEM,
+    prompt: leadScorePrompt(batch),
+    maxTokens: 16000,
+  })
+  return { scores: value.scores, usage }
+}
+
 export async function scoreLeads(
   hits: VerifiedHit[],
   provider: AIProvider
 ): Promise<{ scored: ScoredHit[]; usage: Usage }> {
   if (hits.length === 0) return { scored: [], usage: emptyUsage() }
 
-  const { value, usage } = await provider.generateStructured({
-    schema: LeadScoreListSchema,
-    system: LEAD_SCORE_SYSTEM,
-    prompt: leadScorePrompt(hits),
-    maxTokens: 16000,
-  })
+  const batches: VerifiedHit[][] = []
+  for (let i = 0; i < hits.length; i += BATCH_SIZE) {
+    batches.push(hits.slice(i, i + BATCH_SIZE))
+  }
 
-  const byUrl = new Map(value.scores.map(score => [score.url, score]))
+  // A failed batch must not lose the postings in the other batches — those
+  // hits simply come back unscored, which `unscored()` already renders
+  // honestly rather than hiding.
+  const results = await Promise.all(
+    batches.map(batch =>
+      scoreBatch(batch, provider).catch(error => {
+        console.error('[job-search] scoring batch failed:', error)
+        return { scores: [] as LeadScore[], usage: emptyUsage() }
+      })
+    )
+  )
+
+  let usage = emptyUsage()
+  const byUrl = new Map<string, LeadScore>()
+  for (const result of results) {
+    usage = addUsage(usage, result.usage)
+    for (const score of result.scores) byUrl.set(score.url, score)
+  }
 
   const scored = hits.map(hit => {
     const raw = byUrl.get(hit.url)
@@ -126,5 +169,5 @@ export async function scoreLeads(
     return b.leadScore - a.leadScore
   })
 
-  return { scored, usage: addUsage(emptyUsage(), usage) }
+  return { scored, usage }
 }
