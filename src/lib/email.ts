@@ -209,3 +209,164 @@ export async function sendNewsletterEmail(
 
   return results
 }
+
+/* ------------------------------------------------------------------ *
+ * Overnight job-search digest
+ * ------------------------------------------------------------------ */
+
+/**
+ * One lead as the digest renders it. A subset of JobLead, deliberately — the
+ * email carries what decides whether to open the posting, not everything known.
+ */
+export interface DigestLead {
+  url: string
+  title: string
+  companyName: string
+  location: string
+  salaryText: string
+  leadScore: number
+  band: string
+  liveness: string
+  verdict?: string
+}
+
+export interface JobDigestData {
+  searchName: string
+  leads: DigestLead[]
+  /** Set when the scheduler switched the search off, so the mail can say why. */
+  pausedReason?: string
+}
+
+/** HTML-escape. These strings come from job postings, not from us. */
+function esc(value: string): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+const BAND_COLOR: Record<string, string> = {
+  strong: '#047857',
+  credible: '#1d4ed8',
+  stretch: '#b45309',
+  'long-shot': '#6b7280',
+}
+
+/**
+ * The morning digest.
+ *
+ * Sent only when a scheduled run found something worth opening — the caller
+ * decides that, and calls this with an empty list never. A mail that arrives
+ * every morning saying "nothing today" is one you stop opening, and then the
+ * one that matters is unread too.
+ *
+ * Absolute URLs come from `origin`, not from a hardcoded host: the existing
+ * welcome and newsletter templates in this file hardcode `http://localhost:3000`
+ * in their unsubscribe links, which is a live bug worth not repeating.
+ */
+export async function sendJobDigestEmail(data: JobDigestData, origin: string) {
+  if (!resend) {
+    console.warn('RESEND_API_KEY not configured, skipping digest')
+    return
+  }
+
+  const count = data.leads.length
+  const rows = data.leads
+    .map(
+      lead => `
+        <tr>
+          <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;vertical-align:top;width:56px">
+            <div style="font-size:20px;font-weight:700;color:${BAND_COLOR[lead.band] ?? '#6b7280'}">${lead.leadScore}</div>
+            <div style="font-size:11px;color:#6b7280">${esc(lead.band)}</div>
+          </td>
+          <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;vertical-align:top">
+            <a href="${esc(lead.url)}" style="font-size:15px;font-weight:600;color:#111827;text-decoration:none">${esc(lead.title)}</a>
+            <div style="font-size:13px;color:#374151;margin-top:2px">
+              ${esc(lead.companyName)}${lead.location ? ` &middot; ${esc(lead.location)}` : ''}
+            </div>
+            <div style="font-size:12px;color:#6b7280;margin-top:2px">
+              ${lead.salaryText ? esc(lead.salaryText) : 'Salary not stated'}
+              &middot; ${lead.liveness === 'live' ? 'Verified live' : 'Could not verify'}
+            </div>
+            ${lead.verdict ? `<div style="font-size:12px;color:#4b5563;margin-top:6px">${esc(lead.verdict)}</div>` : ''}
+          </td>
+        </tr>`
+    )
+    .join('')
+
+  try {
+    const { error } = await resend.emails.send({
+      from: 'Lukáš Hošala <onboarding@resend.dev>',
+      to: [process.env.ADMIN_EMAIL || 'hosala.lukas@gmail.com'],
+      subject: `${count} new lead${count === 1 ? '' : 's'} · ${data.searchName}`,
+      html: `
+        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:640px;margin:0 auto;padding:24px">
+          <p style="font-size:13px;color:#6b7280;margin:0 0 4px">Overnight job search</p>
+          <h2 style="font-size:20px;color:#111827;margin:0 0 4px">${esc(data.searchName)}</h2>
+          <p style="font-size:14px;color:#374151;margin:0 0 20px">
+            ${count} new posting${count === 1 ? '' : 's'} worth a look. Scores are the pre-generation triage, not the full fit score.
+          </p>
+          <table style="width:100%;border-collapse:collapse">${rows}</table>
+          <p style="margin:24px 0 0">
+            <a href="${origin}/admin/applications" style="display:inline-block;background:#111827;color:#fff;padding:10px 16px;border-radius:6px;font-size:14px;text-decoration:none">
+              Review in the panel
+            </a>
+          </p>
+          ${
+            data.pausedReason
+              ? `<p style="font-size:13px;color:#b45309;margin-top:20px">This search has been paused: ${esc(data.pausedReason)}</p>`
+              : ''
+          }
+        </div>
+      `,
+    })
+
+    if (error) console.error('Digest email error:', error)
+  } catch (error) {
+    console.error('Digest email failed:', error)
+  }
+}
+
+/**
+ * A scheduled run that did not work.
+ *
+ * Sent instead of silence, because a broken scheduler and a quiet job market
+ * look identical from the outside — and the quiet one is the story you tell
+ * yourself.
+ */
+export async function sendJobSearchFailureEmail(
+  searchName: string,
+  reason: string,
+  origin: string
+) {
+  if (!resend) {
+    console.warn('RESEND_API_KEY not configured, skipping failure notice')
+    return
+  }
+
+  try {
+    const { error } = await resend.emails.send({
+      from: 'Lukáš Hošala <onboarding@resend.dev>',
+      to: [process.env.ADMIN_EMAIL || 'hosala.lukas@gmail.com'],
+      subject: `Job search did not run · ${searchName}`,
+      html: `
+        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:640px;margin:0 auto;padding:24px">
+          <h2 style="font-size:18px;color:#111827;margin:0 0 8px">The overnight search failed</h2>
+          <p style="font-size:14px;color:#374151;margin:0 0 4px"><strong>${esc(searchName)}</strong></p>
+          <pre style="background:#f3f4f6;padding:12px;border-radius:6px;font-size:12px;color:#374151;white-space:pre-wrap;margin:12px 0">${esc(reason)}</pre>
+          <p style="font-size:13px;color:#6b7280;margin:0">
+            Nothing was stored for this run. It will be retried on the next tick it is due.
+          </p>
+          <p style="margin:20px 0 0">
+            <a href="${origin}/admin/applications" style="font-size:14px;color:#1d4ed8">Open the panel</a>
+          </p>
+        </div>
+      `,
+    })
+
+    if (error) console.error('Failure email error:', error)
+  } catch (error) {
+    console.error('Failure email failed:', error)
+  }
+}

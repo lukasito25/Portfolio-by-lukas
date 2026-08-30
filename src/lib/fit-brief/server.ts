@@ -24,6 +24,34 @@ export async function requireAdmin(): Promise<NextResponse | null> {
 }
 
 /**
+ * The scheduler's front door.
+ *
+ * **This is the first inbound secret gate in the repo.** Every other route
+ * under /api/admin is NextAuth session-gated, and `API_SECRET` has until now
+ * only ever authenticated Next -> Worker, never a caller into Next. The cron
+ * tick has no session and cannot get one, so it presents the shared secret in
+ * the same `Bearer` shape the Worker's own `requireAuth` expects — one idiom
+ * across both directions rather than two.
+ *
+ * Refuses outright when no secret is configured. The alternative, treating an
+ * unset secret as "no check needed", would leave the pipeline that spends the
+ * Gemini quota open to anyone who guessed the path.
+ */
+export function requireCronSecret(request: Request): NextResponse | null {
+  const secret = process.env.API_SECRET?.trim()
+  if (!secret) {
+    console.error('[cron] API_SECRET is not set; refusing to run')
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const header = request.headers.get('Authorization')
+  if (header !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  return null
+}
+
+/**
  * Turn a generation failure into something the admin panel can display.
  * Generation runs for minutes, so a bare 500 with no explanation is expensive
  * — the message needs to say what to do next.

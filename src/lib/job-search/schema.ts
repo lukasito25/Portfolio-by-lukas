@@ -96,7 +96,7 @@ export const JobHitSchema = z.object({
 export type JobHit = z.infer<typeof JobHitSchema>
 
 export const JobHitListSchema = z.object({
-  hits: z.array(JobHitSchema).max(30),
+  hits: z.array(JobHitSchema).max(40),
   /**
    * Kept because an empty result set has two very different causes, and the
    * panel should be able to say which: nothing matched, or the search could not

@@ -1596,6 +1596,235 @@ class DataService {
 
     await prisma.jobLead.delete({ where: { id } }).catch(() => undefined)
   }
+
+  /* ---------------------------------------------------------------- *
+   * Saved searches and their run log (the overnight scheduler)
+   * ---------------------------------------------------------------- *
+   *
+   * Same `briefStore()` split as briefs and leads, for the same reason: a
+   * search saved while experimenting locally must not start running against
+   * production D1 overnight.
+   */
+
+  private async searchFetch(path: string, init?: RequestInit) {
+    const base = (
+      process.env.NEXT_PUBLIC_API_URL ||
+      'https://portfolio-api.hosala-lukas.workers.dev'
+    ).replace(/\/$/, '')
+
+    return fetch(`${base}/searches${path}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.API_SECRET}`,
+        ...(init?.headers || {}),
+      },
+      cache: 'no-store',
+    })
+  }
+
+  private searchFromPrisma(row: any) {
+    let criteria: unknown = {}
+    try {
+      criteria = JSON.parse(row.criteria)
+    } catch {
+      criteria = {}
+    }
+    return {
+      ...row,
+      criteria,
+      lastRunAt: row.lastRunAt ? row.lastRunAt.toISOString() : null,
+      createdAt: row.createdAt?.toISOString?.() ?? row.createdAt,
+      updatedAt: row.updatedAt?.toISOString?.() ?? row.updatedAt,
+    }
+  }
+
+  async listSavedSearches() {
+    this.assertServer('listSavedSearches')
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.searchFetch('')
+      if (!res.ok) throw new Error(`Search list failed: ${res.status}`)
+      const { searches } = await res.json()
+      return searches
+    }
+
+    const rows = await prisma.savedSearch.findMany({
+      orderBy: [{ isActive: 'desc' }, { createdAt: 'desc' }],
+    })
+    return rows.map(row => this.searchFromPrisma(row))
+  }
+
+  async createSavedSearch(data: SavedSearchInput) {
+    this.assertServer('createSavedSearch')
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.searchFetch('', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || `Search create failed: ${res.status}`)
+      }
+      const { search } = await res.json()
+      return search
+    }
+
+    const row = await prisma.savedSearch.create({
+      data: {
+        name: data.name ?? 'Untitled search',
+        criteria: JSON.stringify(data.criteria ?? {}),
+        frequency: data.frequency ?? 'daily',
+        hourUtc: data.hourUtc ?? 3,
+        isActive: data.isActive ?? true,
+        notifyByEmail: data.notifyByEmail ?? true,
+        minScore: data.minScore ?? 45,
+      },
+    })
+    return this.searchFromPrisma(row)
+  }
+
+  async updateSavedSearch(id: string, data: Partial<SavedSearchInput>) {
+    this.assertServer('updateSavedSearch')
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.searchFetch(`/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      })
+      if (res.status === 404) return null
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || `Search update failed: ${res.status}`)
+      }
+      const { search } = await res.json()
+      return search
+    }
+
+    const patch: Record<string, unknown> = {}
+    if (data.name !== undefined) patch.name = data.name
+    if (data.criteria !== undefined) {
+      patch.criteria = JSON.stringify(data.criteria)
+    }
+    if (data.frequency !== undefined) patch.frequency = data.frequency
+    if (data.hourUtc !== undefined) patch.hourUtc = data.hourUtc
+    if (data.isActive !== undefined) patch.isActive = data.isActive
+    if (data.notifyByEmail !== undefined) {
+      patch.notifyByEmail = data.notifyByEmail
+    }
+    if (data.minScore !== undefined) patch.minScore = data.minScore
+    if (data.lastRunAt !== undefined) {
+      patch.lastRunAt = data.lastRunAt ? new Date(data.lastRunAt) : null
+    }
+    if (data.emptyRuns !== undefined) patch.emptyRuns = data.emptyRuns
+    if (data.pausedReason !== undefined) patch.pausedReason = data.pausedReason
+
+    if (Object.keys(patch).length === 0) return null
+
+    const row = await prisma.savedSearch
+      .update({ where: { id }, data: patch })
+      .catch(() => null)
+    return row ? this.searchFromPrisma(row) : null
+  }
+
+  async deleteSavedSearch(id: string) {
+    this.assertServer('deleteSavedSearch')
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.searchFetch(`/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok && res.status !== 404) {
+        throw new Error(`Search delete failed: ${res.status}`)
+      }
+      return
+    }
+
+    await prisma
+      .$transaction([
+        prisma.scheduledRun.deleteMany({ where: { searchId: id } }),
+        prisma.savedSearch.delete({ where: { id } }),
+      ])
+      .catch(() => undefined)
+  }
+
+  async recordScheduledRun(searchId: string, data: ScheduledRunInput) {
+    this.assertServer('recordScheduledRun')
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.searchFetch(
+        `/${encodeURIComponent(searchId)}/runs`,
+        { method: 'POST', body: JSON.stringify(data) }
+      )
+      if (!res.ok) throw new Error(`Run record failed: ${res.status}`)
+      const { run } = await res.json()
+      return run
+    }
+
+    return prisma.scheduledRun.create({
+      data: {
+        searchId,
+        status: data.status ?? 'ok',
+        newLeads: data.newLeads ?? 0,
+        notified: data.notified ?? 0,
+        costUsd: data.costUsd ?? 0,
+        note: data.note ?? '',
+      },
+    })
+  }
+
+  /**
+   * What scheduled runs have cost this month.
+   *
+   * Summed from the run log rather than kept on a counter, so it cannot drift
+   * from the runs it describes and a surprising number can be audited row by
+   * row.
+   */
+  async scheduledSpendThisMonth(month?: string): Promise<number> {
+    this.assertServer('scheduledSpendThisMonth')
+    const target = month ?? new Date().toISOString().slice(0, 7)
+
+    if (this.briefStore() === 'worker') {
+      const res = await this.searchFetch(`/runs/spend?month=${target}`)
+      if (!res.ok) throw new Error(`Spend read failed: ${res.status}`)
+      const data = (await res.json()) as { totalUsd?: number }
+      return data.totalUsd ?? 0
+    }
+
+    const start = new Date(`${target}-01T00:00:00.000Z`)
+    const end = new Date(start)
+    end.setUTCMonth(end.getUTCMonth() + 1)
+
+    const result = await prisma.scheduledRun.aggregate({
+      _sum: { costUsd: true },
+      where: { startedAt: { gte: start, lt: end } },
+    })
+    return result._sum.costUsd ?? 0
+  }
+}
+
+/** What the saved-search methods accept. Mirrors the SavedSearch columns. */
+export interface SavedSearchInput {
+  name?: string
+  criteria?: unknown
+  frequency?: string
+  hourUtc?: number
+  isActive?: boolean
+  notifyByEmail?: boolean
+  minScore?: number
+  lastRunAt?: string | null
+  emptyRuns?: number
+  pausedReason?: string
+}
+
+/** One execution record. */
+export interface ScheduledRunInput {
+  status?: string
+  newLeads?: number
+  notified?: number
+  costUsd?: number
+  note?: string
 }
 
 /** What `upsertJobLeads` accepts. Mirrors the JobLead columns. */

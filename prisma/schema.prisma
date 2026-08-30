@@ -394,6 +394,63 @@ model JobLead {
   @@index([foundAt])
 }
 
+/// A job search that runs on a schedule, without him pressing anything.
+///
+/// The manual search competes with the part of the day he could spend writing
+/// applications. This is the same search, run overnight, so the morning starts
+/// with results rather than with a two-minute wait.
+///
+/// `criteria` holds exactly the JobSearchCriteria the manual panel posts, so a
+/// scheduled run and a manual one cannot diverge in what they ask for.
+model SavedSearch {
+  id            String    @id @default(cuid())
+  name          String
+  /// JSON JobSearchCriteria — the same shape /api/admin/job-search accepts.
+  criteria      String    @default("{}")
+  /// daily | every-2-days | weekly
+  frequency     String    @default("daily")
+  /// Hour of day in UTC the run should land on, so results are there by morning.
+  hourUtc       Int       @default(3)
+  isActive      Boolean   @default(true)
+  notifyByEmail Boolean   @default(true)
+  /// Leads below this are still stored, just never emailed. 45 is the bottom of
+  /// the "credible" band — see SCORE_BANDS in src/lib/fit-brief/fit-score.ts.
+  minScore      Int       @default(45)
+  lastRunAt     DateTime?
+  /// Consecutive runs that surfaced nothing new. Drives the auto-pause, so a
+  /// badly worded search cannot burn the Gemini quota nightly forever.
+  emptyRuns     Int       @default(0)
+  /// Why the scheduler switched it off, so a pause is visible rather than a
+  /// search that quietly stopped working.
+  pausedReason  String    @default("")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([isActive])
+}
+
+/// One scheduled execution.
+///
+/// The only way to answer "did it run last night". A scheduler nobody watches
+/// needs a record, or a broken one is indistinguishable from a quiet job
+/// market — which is the same confusion the search's coverage note exists to
+/// prevent, one level up.
+model ScheduledRun {
+  id        String   @id @default(cuid())
+  searchId  String
+  startedAt DateTime @default(now())
+  /// ok | empty | error | skipped
+  status    String   @default("ok")
+  newLeads  Int      @default(0)
+  /// How many of those cleared minScore and were actually emailed.
+  notified  Int      @default(0)
+  costUsd   Float    @default(0)
+  note      String   @default("")
+
+  @@index([searchId])
+  @@index([startedAt])
+}
+
 model Analytics {
   id          String   @id @default(cuid())
 
