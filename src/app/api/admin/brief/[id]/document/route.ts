@@ -4,7 +4,16 @@
  * Rendered from the stored JSON on every request, so an edit made in the review
  * screen is in the next download with nothing to invalidate.
  *
- *   GET /api/admin/brief/<id>/document?kind=cv&locale=en
+ *   GET /api/admin/brief/<id>/document?kind=cv&locale=en&variant=panel
+ *   GET /api/admin/brief/<id>/document?kind=cv&locale=en&format=pdf
+ *
+ * Two formats, for two different readers. The .docx is what goes into an
+ * applicant tracking system; the PDF embeds its fonts and lays out identically
+ * everywhere, and is what goes to a person.
+ *
+ * `variant` selects the document design. Each format has its own default —
+ * `classic` for .docx, `column` for PDF — and an unknown value falls back to it
+ * rather than failing a download.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -14,6 +23,8 @@ import {
   renderCoverLetter,
   documentFilename,
 } from '@/lib/documents/render'
+import { renderCvPdf, renderCoverLetterPdf } from '@/lib/documents/pdf/cv'
+import { defaultVariantFor, isDocVariant } from '@/lib/documents/variants'
 import { LOCALES, type Locale } from '@/lib/fit-brief/guardrails'
 import { requireAdmin } from '@/lib/fit-brief/server'
 import { dataService } from '@/lib/data-service'
@@ -31,6 +42,11 @@ export async function GET(request: NextRequest, { params }: Params) {
   const kind =
     url.searchParams.get('kind') === 'cover-letter' ? 'cover-letter' : 'cv'
   const locale = (url.searchParams.get('locale') || 'en') as Locale
+  const format = url.searchParams.get('format') === 'pdf' ? 'pdf' : 'docx'
+  const requested = url.searchParams.get('variant')
+  const variant = isDocVariant(requested)
+    ? requested
+    : defaultVariantFor(format)
 
   if (!(LOCALES as readonly string[]).includes(locale)) {
     return NextResponse.json({ error: 'Unknown locale' }, { status: 400 })
@@ -55,7 +71,10 @@ export async function GET(request: NextRequest, { params }: Params) {
           { status: 404 }
         )
       }
-      buffer = renderCv(cvResult.data)
+      buffer =
+        format === 'pdf'
+          ? await renderCvPdf(cvResult.data, { variant })
+          : renderCv(cvResult.data, variant)
     } else {
       const letterResult = CoverLetterSchema.safeParse(
         (brief.coverLetter as Record<string, unknown>)?.[locale]
@@ -66,19 +85,36 @@ export async function GET(request: NextRequest, { params }: Params) {
           { status: 404 }
         )
       }
-      buffer = renderCoverLetter(
-        letterResult.data,
-        cvResult.success ? cvResult.data : undefined,
-        locale
-      )
+      buffer =
+        format === 'pdf'
+          ? await renderCoverLetterPdf(
+              letterResult.data,
+              cvResult.success ? cvResult.data : undefined,
+              locale,
+              { variant }
+            )
+          : renderCoverLetter(
+              letterResult.data,
+              cvResult.success ? cvResult.data : undefined,
+              locale,
+              variant
+            )
     }
 
-    const filename = documentFilename(kind, brief.companyName, locale)
+    const filename = documentFilename(
+      kind,
+      brief.companyName,
+      locale,
+      variant,
+      format
+    )
 
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type':
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          format === 'pdf'
+            ? 'application/pdf'
+            : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'Content-Disposition': `attachment; filename="${filename}"`,
         'Content-Length': String(buffer.length),
         'Cache-Control': 'no-store',

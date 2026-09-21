@@ -19,7 +19,17 @@
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { AlertTriangle, Check, Minus, RefreshCw, Target, X } from 'lucide-react'
+import {
+  AlertTriangle,
+  Check,
+  FileText,
+  Minus,
+  RefreshCw,
+  Target,
+  X,
+} from 'lucide-react'
+import type { DocumentRecommendation } from '@/lib/documents/recommend'
+import { DOC_VARIANT_LABELS } from '@/lib/documents/variants'
 
 export interface FitAssessmentView {
   score: number
@@ -76,15 +86,97 @@ const STATUS_ICON = {
   unmet: <X className="h-3.5 w-3.5 text-rose-600" />,
 }
 
+/**
+ * Which document to send — the second half of "worth applying?".
+ *
+ * Rule-based, from where the posting was found, the country and the sector, so
+ * it is here before the score has run and it can say why. The button sets the
+ * download picker; the reasons are listed so a wrong call is auditable.
+ */
+function DocumentAdvice({
+  document,
+  overridden,
+  onFollow,
+}: {
+  document: DocumentRecommendation
+  overridden: boolean
+  onFollow: () => void
+}) {
+  const primary = document.primary
+  const alt = document.alternative
+  return (
+    <div className="mt-4 border-t border-gray-100 pt-4">
+      <p className="mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide text-gray-700 uppercase">
+        <FileText className="h-3.5 w-3.5 text-gray-500" />
+        Which document to send
+        <span className="ml-auto text-[10px] font-normal tracking-normal text-gray-400 normal-case">
+          {document.confidence} confidence
+        </span>
+      </p>
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="rounded-md bg-gray-900 px-2.5 py-1 font-medium text-white">
+          {DOC_VARIANT_LABELS[primary.variant]} · .{primary.format}
+        </span>
+        <span className="text-gray-500">
+          {document.reader === 'parser'
+            ? 'to attach for the portal upload'
+            : document.reader === 'person'
+              ? 'to attach — a person reads this one'
+              : 'to attach as the safe default'}
+        </span>
+        <span className="text-gray-300">·</span>
+        <span className="text-gray-600">
+          then{' '}
+          <span className="font-medium text-gray-800">
+            {DOC_VARIANT_LABELS[alt.variant]} · .{alt.format}
+          </span>{' '}
+          {alt.format === 'pdf'
+            ? 'for a hiring manager'
+            : 'when a portal asks for it'}
+        </span>
+        {overridden && (
+          <button
+            type="button"
+            onClick={onFollow}
+            className="ml-auto rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:border-gray-400"
+          >
+            Follow the recommendation
+          </button>
+        )}
+      </div>
+      <ul className="mt-2 space-y-1 text-xs text-gray-500">
+        {document.reasons.map((reason, i) => (
+          <li key={i}>· {reason}</li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 export function FitScoreCard({
   assessment,
   scoring,
   onScore,
+  document,
+  overridden = false,
+  onFollow,
 }: {
   assessment: FitAssessmentView | null
   scoring: boolean
   onScore: () => void
+  document?: DocumentRecommendation | null
+  overridden?: boolean
+  onFollow?: () => void
 }) {
+  const advice =
+    document && onFollow ? (
+      <DocumentAdvice
+        document={document}
+        overridden={overridden}
+        onFollow={onFollow}
+      />
+    ) : null
+
   if (!assessment) {
     return (
       <Card className="p-6">
@@ -111,6 +203,7 @@ export function FitScoreCard({
             </>
           )}
         </Button>
+        {advice}
       </Card>
     )
   }
@@ -230,6 +323,7 @@ export function FitScoreCard({
           )}
         </p>
       )}
+      {advice}
     </Card>
   )
 }

@@ -183,6 +183,10 @@ THE CV
 - Pick bullets that answer this posting. A requirements-heavy posting wants the
   adidas market-team work near the top; an AI posting wants PlayerGrade and the
   Vertex AI work.
+- highlights: three or four numbers for the band at the top, chosen for THIS
+  posting and varied in kind (scale, money, change, time). They sit above the
+  summary and are read first, so a figure used there should not also open a
+  bullet — pick the next strongest one for the bullet instead.
 - The headline and summary are the only genuinely bespoke parts. Make them
   specific to the role, and keep them free of self-description ("driven",
   "passionate", "results-oriented").

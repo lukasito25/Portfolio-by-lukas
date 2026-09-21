@@ -38,6 +38,20 @@ Management, Risk Mitigation, Process Design, Revenue Impact, Scale Management.
 They are not restatements of the sentence. Pick labels a recruiter for this
 specific posting would look for; the labels are part of the tailoring.
 
+## Highlights — the band at the top
+
+Three or four numbers, set large above the summary. They are read before
+anything else and they carry no sentence to soften them, so:
+
+- Vary the kind. Scale, money, change, time — four percentages read as one fact
+  repeated. "165M+ users", "13 people led", "50+ market teams", "€1M licence".
+- Never repeat a figure the summary already states. The band and the summary are
+  read together; the same number twice wastes the strongest position on the page.
+- Order by force, not by chronology.
+- The label says what the number counts, in two or three words. Not a sentence,
+  not a claim — "registered users", not "platform serving registered users".
+- Exactly as the corpus states the figure. No re-rounding to make it rounder.
+
 ## Bullets
 
 - One line each; two at most. A three-line bullet is two bullets.

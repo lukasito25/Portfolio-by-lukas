@@ -26,6 +26,14 @@ import {
 import { LOCALES, type Locale } from '@/lib/fit-brief/guardrails'
 import type { BriefWarning, FitBriefContent } from '@/lib/fit-brief/schema'
 import type { CvContent, CoverLetterContent } from '@/lib/documents/schema'
+import {
+  DOC_VARIANTS,
+  DOC_VARIANT_LABELS,
+  defaultVariantFor,
+  type DocFormat,
+  type DocVariant,
+} from '@/lib/documents/variants'
+import { recommendDocument } from '@/lib/documents/recommend'
 import { warningKey } from '@/lib/fit-brief/warning-key'
 import { CvEditor, LetterEditor } from './DocumentEditor'
 import { RefinePanel, type RefineProposal } from './RefinePanel'
@@ -98,6 +106,8 @@ interface FullBrief extends BriefSummary {
     location?: string
     postingLanguage?: string
     companyContext?: string[]
+    domainKeywords?: string[]
+    workModel?: 'onsite' | 'hybrid' | 'remote' | 'unspecified'
   }
   content: Partial<Record<Locale, FitBriefContent>>
   cvContent: Record<string, unknown>
@@ -199,6 +209,10 @@ export default function ApplicationsClient() {
     Record<string, CvContent | CoverLetterContent>
   >({})
   const [docMode, setDocMode] = useState<'fields' | 'json'>('fields')
+  // Which document design the downloads use. `auto` follows the per-posting
+  // recommendation — a design for each format — and a named variant forces
+  // that design for both buttons. Session-only, like the locale.
+  const [docVariant, setDocVariant] = useState<DocVariant | 'auto'>('auto')
   const [docJson, setDocJson] = useState('')
 
   // Is this one worth the hour?
@@ -341,6 +355,9 @@ export default function ApplicationsClient() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const { brief } = await res.json()
       setSelected(brief)
+      // Each brief opens on its own recommendation, not on an override left
+      // behind by the last one.
+      setDocVariant('auto')
       const first = LOCALES.find(l => brief.content?.[l]) ?? 'en'
       setActiveLocale(first)
       setTab('brief')
@@ -367,6 +384,29 @@ export default function ApplicationsClient() {
       reviewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     )
   }, [])
+
+  // Which document to send for this posting — rule-based, from the signals
+  // the brief already holds, so it is there before the fit score has run.
+  const docRecommendation = useMemo(
+    () =>
+      selected
+        ? recommendDocument({
+            jobSpec: {
+              ...selected.jobSpec,
+              companyName: selected.companyName,
+              roleTitle: selected.roleTitle,
+            },
+            sourceUrl: selected.sourceUrl,
+          })
+        : null,
+    [selected]
+  )
+
+  /** The design a download button uses: the override, or the recommendation. */
+  const variantFor = (format: DocFormat): DocVariant =>
+    docVariant !== 'auto'
+      ? docVariant
+      : (docRecommendation?.byFormat[format] ?? defaultVariantFor(format))
 
   if (status === 'loading') {
     return (
@@ -1403,6 +1443,9 @@ export default function ApplicationsClient() {
                   }
                   scoring={scoring}
                   onScore={runFitScore}
+                  document={docRecommendation}
+                  overridden={docVariant !== 'auto'}
+                  onFollow={() => setDocVariant('auto')}
                 />
 
                 {/* Warnings */}
@@ -1635,12 +1678,52 @@ export default function ApplicationsClient() {
                               <a
                                 href={`/api/admin/brief/${selected.id}/document?kind=${
                                   tab === 'cv' ? 'cv' : 'cover-letter'
-                                }&locale=${activeLocale}`}
+                                }&locale=${activeLocale}&variant=${variantFor('docx')}`}
                               >
                                 <Download className="mr-2 h-4 w-4" />
-                                Download .docx ({activeLocale.toUpperCase()})
+                                .docx · {
+                                  DOC_VARIANT_LABELS[variantFor('docx')]
+                                }{' '}
+                                ({activeLocale.toUpperCase()})
                               </a>
                             </Button>
+
+                            {/* The PDF embeds its fonts and lays out the same
+                                everywhere, so it is the one to send a person.
+                                The .docx is the one to upload to a portal. The
+                                picker applies to both; for PDF only `column`
+                                changes the design. */}
+                            <Button asChild variant="outline" size="sm">
+                              <a
+                                href={`/api/admin/brief/${selected.id}/document?kind=${
+                                  tab === 'cv' ? 'cv' : 'cover-letter'
+                                }&locale=${activeLocale}&format=pdf&variant=${variantFor('pdf')}`}
+                              >
+                                <Download className="mr-2 h-4 w-4" />
+                                .pdf · {DOC_VARIANT_LABELS[variantFor('pdf')]} (
+                                {activeLocale.toUpperCase()})
+                              </a>
+                            </Button>
+
+                            <select
+                              value={docVariant}
+                              onChange={e =>
+                                setDocVariant(
+                                  e.target.value as DocVariant | 'auto'
+                                )
+                              }
+                              aria-label="Document design"
+                              className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs"
+                            >
+                              <option value="auto">
+                                Recommended for this posting
+                              </option>
+                              {DOC_VARIANTS.map(value => (
+                                <option key={value} value={value}>
+                                  {DOC_VARIANT_LABELS[value]} — both formats
+                                </option>
+                              ))}
+                            </select>
 
                             <div className="inline-flex rounded-lg border border-gray-200 p-1">
                               {(['fields', 'json'] as const).map(value => (
