@@ -182,6 +182,10 @@ export function CvEditor({
         <TextInput value={value.headline} onChange={v => set('headline', v)} />
       </Field>
 
+      {/* `value` is the stored JSON, not a parsed `CvContent`, so a CV written
+          before `highlights` existed has no such key at all — the schema's
+          `.default([])` only applies on a parse. Reading `.map` off it took
+          the whole admin page down in production. Same for `phone`. */}
       <div>
         <p className="mb-2 flex items-baseline gap-2">
           <span className="text-xs font-semibold tracking-wide text-gray-700 uppercase">
@@ -193,9 +197,9 @@ export function CvEditor({
           </span>
         </p>
         <div className="space-y-2">
-          {value.highlights.map((highlight, index) => {
+          {(value.highlights ?? []).map((highlight, index) => {
             const setHighlight = (next: Partial<typeof highlight>) => {
-              const highlights = [...value.highlights]
+              const highlights = [...(value.highlights ?? [])]
               highlights[index] = { ...highlight, ...next }
               set('highlights', highlights)
             }
@@ -221,7 +225,7 @@ export function CvEditor({
                     onClick={() =>
                       set(
                         'highlights',
-                        value.highlights.filter((_, i) => i !== index)
+                        (value.highlights ?? []).filter((_, i) => i !== index)
                       )
                     }
                     className="rounded-md border border-gray-300 px-2 text-xs text-gray-500 hover:border-gray-400"
@@ -234,14 +238,14 @@ export function CvEditor({
             )
           })}
         </div>
-        {value.highlights.length < 4 && (
+        {(value.highlights ?? []).length < 4 && (
           <button
             type="button"
             onClick={() =>
               // No fact ids: an added metric is uncited until one is written in,
               // and the validator raises it rather than letting it through.
               set('highlights', [
-                ...value.highlights,
+                ...(value.highlights ?? []),
                 { value: '', label: '', factIds: [] },
               ])
             }
@@ -263,6 +267,12 @@ export function CvEditor({
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Email">
           <TextInput value={value.email} onChange={v => set('email', v)} />
+        </Field>
+        <Field label="Phone" hint="international format">
+          <TextInput
+            value={value.phone ?? ''}
+            onChange={v => set('phone', v)}
+          />
         </Field>
         <Field label="Links" hint="one per line">
           <StringList value={value.links} onChange={v => set('links', v)} />

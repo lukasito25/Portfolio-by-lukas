@@ -75,6 +75,7 @@ const sourceWords = new Set(
       cv.fullName,
       cv.headline,
       cv.location,
+      cv.phone,
       cv.email,
       ...cv.links,
       cv.summary,

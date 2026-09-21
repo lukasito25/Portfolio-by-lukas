@@ -693,8 +693,9 @@ const Footer = ({ theme }: { theme: Theme }) => (
  * Documents
  * ------------------------------------------------------------------ */
 
-const contactOf = (cv: Pick<CvContent, 'location' | 'email' | 'links'>) =>
-  [cv.location, cv.email, ...cv.links].filter(Boolean)
+const contactOf = (
+  cv: Pick<CvContent, 'location' | 'phone' | 'email' | 'links'>
+) => [cv.location, cv.phone, cv.email, ...cv.links].filter(Boolean)
 
 export function SingleCv({
   cv,

@@ -302,6 +302,15 @@ const MailIcon = () => (
   </Svg>
 )
 
+const PhoneIcon = () => (
+  <Svg viewBox="0 0 10 10" style={styles.contactIcon}>
+    <Path
+      d="M2.2 1.4 L3.6 1.2 L4.4 3.2 L3.4 4 C3.9 5.2 4.8 6.1 6 6.6 L6.8 5.6 L8.8 6.4 L8.6 7.8 C8.5 8.4 8 8.8 7.4 8.7 C4.4 8.3 1.7 5.6 1.3 2.6 C1.2 2 1.6 1.5 2.2 1.4 Z"
+      {...stroke}
+    />
+  </Svg>
+)
+
 const PinIcon = () => (
   <Svg viewBox="0 0 10 10" style={styles.contactIcon}>
     <Path
@@ -353,10 +362,16 @@ const Box = ({ label }: { label: string }) => (
 const Contact = ({
   cv,
 }: {
-  cv: Pick<CvContent, 'email' | 'links' | 'location'>
+  cv: Pick<CvContent, 'phone' | 'email' | 'links' | 'location'>
 }) => (
   <>
     <Box label="Contact" />
+    {cv.phone ? (
+      <View style={styles.contactRow}>
+        <PhoneIcon />
+        <Text style={styles.contactText}>{cv.phone}</Text>
+      </View>
+    ) : null}
     {cv.email ? (
       <View style={styles.contactRow}>
         <MailIcon />

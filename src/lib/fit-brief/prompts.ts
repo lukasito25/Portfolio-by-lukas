@@ -190,7 +190,11 @@ THE CV
 - The headline and summary are the only genuinely bespoke parts. Make them
   specific to the role, and keep them free of self-description ("driven",
   "passionate", "results-oriented").
-- languages: statements only, never levels.
+- languages: the level exactly as the corpus states it (Slovak native,
+  English C2, Italian B2) and never one it does not — German has no level
+  and is not listed as a language.
+- phone, email, links: from the contact.* facts, verbatim. Never guess a
+  handle.
 
 THE COVER LETTER
 - Under one page. Four paragraphs is usually right.

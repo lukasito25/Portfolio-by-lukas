@@ -12,8 +12,9 @@ export const cv: CvContent = {
   fullName: 'Lukáš Hošala',
   headline: 'Senior Product Manager — platform migrations at consumer scale',
   location: 'Volterra, Italy',
-  email: 'hosala.lukas@gmail.com',
-  links: ['lukashosala.com', 'linkedin.com/in/lukashosala'],
+  phone: '+39 379 3110473',
+  email: 'lukas.hosala@icloud.com',
+  links: ['portfolio-by-lukas.vercel.app', 'linkedin.com/in/hosala'],
   highlights: [
     { value: '165M+', label: 'registered users', factIds: ['runtastic.users'] },
     { value: '13', label: 'people led', factIds: ['runtastic.team'] },
