@@ -129,6 +129,16 @@ function collectBriefCitations(content: FitBriefContent): Citation[] {
 
 function collectCvCitations(cv: CvContent): Citation[] {
   const out: Citation[] = []
+  // The band at the top of the CV is the first thing read and the least
+  // qualified — a bare number with a label and nowhere to hedge. It is audited
+  // exactly like the brief's own stat band above.
+  cv.highlights.forEach((highlight, i) => {
+    out.push({
+      path: `cv.highlights[${i}]`,
+      ids: highlight.factIds,
+      text: `${highlight.value} — ${highlight.label}`,
+    })
+  })
   cv.roles.forEach((role, r) => {
     role.bullets.forEach((bullet, b) => {
       out.push({

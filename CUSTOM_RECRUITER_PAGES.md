@@ -489,6 +489,275 @@ To swap in a different design, either edit the script's layout, or mark up a
 real `.docx` with the same placeholders and drop it in. House style for the
 copy itself lives separately in `src/lib/documents/style-guide.ts`.
 
+### Document designs
+
+The documents carry the same visual language as the portfolio and the fit-brief
+pages: the Ink & Signal tokens from `globals.css`, applied to paper. Six
+designs are registered in `src/lib/documents/variants.ts` and built by
+`node scripts/build-doc-variants.mjs`:
+
+| id        | what it does                                                                                                                                                                                                  | cost   |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `classic` | the original plain template; the .docx default                                                                                                                                                                | —      |
+| `rule`    | typographic only — accent section labels at the site's `.section-label` tracking, hairline rules, the ink and grey scale. No images, white page                                                               | none   |
+| `panel`   | the site's panel language — a flat `--background` paper tone behind the page, a filled letterhead block with an accent edge, section headings in tinted bars                                                  | ~5 KB  |
+| `field`   | the brief pages on paper — the hero vignette and the gradient-signal rule, drawn from the same tokens the briefs use, behind the text on every page                                                           | ~33 KB |
+| `dossier` | the brief page as a sheet of paper — a dark hero band, the four-up stat band under it, dates hard right against a tab stop, a spine down each role's bullets. Restructured, still one column, still no tables | ~5 KB  |
+| `column`  | the agency two-column CV — a shaded rail for skills, languages and education beside the summary and experience. **The only variant that uses a table**. As a PDF, the dark-rail page below                    | ~5 KB  |
+
+Pick one per download with `?variant=` on
+`/api/admin/brief/<id>/document`, or from the picker next to Download in
+`/admin/applications`. `npx tsx scripts/preview-doc-variants.ts` renders all of
+them with a realistic sample into `doc-previews/` — through `renderCv` and
+`renderCoverLetter`, not through docxtemplater directly, so a prototype cannot
+look right in the preview and break in the download.
+
+### Typeface
+
+The documents are set in **Geist**, the site's own body face, subsetted by
+`node scripts/build-doc-fonts.mjs` into `templates/fonts/` and embedded in the
+file. Calibri was the previous choice, on the reasoning that "the site's fonts
+are not on a recruiter's machine" — true for a document that only _names_ a
+font, but a `.docx` and a PDF can both carry one, so the constraint was never
+real. Calibri is the Microsoft default, and a default typeface is the loudest
+signal that a document came out of a word processor.
+
+Licence: SIL OFL 1.1, which permits embedding and requires the licence text to
+travel with the font — hence `templates/fonts/Geist-OFL.txt`.
+
+Three OOXML traps, each of which produces a document that opens without
+complaint and silently uses the wrong font:
+
+- **Font relationships belong to `word/_rels/fontTable.xml.rels`**, not to
+  `document.xml.rels`. The `r:id` values inside `fontTable.xml` resolve against
+  the font table's own rels.
+- **The obfuscation key is the GUID's hex pairs read backwards** (ECMA-376
+  §17.8.1), XORed over the first 32 bytes. Forwards produces a valid package
+  Word refuses to use.
+- **Name the face on the runs**, not only in `docDefaults`. Google Docs,
+  LibreOffice and other consumers ignore `rPrDefault` and fall back to their own
+  default.
+
+`w:altName` is Arial, and that is not arbitrary: Next.js generates a
+metric-matched fallback for Geist against Arial at `size-adjust: 104.76%`.
+Word for Windows honours embedded fonts; **Word for Mac may not**, so `altName`
+is what decides the substitute rather than leaving it to the reader's Word.
+
+Space Grotesk, the site's display face, was tried and dropped — the only source
+that ships it embeddably is a woff2 that must be decompressed to TrueType, and
+the result would not paint despite passing Chrome's font sanitiser. `globals.css`
+already names Geist as the display fallback, so this is the site's own second
+choice. See `scripts/doc-fonts.mjs`.
+
+### Two formats, two readers
+
+`?format=pdf` on the download route renders through
+`src/lib/documents/pdf/cv.tsx`; anything else renders `.docx`. Same
+`CvContent`, so the two can never disagree about what they say. Every variant
+has a PDF design, chosen by the same `variant` as the `.docx`. The five
+single-column ones — `classic`, `rule`, `panel`, `field`, `dossier` — are
+themes of one document in `src/lib/documents/pdf/single.tsx`: the body is the
+same component in the same order for all five, and a theme may change only the
+letterhead, the section heading, the page ground and the accent. That split is
+deliberate: a recruiter compares designs on the top third of the page and a
+parser does not care about any of it. `column` is the dark-rail page described
+under "The column PDF" below. Each design's cover letter shares its CV's
+letterhead exactly.
+
+Shared across the six: dates hard right on the title line; a heading never
+strands at a page foot (`minPresenceAhead`) and a role header keeps at least
+two bullets with it; a page number only when there is a second page; tracking
+under ~0.08em (see below).
+
+Three react-pdf traps, each of which renders without an error: a unitless
+`lineHeight` on a style with no `fontSize` of its own is resolved against the
+library's 18pt default rather than the inherited size, and the page triples its
+leading; `alignItems: 'baseline'` misplaces a flex row whose text has nested
+spans, so rows align by their tops with matched line heights instead; and
+gradients ignore `stopOpacity`, so `field`'s vignette fades in colour stops
+down to the paper.
+
+|         | goes to                      | why                                                                                                                                                                                         |
+| ------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.docx` | an applicant tracking system | Measured 2026 parser testing: single-column `.docx` extracts 97.4% of fields, two-column PDF 71.2%. Greenhouse, Lever and Workday parse text PDFs as cleanly; older Taleo and iCIMS do not. |
+| PDF     | a person                     | Embeds its fonts by definition and lays out identically everywhere, so the design does not have to survive a negotiation with someone else's word processor.                                |
+
+**`tsx` cannot run the PDF renderer.** It fails to resolve
+`@react-pdf/hyphenate/en-us`, which is reached through a `"./*"` export
+pattern, with ERR_PACKAGE_PATH_NOT_EXPORTED. Node's own resolver handles it and
+so does the Next bundler — verified: react-pdf is present in the built
+`document/route.js`, and `templates/fonts/` is traced into
+`.next/standalone/`. So `scripts/preview-cv-pdf.mjs` esbuild-bundles the
+component (JSX automatic runtime, packages external) and runs it under plain
+Node.
+
+### Which document to send
+
+Six designs and two formats is a decision per application, and the evidence
+is already on the brief. `src/lib/documents/recommend.ts` makes the call and
+lists its reasons; the panel's download buttons follow it and the reasons show
+under the fit score. It is rule-based on purpose — a rule can be audited, and
+when the recommendation is wrong the reason it gives names the signal that
+misfired.
+
+It starts from one default per format (`variants.ts`): **`classic` for the
+.docx** — the plainest single-column page, the one nothing in a parser has ever
+mis-read — and **`column` for the PDF**, the dark-rail page with the photo,
+chosen from rendered previews of all six. The rules then adjust:
+
+| Signal          | Read from                        | Decides                                                                                                                                                                               |
+| --------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tracking system | `sourceUrl` hostname             | A parser reads it first → attach the .docx. Greenhouse/Lever/Ashby/Workday/SmartRecruiters read text PDFs cleanly; Taleo/iCIMS/SuccessFactors do not                                  |
+| Country         | `jobSpec.countryCode`            | DACH, IT, FR, ES and most of central Europe expect a photo; UK/IE/US/CA/NL/Nordics discourage one — the reasons say to send `column` without `templates/photo.jpg`, or pick `dossier` |
+| Sector          | company context, title, keywords | Banking, insurance, consulting, public sector, pharma, legal → `rule` for both formats                                                                                                |
+| Company size    | company context                  | Startup/scale-up with no ATS → a person reads it → attach the PDF; enterprise → assume a parser                                                                                       |
+| Nothing         | —                                | the defaults, attach the .docx, low confidence                                                                                                                                        |
+
+The output is `byFormat` (a design for each format — both are always
+downloadable), `attach` (which format goes on the application), the reader
+(`parser` / `person` / `unknown`), the ATS profile when recognised, and a
+confidence. The picker in the panel overrides it by forcing one design for
+both formats.
+
+### The column PDF
+
+`src/lib/documents/pdf/column.tsx` is the two-column résumé he had been sending
+by hand, rebuilt from `CvContent`: a charcoal rail with a round photo, boxed
+section labels and the reference material — contact, education, skills,
+languages — beside a white column with the name set very large in the heaviest
+cut of Geist, the summary and the experience. The cover letter shares the rail
+and the name block, with contact only.
+
+What the reference has that this drops: the second page of portfolio
+screenshots, the tools list, the hobbies and the references. None of it is in
+`CvContent`, and the screenshots in particular are text a parser cannot read
+and a person cannot verify. The portfolio link in the contact block stands in
+for them.
+
+A two-column PDF is the layout an ATS parses worst (71.2% field extraction in
+the 2026 testing above), so the design does everything a layout can do to stay
+readable, and `node scripts/check-pdf-text.mjs` asserts each of these:
+
+- **The content stream is a parser's order, not the visual one.** A PDF has no
+  columns; a parser reads text in the order it was drawn. The rail is drawn
+  _between_ the name block and the body, so extraction reads name → contact →
+  education → skills → languages → summary → experience. Name and contact
+  first, every heading on a line of its own, nothing interleaved.
+- **The rail content is drawn once**, on the first page; only its dark
+  background repeats. A rail repeated per page would put the email address in
+  the text twice.
+- **Nothing textual is an image.** The photo carries no text and the contact
+  icons are vector strokes with no glyphs in them.
+- **Tracking stays under ~0.08em.** Past that pdf.js — and so a good share of
+  parsers — reads the gaps between glyphs as spaces, and `SUMMARY` extracts as
+  `S U M M A R Y`, which is no heading at all. The `dossier` labels shipped at
+  0.19em; the gate caught it and they were brought down.
+
+The photo is optional and not committed. Put a square headshot at
+`templates/photo.jpg` (or `.png`) and every `column` PDF carries it; leave it
+out and the rail starts at Contact. Whether a CV should carry a photo differs
+by country and by recruiter, which is why it is a file and not a default.
+`scripts/preview-cv-pdf.mjs` uses `doc-previews/photo.jpg` for the preview
+when one is there.
+
+The .docx gates render Word's reading order; this one uses `pdf-parse` (pdf.js)
+on the previews `preview-cv-pdf.mjs` writes, so run that first. Negative
+controls: a rail drawn last, a contact block repeated, a heading lost and a
+word lost all fail.
+
+### Nothing in these files identifies a tool
+
+An audit of every generated document found no trace of any model or tool: no
+`docProps/app.xml`, no RSIDs, no zip comment, no PNG text chunks, and no hidden
+characters — `sanitizeDeep` is on the generation path for every provider via
+`validateAgainstSchema`.
+
+Two things were changed to keep that true rather than merely observed:
+
+- **The review-screen PUT now sanitises.** It validated and stored edits without
+  it, so text _pasted_ into the panel from another tool reached the `.docx`
+  unsanitised. Generated text was never the risk; pasted text was.
+- **`docProps/core.xml` names the author.** A `.docx` with no metadata at all is
+  itself unusual and tells anyone who unzips it that a script produced the file.
+  There is deliberately no `app.xml` — that part declares
+  `<Application>Microsoft Office Word</Application>`, which would be untrue.
+
+`node scripts/check-doc-clean.mjs` asserts all of it: fingerprints in XML and in
+raw bytes, invisible characters (including both variation-selector blocks, which
+a negative control caught this check missing), homoglyphs, `app.xml`, the
+`dc:creator` name, PNG text chunks and zip comments. It has negative controls —
+plant a zero-width space, a Cyrillic "а", a tag character or a model name and it
+fails.
+
+### The two-column trade
+
+`column` is the one design whose text does not come out in reading order. A
+parser walks table cells row-major, so the rail is extracted first:
+
+    Skills → Languages → Education → Certifications → Summary → Work Experience
+
+Everything is present and every heading survives, but experience arrives last.
+Two things keep that survivable, and both are deliberate:
+
+- **The letterhead and stat band sit above the table**, as ordinary full-width
+  paragraphs. A name inside the main cell would be extracted after every skill
+  in the rail; this way name, headline and contact are still read first.
+- **`RAIL_SIDE` in `scripts/build-doc-variants.mjs` is a constant.** Flip it to
+  `'right'` and summary and experience come out ahead of the rail — strictly
+  better for parsing, at the cost of the more familiar left-rail look.
+
+Whether the trade is worth it depends on where the application is going: a
+direct-to-hiring-manager email and a Workday portal are not the same bet. The
+other five designs make no such trade, which is why `column` is a choice rather
+than a default.
+
+### The stat band
+
+The four-up band at the top of `dossier` and `column` comes from `highlights` on
+`CvContentSchema` — the same device as the brief pages' `HeroStatSchema`,
+fact-cited like every other claim and audited by `collectCvCitations`.
+
+The field is `.default([])`, not required, and that is load-bearing: five call
+sites `safeParse` a stored CV, and a CV generated before the field existed would
+otherwise fail all of them — two of them silently, stopping warnings being
+recomputed and dropping the edit-learning training pair with no error anywhere.
+Such a brief simply renders no band: `{#hasHighlights}` drops it, rule and all.
+
+It is a **tab grid, not a table** — one paragraph of tab-separated runs against
+tab stops, which an ATS reads as two ordinary lines. `renderCv` supplies four
+fixed slots rather than a list because a docxtemplater loop cannot run inside a
+paragraph.
+
+Four constraints shaped these, and a new design has to respect all four:
+
+- **The text stream is identical in every variant**, in the same order, and none
+  of them puts a character in a header, a text box or a table. An ATS reads the
+  same document whichever is chosen; only a person sees the difference. The
+  invariant is checkable — extract every `<w:t>` from every part and compare.
+- **A page background must be an anchored picture in the header**, behind the
+  text, which is the mechanism Word's own watermark uses. `w:background` alone
+  is not printed unless the reader has enabled "Print background colors and
+  images", and most PDF exports drop it. Set both; rely on the picture.
+- **Noise is incompressible.** The site's `.grain` overlay costs 481 KB as
+  per-pixel noise on an A4 page and 29 KB as the dither pattern of a smooth
+  gradient quantised to 64 colours, which reads the same at print size. See
+  `scripts/doc-background.mjs`.
+- **The fonts travel with the file.** Geist is subsetted and embedded — see
+  "Typeface" above — so the document is set in the same face on every machine.
+
+The one text difference the variants introduced: the cover letter's letterhead
+now repeats the CV's headline, so the two documents in one application open with
+the same block. `classic` has no `{headline}` placeholder and is unaffected.
+
+`node scripts/check-doc-text.mjs` asserts all of this against the rendered
+previews rather than trusting it, because a regression here would be invisible
+in every preview — the document would look right and parse wrong. It checks
+three different promises: `rule`, `panel` and `field` must produce a token
+sequence _identical_ to `classic`; `dossier` must lose no word and must keep the
+section order; `column` must lose no word, and its section order is printed so
+the trade above is decided on evidence. It fails if any variant puts a single
+character of text in a header.
+
 ### One-time setup
 
 ```bash

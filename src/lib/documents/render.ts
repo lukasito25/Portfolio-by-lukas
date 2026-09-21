@@ -12,6 +12,12 @@ import { join } from 'node:path'
 import PizZip from 'pizzip'
 import Docxtemplater from 'docxtemplater'
 import type { CvContent, CoverLetterContent } from './schema'
+import {
+  DEFAULT_DOC_VARIANT,
+  defaultVariantFor,
+  templateFile,
+  type DocVariant,
+} from './variants'
 import type { Locale } from '@/lib/fit-brief/guardrails'
 
 const TEMPLATE_DIR = join(process.cwd(), 'templates')
@@ -32,7 +38,57 @@ function loadTemplate(name: string): Buffer {
   return buffer
 }
 
-function render(templateName: string, data: Record<string, unknown>): Buffer {
+const NBSP = '\u00a0'
+
+/**
+ * Bind a figure to the word it measures, so a line break cannot separate them.
+ *
+ * "led 13 / people across three countries" with the number stranded at the end
+ * of a line is the sort of thing that reads as unproofed. Length-guarded,
+ * because an unbreakable run that is too long is worse than the break it
+ * prevents — especially inside the narrow rail of the two-column design.
+ *
+ * This deliberately reintroduces U+00A0, which `src/lib/ai/sanitize.ts`
+ * normalises away. There is no contradiction: sanitize strips odd spaces from
+ * *model output*, where they arrive unexplained. This adds one back at render
+ * time, in one known place, as typography. A non-breaking space is visible as a
+ * space and is not a watermarking channel — unlike the zero-width and tag
+ * characters sanitize exists to remove.
+ */
+function bindFigures(text: string): string {
+  return text.replace(
+    /(\d[\d.,]*[%+]?)\s+(\p{L}[\p{L}-]*)/gu,
+    (match, figure: string, word: string) =>
+      `${figure}${NBSP}${word}`.length <= 18 ? `${figure}${NBSP}${word}` : match
+  )
+}
+
+/**
+ * Document metadata.
+ *
+ * A `.docx` carrying no `docProps` at all is unusual enough to tell anyone who
+ * unzips it that a script produced the file, so the author is stated here.
+ * There is deliberately no `docProps/app.xml`: that part declares
+ * `<Application>Microsoft Office Word</Application>`, and claiming that would
+ * be untrue.
+ */
+function coreProperties(author: string, title: string): string {
+  const esc = (v: string) =>
+    v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties"
+ xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dc:title>${esc(title)}</dc:title>
+<dc:creator>${esc(author)}</dc:creator>
+<cp:lastModifiedBy>${esc(author)}</cp:lastModifiedBy>
+</cp:coreProperties>`
+}
+
+function render(
+  templateName: string,
+  data: Record<string, unknown>,
+  meta: { author: string; title: string }
+): Buffer {
   const zip = new PizZip(loadTemplate(templateName))
   const doc = new Docxtemplater(zip, {
     paragraphLoop: true,
@@ -43,7 +99,10 @@ function render(templateName: string, data: Record<string, unknown>): Buffer {
 
   doc.render(data)
 
-  return doc.getZip().generate({
+  const out = doc.getZip()
+  out.file('docProps/core.xml', coreProperties(meta.author, meta.title))
+
+  return out.generate({
     type: 'nodebuffer',
     compression: 'DEFLATE',
   }) as Buffer
@@ -53,44 +112,66 @@ function render(templateName: string, data: Record<string, unknown>): Buffer {
  * CV
  * ------------------------------------------------------------------ */
 
-export function renderCv(cv: CvContent): Buffer {
+export function renderCv(
+  cv: CvContent,
+  variant: DocVariant = DEFAULT_DOC_VARIANT
+): Buffer {
   const contactLine = [cv.location, cv.email, ...cv.links]
     .filter(Boolean)
     .join('  ·  ')
 
-  return render('cv-template.docx', {
-    fullName: cv.fullName,
-    headline: cv.headline,
-    contactLine,
-    summary: cv.summary,
-    roles: cv.roles.map(role => ({
-      title: role.title,
-      company: role.company,
-      period: role.period,
-      location: role.location,
-      bullets: role.bullets.map(b => ({
-        // Trailing separator lives here so a label-less bullet has no stray
-        // punctuation in the rendered document.
-        label: b.label ? `${b.label}: ` : '',
-        text: b.text,
+  return render(
+    templateFile('cv', variant),
+    {
+      fullName: cv.fullName,
+      headline: cv.headline,
+      contactLine,
+      summary: bindFigures(cv.summary),
+      // The stat band is one paragraph of tab-separated runs, and a docxtemplater
+      // loop cannot run inside a paragraph — so the metrics go in as four fixed
+      // slots rather than a list. Wrapping them in a single-iteration section
+      // lets `{#hasHighlights}` drop the whole band, rule included, for a CV
+      // generated before the field existed.
+      hasHighlights: cv.highlights.length
+        ? [
+            Object.fromEntries(
+              [0, 1, 2, 3].flatMap(i => [
+                [`h${i + 1}value`, cv.highlights[i]?.value ?? ''],
+                [`h${i + 1}label`, cv.highlights[i]?.label ?? ''],
+              ])
+            ),
+          ]
+        : [],
+      roles: cv.roles.map(role => ({
+        title: role.title,
+        company: role.company,
+        period: role.period,
+        location: role.location,
+        bullets: role.bullets.map(b => ({
+          // Trailing separator lives here so a label-less bullet has no stray
+          // punctuation in the rendered document.
+          label: b.label ? `${b.label}: ` : '',
+          text: bindFigures(b.text),
+        })),
       })),
-    })),
-    skills: cv.skills.map(group => ({
-      group: group.group,
-      itemsLine: group.items.join(' · '),
-    })),
-    education: cv.education.map(entry => ({
-      qualification: entry.qualification,
-      institution: entry.institution,
-      // Rendered inline after the institution, so carry its own separator.
-      detailSuffix: entry.detail ? ` — ${entry.detail}` : '',
-    })),
-    certifications: (cv.certifications ?? []).map(c => ({
-      year: c.year ? `${c.year} — ` : '',
-      entry: c.entry,
-    })),
-    languagesLine: cv.languages.join('  ·  '),
-  })
+      skills: cv.skills.map(group => ({
+        group: group.group,
+        itemsLine: group.items.join(' · '),
+      })),
+      education: cv.education.map(entry => ({
+        qualification: entry.qualification,
+        institution: entry.institution,
+        // Rendered inline after the institution, so carry its own separator.
+        detailSuffix: entry.detail ? ` — ${entry.detail}` : '',
+      })),
+      certifications: (cv.certifications ?? []).map(c => ({
+        year: c.year ? `${c.year} — ` : '',
+        entry: c.entry,
+      })),
+      languagesLine: cv.languages.join('  ·  '),
+    },
+    { author: cv.fullName, title: `${cv.fullName} — CV` }
+  )
 }
 
 /* ------------------------------------------------------------------ *
@@ -106,7 +187,8 @@ const DATE_LOCALES: Record<Locale, string> = {
 export function renderCoverLetter(
   letter: CoverLetterContent,
   cv: CvContent | undefined,
-  locale: Locale
+  locale: Locale,
+  variant: DocVariant = DEFAULT_DOC_VARIANT
 ): Buffer {
   const date = new Date().toLocaleDateString(DATE_LOCALES[locale], {
     day: 'numeric',
@@ -118,17 +200,26 @@ export function renderCoverLetter(
     ? [cv.location, cv.email, ...cv.links].filter(Boolean).join('  ·  ')
     : ''
 
-  return render('cover-letter-template.docx', {
-    fullName: cv?.fullName ?? letter.signature,
-    contactLine,
-    date,
-    recipient: letter.recipient,
-    subject: letter.subject,
-    greeting: letter.greeting,
-    paragraphs: letter.paragraphs.map(p => ({ text: p.text })),
-    closing: letter.closing,
-    signature: letter.signature,
-  })
+  const author = cv?.fullName ?? letter.signature
+
+  return render(
+    templateFile('cover-letter', variant),
+    {
+      fullName: author,
+      // The letterhead is the CV's, verbatim, so the two documents in one
+      // application open with the same block rather than two near-misses.
+      headline: cv?.headline ?? '',
+      contactLine,
+      date,
+      recipient: letter.recipient,
+      subject: letter.subject,
+      greeting: letter.greeting,
+      paragraphs: letter.paragraphs.map(p => ({ text: bindFigures(p.text) })),
+      closing: letter.closing,
+      signature: letter.signature,
+    },
+    { author, title: `${author} — Cover Letter` }
+  )
 }
 
 /* ------------------------------------------------------------------ *
@@ -149,8 +240,15 @@ function filenamePart(value: string): string {
 export function documentFilename(
   kind: 'cv' | 'cover-letter',
   companyName: string,
-  locale: Locale
+  locale: Locale,
+  variant: DocVariant = DEFAULT_DOC_VARIANT,
+  format: 'docx' | 'pdf' = 'docx'
 ): string {
   const prefix = kind === 'cv' ? 'CV' : 'Cover_Letter'
-  return `${prefix}_Lukas_Hosala_${filenamePart(companyName)}_${locale.toUpperCase()}.docx`
+  // The format's own default leaves no trace in the name; any other design is
+  // named, so two downloads of one application do not overwrite each other in
+  // the downloads folder.
+  const suffix =
+    variant === defaultVariantFor(format) ? '' : `_${filenamePart(variant)}`
+  return `${prefix}_Lukas_Hosala_${filenamePart(companyName)}_${locale.toUpperCase()}${suffix}.${format}`
 }

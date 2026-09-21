@@ -26,6 +26,7 @@ import { diffBriefContent } from '@/lib/style/learning'
 import { diffCvContent, diffCoverLetter } from '@/lib/documents/diff'
 import { recordEdits } from '@/lib/style/store'
 import { warningKey } from '@/lib/fit-brief/warning-key'
+import { sanitizeDeep } from '@/lib/ai/sanitize'
 import type * as z from 'zod/v4'
 
 export const dynamic = 'force-dynamic'
@@ -129,6 +130,15 @@ export async function PUT(request: NextRequest, { params }: Params) {
     // Documents are validated on the way in for the same reason the brief is:
     // a save that quietly stores a malformed CV would fail later at render
     // time, with the docx template as the error message.
+    //
+    // They are also sanitised here, and this is the only place it happens on an
+    // edit. Generated text is already clean — every provider funnels through
+    // `validateAgainstSchema`, which calls `sanitizeDeep` — but text typed or
+    // *pasted* into the review screen has never been near that path. Paste a
+    // paragraph out of a chat window or another tool and its zero-width
+    // characters travel straight into a .docx a recruiter opens. An ATS that
+    // finds hidden characters does not conclude "a model wrote this", it
+    // concludes "someone is hiding something".
     if (body.cvContent !== undefined) {
       const invalid = validateLocaleMap(
         body.cvContent as Record<string, unknown>,
@@ -136,7 +146,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
         'CV'
       )
       if (invalid) return NextResponse.json({ error: invalid }, { status: 400 })
-      patch.cvContent = body.cvContent
+      patch.cvContent = sanitizeDeep(body.cvContent)
     }
 
     if (body.coverLetter !== undefined) {
@@ -146,7 +156,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
         'cover letter'
       )
       if (invalid) return NextResponse.json({ error: invalid }, { status: 400 })
-      patch.coverLetter = body.coverLetter
+      patch.coverLetter = sanitizeDeep(body.coverLetter)
     }
 
     // Checks he has reviewed and accepted. Kept separately from `warnings`

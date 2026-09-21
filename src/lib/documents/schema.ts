@@ -56,6 +56,27 @@ export const CvSkillGroupSchema = z.object({
   items: z.array(z.string()).min(3).max(10),
 })
 
+/**
+ * One number for the band at the top of the CV.
+ *
+ * The same device as the fit-brief pages' stat band (`HeroStatSchema` in
+ * `src/lib/fit-brief/schema.ts`), and deliberately the same shape — it is the
+ * one thing a hiring manager reads before deciding whether to read the rest.
+ */
+export const CvHighlightSchema = z.object({
+  value: z
+    .string()
+    .describe(
+      'Short, and leads with the number. e.g. "165M+", "13", "€1M", "Zero", "80%".'
+    ),
+  label: z
+    .string()
+    .describe(
+      'What the number counts, max ~24 characters. e.g. "registered users", "people led".'
+    ),
+  factIds: factIds('this highlight'),
+})
+
 export const CvEducationSchema = z.object({
   qualification: z.string(),
   institution: z.string(),
@@ -97,6 +118,17 @@ export const CvContentSchema = z.object({
       'Most recent first. Include every role; tailor the bullets, not the history.'
     ),
   skills: z.array(CvSkillGroupSchema).min(2).max(4),
+  // Defaulted rather than required: every CV generated before this field
+  // existed still has to parse. Five call sites `safeParse` a stored CV, and
+  // two of them fail silently — a required field would stop warnings being
+  // recomputed and drop the edit-learning training pair with no error anywhere.
+  highlights: z
+    .array(CvHighlightSchema)
+    .max(4)
+    .default([])
+    .describe(
+      'Three or four headline metrics for the band at the top, ordered by force. Vary the kind — scale, money, change, time — and never repeat a figure the summary already states.'
+    ),
   education: z.array(CvEducationSchema).min(1).max(4),
   certifications: z
     .array(CvCertificationSchema)

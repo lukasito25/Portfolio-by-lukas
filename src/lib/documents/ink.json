@@ -1,0 +1,16 @@
+{
+  "_comment": "The Ink & Signal light-theme tokens from src/app/globals.css, as the documents need them. One source, because two renderers consume it: scripts/doc-kit.mjs builds the .docx templates and src/lib/documents/pdf renders the PDF, and a palette kept in two files drifts. Word and PDF have no notion of alpha on text or shading, so the translucent tokens are pre-composited onto white: --border rgba(21,21,28,0.1) becomes E4E4E8, --accent-soft rgba(18,119,217,0.1) becomes E8F1FB.",
+  "paper": "FAFAFC",
+  "white": "FFFFFF",
+  "ink": "15151C",
+  "secondary": "4C4C5C",
+  "tertiary": "8A8A9C",
+  "hairline": "E4E4E8",
+  "hairlineStrong": "D2D2D9",
+  "accent": "1277D9",
+  "accentDeep": "051D39",
+  "accentSky": "4DA6FF",
+  "accentSoft": "E8F1FB",
+  "accentSoftPaper": "EDF2F9",
+  "onDark": "AECBE8"
+}

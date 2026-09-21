@@ -50,3 +50,6 @@ next-env.d.ts
 
 # cloudflare workers (separate deployment)
 /cloudflare-api
+
+# Rendered document-design previews (npx tsx scripts/preview-doc-variants.ts)
+/doc-previews/

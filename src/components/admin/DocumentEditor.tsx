@@ -182,6 +182,76 @@ export function CvEditor({
         <TextInput value={value.headline} onChange={v => set('headline', v)} />
       </Field>
 
+      <div>
+        <p className="mb-2 flex items-baseline gap-2">
+          <span className="text-xs font-semibold tracking-wide text-gray-700 uppercase">
+            Highlights
+          </span>
+          <span className="text-xs text-gray-400">
+            the band at the top — vary the kind, and never repeat a figure the
+            summary already states
+          </span>
+        </p>
+        <div className="space-y-2">
+          {value.highlights.map((highlight, index) => {
+            const setHighlight = (next: Partial<typeof highlight>) => {
+              const highlights = [...value.highlights]
+              highlights[index] = { ...highlight, ...next }
+              set('highlights', highlights)
+            }
+            return (
+              <div key={index}>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    aria-label="Value"
+                    value={highlight.value}
+                    onChange={e => setHighlight({ value: e.target.value })}
+                    className="w-24 rounded-md border border-gray-300 px-2 py-2 text-sm font-semibold"
+                  />
+                  <input
+                    type="text"
+                    aria-label="Label"
+                    value={highlight.label}
+                    onChange={e => setHighlight({ label: e.target.value })}
+                    className={inputClass}
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      set(
+                        'highlights',
+                        value.highlights.filter((_, i) => i !== index)
+                      )
+                    }
+                    className="rounded-md border border-gray-300 px-2 text-xs text-gray-500 hover:border-gray-400"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <Citations ids={highlight.factIds} />
+              </div>
+            )
+          })}
+        </div>
+        {value.highlights.length < 4 && (
+          <button
+            type="button"
+            onClick={() =>
+              // No fact ids: an added metric is uncited until one is written in,
+              // and the validator raises it rather than letting it through.
+              set('highlights', [
+                ...value.highlights,
+                { value: '', label: '', factIds: [] },
+              ])
+            }
+            className="mt-2 rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:border-gray-400"
+          >
+            Add highlight
+          </button>
+        )}
+      </div>
+
       <Field label="Summary" hint="2–4 sentences">
         <TextBox
           value={value.summary}
