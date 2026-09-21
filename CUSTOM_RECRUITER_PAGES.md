@@ -479,15 +479,34 @@ by hand during the July run, encoded so they do not have to be made again:
 
 ### Changing the CV template
 
-`templates/cv-template.docx` and `templates/cover-letter-template.docx` are
-built by `node scripts/build-doc-templates.mjs`, so the layout is reviewable as
-code rather than an opaque binary. The placeholder names are the contract with
+`templates/cv-template.docx` and `templates/cover-letter-template.docx` (the
+`classic` pair) are built by `node scripts/build-doc-templates.mjs`; the five
+other designs by `node scripts/build-doc-variants.mjs`. Both scripts draw on
+`scripts/doc-kit.mjs` — the paragraph, run, tab-grid, table and stat-band
+builders — so the layout is reviewable as code rather than an opaque binary,
+and a block that every design needs (the stat band, the letterhead's contact
+lines) exists once. The placeholder names are the contract with
 `src/lib/documents/schema.ts` — change one and change the other in the same
-commit.
+commit, and rebuild.
 
-To swap in a different design, either edit the script's layout, or mark up a
+To swap in a different design, either edit a script's layout, or mark up a
 real `.docx` with the same placeholders and drop it in. House style for the
 copy itself lives separately in `src/lib/documents/style-guide.ts`.
+
+### The gates — `npm run check:docs`
+
+One command renders the previews and runs every document check, in this order.
+Run it before any PR that touches `src/lib/documents/`, `templates/` or the
+document scripts; each check has negative controls, because a regression in
+any of them looks right in every preview.
+
+| Check                         | Asserts                                                                                                                                                           |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `check-doc-text.mjs`          | The .docx designs: no text in a header; `rule`/`panel`/`field` token-identical to `classic`; `dossier` and `column` exactly classic's words; section order stated |
+| `check-doc-clean.mjs`         | No tool fingerprint, hidden character, homoglyph, `docProps/app.xml`, PNG text chunk or zip comment in any .docx                                                  |
+| `check-pdf-text.mjs`          | Every PDF design: name first, every heading on its own line, email once, no word lost, and in the declared reading order                                          |
+| `check-pdf-pagination.mjs`    | A CV three times the sample, every design, four bullet counts (24 renders): no page ends with a bullet glyph or a heading, none begins mid-sentence               |
+| `check-doc-recommendation.ts` | `recommendDocument` for seven postings, one per rule — the design per format, which format to attach, the reader, and that the intended rule's reason fired       |
 
 ### Document designs
 

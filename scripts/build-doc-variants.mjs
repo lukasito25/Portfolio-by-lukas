@@ -1,8 +1,8 @@
 /**
  * Builds the CV and cover-letter template variants.
  *
- * Five prototypes, deliberately spanning a range of risk, so the choice can be
- * made by looking at real documents rather than at descriptions:
+ * Five designs beside `classic`, deliberately spanning a range of risk, so a
+ * choice can be made by looking at real documents rather than at descriptions:
  *
  *   rule     Typographic only. No images, white page, nothing an ATS has never
  *            seen. The design is carried entirely by the site's type system:
@@ -29,8 +29,9 @@
  *            reading order. See the note above `table()` in `doc-kit.mjs`.
  *
  * `rule`, `panel` and `field` render exactly the same text in exactly the same
- * order as the classic template. `dossier` adds the stat band. Only `column`
- * reorders anything. None of them puts a single character in a header or a text
+ * order as the classic template; `dossier` the same words with the role
+ * header laid out differently. Every design carries the stat band. Only
+ * `column` reorders anything. None of them puts a single character in a header or a text
  * box. `scripts/check-doc-text.mjs` asserts all of that rather than trusting it.
  *
  * Run: node scripts/build-doc-variants.mjs

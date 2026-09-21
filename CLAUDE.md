@@ -27,8 +27,11 @@ node scripts/build-doc-variants.mjs    # rebuild the five .docx design variants
 npx tsx scripts/preview-doc-variants.ts  # render every variant with a sample into doc-previews/
 node scripts/check-doc-text.mjs        # assert what an ATS reads out of each design
 node scripts/check-doc-clean.mjs       # assert no tool fingerprint or hidden characters
-node scripts/preview-cv-pdf.mjs        # render the sample CV + letter as PDFs, both designs
+node scripts/preview-cv-pdf.mjs        # render the sample CV + letter as PDFs, all six designs
 node scripts/check-pdf-text.mjs        # assert what an ATS reads out of each PDF design, in order
+node scripts/check-pdf-pagination.mjs  # assert no split bullet / stranded heading at any page break
+npx tsx scripts/check-doc-recommendation.ts  # assert which document the recommender picks per posting
+npm run check:docs     # all of the above in order — the document gate before any document PR
 node scripts/seed-example-brief.mjs    # seed a local /brief/[slug] fixture, prints a preview URL
 npx tsx scripts/apply.ts <url|file|->  # generate an application from the terminal
 
@@ -112,7 +115,7 @@ letter. Documented in **`CUSTOM_RECRUITER_PAGES.md` §11**; admin UI in `ADMIN.m
 - **Five rules for the documents:**
   - **Nothing but artwork goes in a header.** Text there is invisible to a good share of ATS. A page background must be an anchored picture, never `w:background` alone: Word does not print page colours unless the reader has turned that on.
   - **`column` is the only variant that uses a table**, and so the only one whose text does not come out in reading order — a parser walks cells row-major, so the rail precedes the main column. Its letterhead sits _above_ the table for that reason.
-  - **`check-doc-text.mjs`, `check-doc-clean.mjs` and `check-pdf-text.mjs` are the gates**, not comments. The first asserts the .docx ATS invariants; the second asserts no tool fingerprint, no hidden characters, no homoglyphs, no `docProps/app.xml`; the third asserts what a parser reads out of each PDF **and in what order** — a PDF has no columns, only a drawing order, so the `column` design draws the rail between the name and the body to be read name → contact → education → skills → summary → experience. All three have negative controls — a regression here looks right in every preview.
+  - **`npm run check:docs` is the gate**, not comments. It renders the previews and runs five checks: `check-doc-text` (the .docx ATS invariants), `check-doc-clean` (no tool fingerprint, hidden character, homoglyph or `docProps/app.xml`), `check-pdf-text` (what a parser reads out of each PDF **and in what order** — a PDF has no columns, only a drawing order, so `column` draws the rail between the name and the body), `check-pdf-pagination` (a three-times-longer CV at four break positions: no split bullet, stranded heading or split sentence at any page boundary) and `check-doc-recommendation` (the recommender's call for seven postings, one per rule). Every one has negative controls — a regression here looks right in every preview.
   - **`pdfkit` needs an explicit trace include.** It loads its built-in fonts through a package `#imports` subpath (`require('#standard-fonts/Helvetica')`), which Next's file tracer does not follow; without `outputFileTracingIncludes` for the document route the lambda ships without `pdfkit/js/standard-fonts/` and every PDF download dies at module load. It shipped that way once. Proving a PDF works means rendering from `.next/standalone/` alone — the preview scripts run against full `node_modules` and cannot catch it.
   - **Tracking in a PDF stays under ~0.08em.** Past that, pdf.js and a good share of parsers read the glyph gaps as spaces and a heading extracts as `S U M M A R Y`. The `dossier` labels were shipped at 0.19em and the gate caught it.
   - **Every design carries the stat band and the two-line contact block.** The band is `statBand()` in `scripts/doc-kit.mjs` for .docx and `StatBand` in `pdf/single.tsx`; a design without it is a design the highlights silently vanish from. A bullet never splits across pages (`wrap={false}`) and a heading never strands (`minPresenceAhead`).
@@ -136,7 +139,7 @@ letter. Documented in **`CUSTOM_RECRUITER_PAGES.md` §11**; admin UI in `ADMIN.m
 Use the **`ship` skill** (`/ship`) for anything going to production — it runs branch → verify → localhost review → PR → merge → deploy → verify live. Project specifics it needs:
 
 - **Branches**: `feat/…`, `fix/…`, `docs/…` off `main`. PRs are **squash-merged**; merging `main` auto-deploys to Vercel. Never push to `main` directly.
-- **Verification gate**: `npm run type-check` + `npm run build`. `npm run lint` parses TypeScript again since 2026-09-21 (Next's flat config); it reports warnings only and is not a gate. The Playwright suites (`tests/`) contain stale admin specs and are not a ship gate — verify what changed with targeted checks instead.
+- **Verification gate**: `npm run type-check` + `npm run build`, plus `npm run check:docs` for anything under `src/lib/documents/`, `templates/` or `scripts/*doc*`. `npm run lint` parses TypeScript again since 2026-09-21 (Next's flat config); it reports warnings only and is not a gate. The Playwright suites (`tests/`) contain stale admin specs and are not a ship gate — verify what changed with targeted checks instead.
 - **Kill the dev server before `npm run build`.** Both write `.next` and the collision corrupts it; the failure masquerades as a code error. Recovery: kill dev → `rm -rf .next` → rebuild.
 - **`cloudflare-api/` is git-ignored** and never appears in a PR diff. If a change touches Worker routes or D1 schema, `wrangler deploy` + apply the migration **before** merging the app — the app writes columns the Worker must already have.
 - **Probing production writes analytics rows.** Poll deploys with `HEAD`, or send a `pv_optout=1` cookie. `GET` requests from `curl` are recorded as visits (now classified as bots, but still stored).
