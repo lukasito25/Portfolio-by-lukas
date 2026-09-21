@@ -353,8 +353,10 @@ const href = (link: string) =>
  * Rail pieces
  * ------------------------------------------------------------------ */
 
+// A rail label keeps at least its first entry with it when the rail runs on
+// to a second page.
 const Box = ({ label }: { label: string }) => (
-  <View style={styles.box}>
+  <View style={styles.box} minPresenceAhead={44}>
     <Text style={styles.boxLabel}>{label.toUpperCase()}</Text>
   </View>
 )
@@ -496,6 +498,7 @@ function CvDocument({ cv, photo }: { cv: CvContent; photo?: Photo }) {
             <View
               key={`${e.qualification}-${e.institution}`}
               style={styles.eduEntry}
+              wrap={false}
             >
               <Text style={styles.eduInstitution}>{e.institution}</Text>
               <Text style={styles.eduQualification}>{e.qualification}</Text>
@@ -551,7 +554,9 @@ function CvDocument({ cv, photo }: { cv: CvContent; photo?: Photo }) {
             </Text>
             <View style={styles.bullets}>
               {role.bullets.map((b, i) => (
-                <View key={i} style={styles.bullet}>
+                // Never split a bullet: the production example that prompted
+                // this had a lone "•" at the foot of page one.
+                <View key={i} style={styles.bullet} wrap={false}>
                   <Text style={styles.bulletGlyph}>•</Text>
                   <Text style={styles.bulletText}>
                     {b.label ? (

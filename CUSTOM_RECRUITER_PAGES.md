@@ -564,10 +564,16 @@ parser does not care about any of it. `column` is the dark-rail page described
 under "The column PDF" below. Each design's cover letter shares its CV's
 letterhead exactly.
 
-Shared across the six: dates hard right on the title line; a heading never
-strands at a page foot (`minPresenceAhead`) and a role header keeps at least
-two bullets with it; a page number only when there is a second page; tracking
-under ~0.08em (see below).
+Shared across the six: dates hard right on the title line; the contact block
+on two lines (where and how to reach him, then the links — one line wrapped a
+URL at its hyphen once the phone joined it); a heading never strands at a page
+foot (`minPresenceAhead`), a role header keeps at least two bullets with it,
+and **a bullet never splits** (`wrap={false}` — a production PDF once ended
+page one with a lone "•" and began page two with its sentence); a page number
+only when there is a second page; tracking under ~0.08em (see below). The
+page-break rules are checked by rendering a three-times-longer CV with the
+bullet count varied so the break lands in different places: no page may end
+with a bullet glyph or a heading, or begin mid-sentence.
 
 Three react-pdf traps, each of which renders without an error: a unitless
 `lineHeight` on a style with no `fontSize` of its own is resolved against the
@@ -732,8 +738,8 @@ CV; they now agree.
 
 ### The stat band
 
-The four-up band at the top of `dossier` and `column` comes from `highlights` on
-`CvContentSchema` — the same device as the brief pages' `HeroStatSchema`,
+The four-up band under the letterhead of every design comes from `highlights`
+on `CvContentSchema` — the same device as the brief pages' `HeroStatSchema`,
 fact-cited like every other claim and audited by `collectCvCitations`.
 
 The field is `.default([])`, not required, and that is load-bearing: five call
@@ -745,7 +751,9 @@ Such a brief simply renders no band: `{#hasHighlights}` drops it, rule and all.
 It is a **tab grid, not a table** — one paragraph of tab-separated runs against
 tab stops, which an ATS reads as two ordinary lines. `renderCv` supplies four
 fixed slots rather than a list because a docxtemplater loop cannot run inside a
-paragraph.
+paragraph. It lives once, in `scripts/doc-kit.mjs`, and every `.docx` design
+carries it — `classic` in ink, the rest in the accent — since 2026-09-21, when
+a CV with highlights downloaded as a `.docx` without them.
 
 Four constraints shaped these, and a new design has to respect all four:
 

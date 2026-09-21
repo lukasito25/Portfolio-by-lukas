@@ -17,7 +17,16 @@
 
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { INK, TYPE, p, run, loop, writeDocx } from './doc-kit.mjs'
+import {
+  INK,
+  PAGE,
+  TYPE,
+  p,
+  run,
+  loop,
+  writeDocx,
+  statBand,
+} from './doc-kit.mjs'
 
 const outDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'templates')
 
@@ -51,6 +60,14 @@ const cvBody = [
   }),
   p(run('{headline}', { size: 21, color: '4A4A55' }), { after: 30 }),
   p(run('{contactLine}', { size: 18, color: '4A4A55' }), { after: 140 }),
+
+  // The stat band in ink — classic has no accent. Same tab grid as the other
+  // designs, so an ATS reads two ordinary lines.
+  statBand(PAGE.contentTwips, {
+    value: { font: TYPE.display, size: 32, bold: true, track: -10 },
+    label: { size: 15, caps: true, track: 24, color: INK.tertiary },
+    rule: 'C8C8CE',
+  }),
 
   heading('Summary'),
   p(run('{summary}')),

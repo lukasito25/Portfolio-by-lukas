@@ -64,6 +64,23 @@ function bindFigures(text: string): string {
 }
 
 /**
+ * The contact block as two lines: where and how to reach him, then the links.
+ *
+ * One line was fine until the phone joined it; with five items Word wraps,
+ * and it wraps a URL at its hyphens — "portfolio-by-" / "lukas.vercel.app" —
+ * which reads as a broken address. Two lines with a hard break keep every
+ * item whole. `linebreaks: true` on docxtemplater turns the newline into
+ * `<w:br/>` inside the run, so the template's single placeholder still holds.
+ */
+function contactLines(
+  cv: Pick<CvContent, 'location' | 'phone' | 'email' | 'links'>
+): string {
+  const reach = [cv.location, cv.phone, cv.email].filter(Boolean).join('  ·  ')
+  const links = cv.links.filter(Boolean).join('  ·  ')
+  return [reach, links].filter(Boolean).join('\n')
+}
+
+/**
  * Document metadata.
  *
  * A `.docx` carrying no `docProps` at all is unusual enough to tell anyone who
@@ -116,9 +133,7 @@ export function renderCv(
   cv: CvContent,
   variant: DocVariant = DEFAULT_DOC_VARIANT
 ): Buffer {
-  const contactLine = [cv.location, cv.phone, cv.email, ...cv.links]
-    .filter(Boolean)
-    .join('  ·  ')
+  const contactLine = contactLines(cv)
 
   return render(
     templateFile('cv', variant),
@@ -196,11 +211,7 @@ export function renderCoverLetter(
     year: 'numeric',
   })
 
-  const contactLine = cv
-    ? [cv.location, cv.phone, cv.email, ...cv.links]
-        .filter(Boolean)
-        .join('  ·  ')
-    : ''
+  const contactLine = cv ? contactLines(cv) : ''
 
   const author = cv?.fullName ?? letter.signature
 
