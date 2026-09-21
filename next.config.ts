@@ -19,6 +19,20 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // The PDF renderer's `pdfkit` loads its built-in fonts through a package
+  // `#imports` subpath — `require('#standard-fonts/Helvetica')` — which the
+  // file tracer does not follow, so the lambda shipped without
+  // `pdfkit/js/standard-fonts/` and every PDF download died at module load
+  // with MODULE_NOT_FOUND. The templates and the embedded Geist are listed
+  // too: they were traced by luck of a `process.cwd()` join, and a route that
+  // needs a file on disk should say so rather than rely on that.
+  outputFileTracingIncludes: {
+    '/api/admin/brief/[id]/document': [
+      './node_modules/pdfkit/js/standard-fonts/**',
+      './node_modules/pdfkit/js/data/**',
+      './templates/**',
+    ],
+  },
   webpack: config => {
     // Exclude cloudflare-api from webpack processing
     config.watchOptions = {
