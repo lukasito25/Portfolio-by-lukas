@@ -567,7 +567,10 @@ export function CvEditor({
         </div>
       </div>
 
-      <Field label="Languages" hint="statements, never levels — one per line">
+      <Field
+        label="Languages"
+        hint="one per line, with the level the corpus states — never an invented one"
+      >
         <StringList
           value={value.languages}
           onChange={v => set('languages', v)}

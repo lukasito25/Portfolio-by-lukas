@@ -18,6 +18,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "apply": "tsx scripts/apply.ts",
     "db:studio": "prisma studio",
+    "check:docs": "npx tsx scripts/preview-doc-variants.ts && node scripts/preview-cv-pdf.mjs && node scripts/check-doc-text.mjs && node scripts/check-doc-clean.mjs && node scripts/check-pdf-text.mjs && node scripts/check-pdf-pagination.mjs && npx tsx scripts/check-doc-recommendation.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",

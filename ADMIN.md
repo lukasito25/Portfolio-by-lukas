@@ -175,7 +175,7 @@ The main dashboard provides a comprehensive overview with:
 - **Checks**: every claim on the page and every CV bullet must cite a fact id from `src/lib/career-facts.ts`. The review screen lists:
   - **Blockers** (red) — an unknown fact id, or an invented language-proficiency claim. Publishing is refused until they are resolved, with a deliberate "Publish anyway" escape hatch
   - **Review** (amber) — an uncited claim, an accent colour failing WCAG AA, or use of the €1M Sprinklr figure
-- **Editing**: the fit-brief copy is editable per locale and re-validated on save, so an edit cannot bypass the checks
+- **Editing**: the fit-brief copy is editable per locale and re-validated on save, so an edit cannot bypass the checks. The CV tab edits every field the documents render — headline, **Highlights** (the four-figure band under the letterhead, on every design in both formats; each needs a fact id or the validator raises it), summary, email, **Phone**, links, roles and bullets, skills, education, certifications, languages (with the level the corpus states, never an invented one) — and the cover-letter tab the letter. Every download re-renders from the saved edit, so there is nothing to regenerate
 - **Cost**: roughly **$1–1.50** per application at list prices, across ~7 generation calls and 2–4 minutes. Unticking "all three languages" for the documents roughly halves it
 - **Geo banner**: "Check geo banner slot" queries the **live** `/api/campaigns` list and says whether the posting's country is already taken — one country carries one banner
 
