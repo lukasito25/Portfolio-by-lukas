@@ -653,12 +653,17 @@ readable, and `node scripts/check-pdf-text.mjs` asserts each of these:
   `S U M M A R Y`, which is no heading at all. The `dossier` labels shipped at
   0.19em; the gate caught it and they were brought down.
 
-The photo is optional and not committed. Put a square headshot at
-`templates/photo.jpg` (or `.png`) and every `column` PDF carries it; leave it
-out and the rail starts at Contact. Whether a CV should carry a photo differs
-by country and by recruiter, which is why it is a file and not a default.
-`scripts/preview-cv-pdf.mjs` uses `doc-previews/photo.jpg` for the preview
-when one is there.
+The photo has a source and a switch. The source is the square headshot at
+`templates/photo.jpg` (600×600, composited onto the rail colour, committed
+2026-09-21 — replace the file to change it), read at render time. The switch is per download: `?photo=0` on the document
+route, which the panel exposes as **Photo in PDF** whenever the PDF design is
+`column`. Whether a CV should carry a photo differs by country and by
+recruiter — expected in DACH and Italy, a liability in the UK and US — so the
+recommender's reasons say which applies and the checkbox is where the choice
+is made. `/api/admin/brief/health` reports `hasPhoto` so the panel can disable
+the checkbox, with the reason, when no file is on disk. Without a file the
+rail simply starts at Contact. `scripts/preview-cv-pdf.mjs` uses
+`doc-previews/photo.jpg` for the preview when one is there.
 
 The .docx gates render Word's reading order; this one uses `pdf-parse` (pdf.js)
 on the previews `preview-cv-pdf.mjs` writes, so run that first. Negative
