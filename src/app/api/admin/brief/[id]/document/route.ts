@@ -6,6 +6,7 @@
  *
  *   GET /api/admin/brief/<id>/document?kind=cv&locale=en&variant=panel
  *   GET /api/admin/brief/<id>/document?kind=cv&locale=en&format=pdf
+ *   GET /api/admin/brief/<id>/document?kind=cv&locale=en&format=pdf&photo=0
  *
  * Two formats, for two different readers. The .docx is what goes into an
  * applicant tracking system; the PDF embeds its fonts and lays out identically
@@ -43,6 +44,10 @@ export async function GET(request: NextRequest, { params }: Params) {
     url.searchParams.get('kind') === 'cover-letter' ? 'cover-letter' : 'cv'
   const locale = (url.searchParams.get('locale') || 'en') as Locale
   const format = url.searchParams.get('format') === 'pdf' ? 'pdf' : 'docx'
+  // `photo=0` drops the headshot from the column PDF for this download —
+  // for a UK or US recruiter, say. Default on; it only shows when
+  // `templates/photo.jpg` exists, so `on` with no file is simply no photo.
+  const photo = url.searchParams.get('photo') === '0' ? null : undefined
   const requested = url.searchParams.get('variant')
   const variant = isDocVariant(requested)
     ? requested
@@ -73,7 +78,7 @@ export async function GET(request: NextRequest, { params }: Params) {
       }
       buffer =
         format === 'pdf'
-          ? await renderCvPdf(cvResult.data, { variant })
+          ? await renderCvPdf(cvResult.data, { variant, photo })
           : renderCv(cvResult.data, variant)
     } else {
       const letterResult = CoverLetterSchema.safeParse(
@@ -91,7 +96,7 @@ export async function GET(request: NextRequest, { params }: Params) {
               letterResult.data,
               cvResult.success ? cvResult.data : undefined,
               locale,
-              { variant }
+              { variant, photo }
             )
           : renderCoverLetter(
               letterResult.data,

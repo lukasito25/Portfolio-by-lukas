@@ -232,6 +232,12 @@ export default function ApplicationsClient() {
    * server first and show the terminal command instead.
    */
   const [canGenerate, setCanGenerate] = useState<boolean | null>(null)
+  // Whether `templates/photo.jpg` exists in this deployment, and whether the
+  // column PDF should carry it on the next download. The toggle is the
+  // per-application choice (a UK recruiter, a US portal); the file is the
+  // source. Without the file the toggle is shown disabled with the reason.
+  const [hasPhoto, setHasPhoto] = useState(false)
+  const [includePhoto, setIncludePhoto] = useState(true)
   const [genDetail, setGenDetail] = useState('')
   /** Where the generator lives — decides which recovery advice is honest. */
   const [genRemote, setGenRemote] = useState(true)
@@ -271,6 +277,7 @@ export default function ApplicationsClient() {
         setCanGenerate(Boolean(d.canGenerate))
         setGenDetail(d.detail ?? '')
         setGenRemote(d.remote !== false)
+        setHasPhoto(Boolean(d.hasPhoto))
       })
       .catch(() => setCanGenerate(false))
   }, [])
@@ -1697,7 +1704,9 @@ export default function ApplicationsClient() {
                               <a
                                 href={`/api/admin/brief/${selected.id}/document?kind=${
                                   tab === 'cv' ? 'cv' : 'cover-letter'
-                                }&locale=${activeLocale}&format=pdf&variant=${variantFor('pdf')}`}
+                                }&locale=${activeLocale}&format=pdf&variant=${variantFor('pdf')}${
+                                  includePhoto ? '' : '&photo=0'
+                                }`}
                               >
                                 <Download className="mr-2 h-4 w-4" />
                                 .pdf · {DOC_VARIANT_LABELS[variantFor('pdf')]} (
@@ -1724,6 +1733,33 @@ export default function ApplicationsClient() {
                                 </option>
                               ))}
                             </select>
+
+                            {/* Only the column PDF has a photo. The toggle is
+                                per download; the file in templates/ is what it
+                                shows, and without one it says so. */}
+                            {variantFor('pdf') === 'column' && (
+                              <label
+                                className={`flex items-center gap-1.5 text-xs ${
+                                  hasPhoto ? 'text-gray-700' : 'text-gray-400'
+                                }`}
+                                title={
+                                  hasPhoto
+                                    ? 'Include the headshot in the column PDF'
+                                    : 'No templates/photo.jpg in this deployment — add one to enable'
+                                }
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={hasPhoto && includePhoto}
+                                  disabled={!hasPhoto}
+                                  onChange={e =>
+                                    setIncludePhoto(e.target.checked)
+                                  }
+                                />
+                                Photo in PDF
+                                {!hasPhoto && ' (no photo on file)'}
+                              </label>
+                            )}
 
                             <div className="inline-flex rounded-lg border border-gray-200 p-1">
                               {(['fields', 'json'] as const).map(value => (

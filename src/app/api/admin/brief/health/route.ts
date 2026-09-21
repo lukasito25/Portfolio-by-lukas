@@ -13,6 +13,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { templatePhoto } from '@/lib/documents/pdf/cv'
 import { getProvider } from '@/lib/ai'
 import { isRemote } from '@/lib/ai/agent-suite'
 import { requireAdmin } from '@/lib/fit-brief/server'
@@ -28,6 +29,11 @@ export async function GET() {
   // Vercel sets this; a local `next dev` does not.
   const isServerless = Boolean(process.env.VERCEL)
 
+  // Whether the column PDF can carry a headshot in this deployment: the file
+  // is read from `templates/`, and the panel should say when it is missing
+  // rather than offer a toggle that does nothing.
+  const hasPhoto = Boolean(templatePhoto())
+
   // Only the agent suite has a notion of "somewhere else"; every other provider
   // is an API call and is remote by definition.
   const remote = provider.name === 'agent-suite' ? isRemote() : true
@@ -39,6 +45,7 @@ export async function GET() {
       detail: provider.isConfigured() ? 'ready' : provider.configurationHint(),
       isServerless,
       remote,
+      hasPhoto,
     })
   }
 
@@ -50,5 +57,6 @@ export async function GET() {
     detail: health.detail,
     isServerless,
     remote,
+    hasPhoto,
   })
 }
