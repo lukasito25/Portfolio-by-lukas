@@ -101,6 +101,14 @@ export const CvContentSchema = z.object({
     ),
   location: z.string(),
   email: z.string(),
+  // Defaulted for the same reason as `highlights`: every CV stored before the
+  // field existed must still parse, in the five places that parse one.
+  phone: z
+    .string()
+    .default('')
+    .describe(
+      'Exactly as the corpus states it (fact contact.phone), international format. Empty string only if the corpus has none.'
+    ),
   links: z
     .array(z.string())
     .max(3)
@@ -140,7 +148,7 @@ export const CvContentSchema = z.object({
     .array(z.string())
     .max(5)
     .describe(
-      'Statements about languages, never proficiency levels. e.g. "Slovak — first language", "English — working language since 2016". No CEFR levels.'
+      'One entry per language, with the level exactly as the corpus states it and never one it does not: "Slovak — native", "English — C2", "Italian — B2". A language with no stated level (German) is a statement about where he worked, not a level.'
     ),
 })
 

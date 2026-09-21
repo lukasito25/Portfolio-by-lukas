@@ -25,6 +25,14 @@ const nextConfig: NextConfig = {
       ...config.watchOptions,
       ignored: ['**/cloudflare-api/**'],
     }
+    // `rate-limiter-flexible` ships a Drizzle store that requires `drizzle-orm`
+    // at module load. It is optional and unused here, but webpack still tries
+    // to resolve it and every build warned "Module not found". Aliasing to
+    // `false` tells webpack the module is intentionally absent.
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'drizzle-orm': false,
+    }
     return config
   },
 }

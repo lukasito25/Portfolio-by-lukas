@@ -711,6 +711,20 @@ direct-to-hiring-manager email and a Workday portal are not the same bet. The
 other five designs make no such trade, which is why `column` is a choice rather
 than a default.
 
+### Contact and languages
+
+The contact line on every design is location · phone · email · links, from the
+`contact.*` facts verbatim — the generator once invented a LinkedIn handle,
+which is why they are facts. `phone` was added 2026-09-21 and is `.default('')`
+on the schema for the same reason `highlights` is (below); the editor reads
+`value.phone ?? ''` because it works on the stored JSON, not a parsed CV.
+
+Languages carry the level the corpus states — Slovak native, English C2,
+Italian B2 — and never one it does not; German has no level and is not listed.
+`validate.ts` enforces exactly that. The schema description and the prompt
+used to say "never levels", which contradicted both the validator and his own
+CV; they now agree.
+
 ### The stat band
 
 The four-up band at the top of `dossier` and `column` comes from `highlights` on

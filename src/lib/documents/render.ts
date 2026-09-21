@@ -116,7 +116,7 @@ export function renderCv(
   cv: CvContent,
   variant: DocVariant = DEFAULT_DOC_VARIANT
 ): Buffer {
-  const contactLine = [cv.location, cv.email, ...cv.links]
+  const contactLine = [cv.location, cv.phone, cv.email, ...cv.links]
     .filter(Boolean)
     .join('  ·  ')
 
@@ -197,7 +197,9 @@ export function renderCoverLetter(
   })
 
   const contactLine = cv
-    ? [cv.location, cv.email, ...cv.links].filter(Boolean).join('  ·  ')
+    ? [cv.location, cv.phone, cv.email, ...cv.links]
+        .filter(Boolean)
+        .join('  ·  ')
     : ''
 
   const author = cv?.fullName ?? letter.signature
