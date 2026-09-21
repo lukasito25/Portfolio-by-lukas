@@ -19,11 +19,11 @@
  *
  *   rule, panel, field   Identical token sequence to classic. These changed
  *                        only how the page looks.
- *   dossier              Same words plus the stat band, same section order.
+ *   dossier              Same words, same section order.
  *                        Within a role the four header fields are reordered —
  *                        title and dates on one line, company and location on
  *                        the next — which is a mainstream CV layout, not a loss.
- *   column               Same words plus the stat band, section order changed.
+ *   column               Same words, section order changed.
  *                        A parser walks table cells row-major, so the rail is
  *                        read before the main column. Reported, not hidden.
  *
@@ -171,10 +171,13 @@ for (const variant of ['dossier', 'column']) {
   if (lost.length) {
     fail.push(`${variant}: ${lost.length} word(s) missing entirely`)
     note(`✗ ${variant} — dropped ${JSON.stringify(lost.slice(0, 8))}`)
+  } else if (added !== 0) {
+    // Every design carries the stat band now, so a restructured design has
+    // exactly classic's words — more means a placeholder was duplicated.
+    fail.push(`${variant}: ${added} word(s) more than classic`)
+    note(`✗ ${variant} — ${added} extra word(s)`)
   } else {
-    note(
-      `✓ ${variant} — every word classic has is present (+${added} for the stat band)`
-    )
+    note(`✓ ${variant} — every word classic has is present, and no more`)
   }
 
   const order = sectionOrder(streams[variant])

@@ -369,25 +369,45 @@ const FieldGround = () => (
  * Letterheads
  * ------------------------------------------------------------------ */
 
+/**
+ * Two lines: where and how to reach him, then the links. One line wrapped
+ * once the phone joined it, and a wrapped URL reads as a broken address.
+ */
 const ContactLine = ({
-  items,
+  reach,
+  links,
   color,
   style,
 }: {
-  items: string[]
+  reach: string[]
+  links: string[]
   color: string
   style?: Style
 }) => (
-  <Text style={[s.contact, { color }, style ?? {}]}>
-    {items.map((item, i) => (
-      <Text key={item}>
-        {i > 0 ? (
-          <Text style={[s.contactSep, { color }]}>{'  ·  '}</Text>
-        ) : null}
-        {item}
-      </Text>
-    ))}
-  </Text>
+  <>
+    {[reach, links]
+      .filter(line => line.length > 0)
+      .map((line, n) => (
+        <Text
+          key={n}
+          style={[
+            s.contact,
+            { color },
+            style ?? {},
+            n > 0 ? { marginTop: 1 } : {},
+          ]}
+        >
+          {line.map((item, i) => (
+            <Text key={item}>
+              {i > 0 ? (
+                <Text style={[s.contactSep, { color }]}>{'  ·  '}</Text>
+              ) : null}
+              {item}
+            </Text>
+          ))}
+        </Text>
+      ))}
+  </>
 )
 
 function Letterhead({
@@ -399,7 +419,7 @@ function Letterhead({
   theme: Theme
   name: string
   headline: string
-  contact: string[]
+  contact: Contact
 }) {
   switch (theme.letterhead) {
     case 'hero':
@@ -420,7 +440,8 @@ function Letterhead({
             </Text>
           ) : null}
           <ContactLine
-            items={contact}
+            reach={contact.reach}
+            links={contact.links}
             color={hex(ink.onDark)}
             style={s.heroContact}
           />
@@ -443,7 +464,11 @@ function Letterhead({
               {headline}
             </Text>
           ) : null}
-          <ContactLine items={contact} color={theme.secondary} />
+          <ContactLine
+            reach={contact.reach}
+            links={contact.links}
+            color={theme.secondary}
+          />
         </View>
       )
     case 'field':
@@ -455,7 +480,11 @@ function Letterhead({
               {headline}
             </Text>
           ) : null}
-          <ContactLine items={contact} color={theme.secondary} />
+          <ContactLine
+            reach={contact.reach}
+            links={contact.links}
+            color={theme.secondary}
+          />
         </View>
       )
     case 'typographic':
@@ -467,7 +496,11 @@ function Letterhead({
               {headline}
             </Text>
           ) : null}
-          <ContactLine items={contact} color={theme.tertiary} />
+          <ContactLine
+            reach={contact.reach}
+            links={contact.links}
+            color={theme.tertiary}
+          />
         </View>
       )
     default:
@@ -479,7 +512,11 @@ function Letterhead({
               {headline}
             </Text>
           ) : null}
-          <ContactLine items={contact} color={theme.tertiary} />
+          <ContactLine
+            reach={contact.reach}
+            links={contact.links}
+            color={theme.tertiary}
+          />
         </View>
       )
   }
@@ -602,7 +639,10 @@ const Roles = ({ theme, cv }: { theme: Theme; cv: CvContent }) => (
           }
         >
           {role.bullets.map((b, i) => (
-            <View key={i} style={s.bullet}>
+            // A bullet is one to three lines and never splits: a glyph alone
+            // at a page foot with its sentence on the next page is the
+            // emptiest thing a CV can show.
+            <View key={i} style={s.bullet} wrap={false}>
               <Text style={[s.glyph, { color: theme.accent }]}>•</Text>
               <Text style={[s.bulletText, { color: theme.ink }]}>
                 {b.label ? <Text style={s.bold}>{b.label}: </Text> : null}
@@ -693,9 +733,19 @@ const Footer = ({ theme }: { theme: Theme }) => (
  * Documents
  * ------------------------------------------------------------------ */
 
+interface Contact {
+  reach: string[]
+  links: string[]
+}
+
 const contactOf = (
   cv: Pick<CvContent, 'location' | 'phone' | 'email' | 'links'>
-) => [cv.location, cv.phone, cv.email, ...cv.links].filter(Boolean)
+): Contact => ({
+  reach: [cv.location, cv.phone, cv.email].filter(Boolean),
+  links: cv.links.filter(Boolean),
+})
+
+const NO_CONTACT: Contact = { reach: [], links: [] }
 
 export function SingleCv({
   cv,
@@ -779,7 +829,7 @@ export function SingleLetter({
           theme={theme}
           name={author}
           headline={cv?.headline ?? ''}
-          contact={cv ? contactOf(cv) : []}
+          contact={cv ? contactOf(cv) : NO_CONTACT}
         />
         <Text style={[s.letterDate, { color: theme.tertiary }]}>{date}</Text>
         <Text style={s.letterBlock}>{letter.recipient}</Text>

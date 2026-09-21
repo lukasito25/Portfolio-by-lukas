@@ -509,3 +509,37 @@ export function writeDocx({
   )
   return path
 }
+
+/**
+ * The stat band — four numbers over their labels, the fit-brief hero band.
+ *
+ * A tab grid rather than a table: an ATS reads two ordinary lines of text, and
+ * `renderCv` supplies four fixed slots because a docxtemplater loop cannot run
+ * inside a paragraph. `{#hasHighlights}` drops the band, rule and all, for a CV
+ * generated before the field existed. Every design carries it: the numbers
+ * are the strongest thing on the page, and a design that dropped them would
+ * be the one design a recruiter never saw them on.
+ *
+ * @param {number} width   content width in twips
+ * @param {object} style
+ * @param {object} style.value  run style for the figures
+ * @param {object} style.label  run style for the labels
+ * @param {string} style.rule   hairline colour under the band
+ */
+export const statBand = (width, { value, label, rule }) => {
+  const step = Math.round(width / 4)
+  const stops = [1, 2, 3].map(i => ({ pos: step * i }))
+  const line = (slot, style) =>
+    [1, 2, 3, 4].map(i => run(`{h${i}${slot}}`, style)).join(tab())
+
+  return (
+    loop('{#hasHighlights}') +
+    p(line('value', value), { tabs: stops, keepNext: true, after: 0 }) +
+    p(line('label', label), {
+      tabs: stops,
+      after: 260,
+      border: { bottom: { sz: 4, color: rule, space: 8 } },
+    }) +
+    loop('{/hasHighlights}')
+  )
+}

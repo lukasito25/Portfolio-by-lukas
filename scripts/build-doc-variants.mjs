@@ -48,6 +48,7 @@ import {
   loop,
   table,
   writeDocx,
+  statBand,
 } from './doc-kit.mjs'
 import { buildBackgroundPng } from './doc-background.mjs'
 
@@ -281,31 +282,8 @@ const bullet = (runs, spine) =>
       : {}),
   })
 
-/**
- * The stat band — four numbers over their labels, the fit-brief hero band.
- *
- * A tab grid rather than a table: an ATS reads two ordinary lines of text, and
- * `renderCv` supplies four fixed slots because a docxtemplater loop cannot run
- * inside a paragraph. `{#hasHighlights}` drops the band, rule and all, for a CV
- * generated before the field existed.
- */
-const statBand = width => {
-  const step = Math.round(width / 4)
-  const stops = [1, 2, 3].map(i => ({ pos: step * i }))
-  const line = (slot, style) =>
-    [1, 2, 3, 4].map(i => run(`{h${i}${slot}}`, style)).join(tab())
-
-  return (
-    loop('{#hasHighlights}') +
-    p(line('value', STAT_VALUE), { tabs: stops, keepNext: true, after: 0 }) +
-    p(line('label', STAT_LABEL), {
-      tabs: stops,
-      after: 260,
-      border: { bottom: { sz: 4, color: INK.hairline, space: 8 } },
-    }) +
-    loop('{/hasHighlights}')
-  )
-}
+/** The band in the site's colours: display numerals in the accent, tertiary labels. */
+const BAND = { value: STAT_VALUE, label: STAT_LABEL, rule: INK.hairline }
 
 const summaryBlock = skin => skin.heading('Summary') + p(run('{summary}'))
 
@@ -393,6 +371,7 @@ const languagesBlock = skin =>
 /** The original order, unchanged, with no stat band. */
 const cvBody = skin =>
   skin.letterhead() +
+  statBand(PAGE.contentTwips, BAND) +
   summaryBlock(skin) +
   skillsBlock(skin) +
   rolesBlock(skin) +
@@ -400,10 +379,10 @@ const cvBody = skin =>
   certificationsBlock(skin) +
   languagesBlock(skin)
 
-/** Same order, plus the stat band and the rail layout for roles. */
+/** Same order and band, plus the rail layout for roles. */
 const dossierCvBody = skin =>
   skin.letterhead() +
-  statBand(PAGE.contentTwips) +
+  statBand(PAGE.contentTwips, BAND) +
   summaryBlock(skin) +
   skillsBlock(skin) +
   rolesBlock(skin, { layout: 'rail', width: PAGE.contentTwips }) +
@@ -447,7 +426,7 @@ const columnCvBody = skin => {
 
   return (
     skin.letterhead() +
-    statBand(PAGE.contentTwips) +
+    statBand(PAGE.contentTwips, BAND) +
     table(RAIL_SIDE === 'left' ? [rail, main] : [main, rail])
   )
 }
