@@ -432,7 +432,7 @@ Both kinds coexist and neither affects the other.
 | Lives in | `src/app/<company>/` — three files          | The `GeneratedBrief` table (D1 in production, SQLite locally) |
 | URL      | `/company`                                  | `/brief/company`                                              |
 | Layout   | Bespoke per page                            | One shared scaffold, `src/components/fit-brief/`              |
-| Hero     | Video, canvas, or a hand-drawn SVG          | Code-drawn motif chosen per company                           |
+| Hero     | Video, canvas, or a hand-drawn SVG          | Code-drawn motif, or footage for a brief worth it (below)     |
 | Accent   | A `[data-brand='…']` block in `globals.css` | Inline custom properties, no deploy                           |
 | Ship     | PR → merge → deploy                         | Live the moment you press Publish                             |
 | Best for | A role worth a bespoke page                 | Everything else                                               |
@@ -1000,6 +1000,55 @@ box reported failure while saving correctly.
 **`cloudflare-api/` is git-ignored, so a stale Worker never shows up in a diff
 or a build.** When a change touches Worker fields, deploy it and verify the new
 field round-trips before assuming the app is at fault.
+
+### A video hero for a generated brief
+
+A generated brief draws its hero in code and ships no binary assets, which is
+what lets it go live the moment you press Publish. A few roles are worth more
+than that — a clip that puts the company's world on screen the way `/fifa`
+does with its stadium. `/brief/fifa` and `/brief/on` have one.
+
+**The mapping lives in code, not in the database.** `src/lib/fit-brief/hero-media.ts`
+maps a slug to its two files, and `/brief/[slug]` passes `heroMediaFor(slug)`
+straight through. The clip has to be committed under `public/brief/<slug>/` and
+deployed anyway, so a URL stored in `brand` would only pretend to be decoupled
+from the deploy; keeping it in code also keeps the generator out of it, since
+the model never sees a video field it could invent. **Adding an entry here is
+the one change to a generated brief that needs a PR.**
+
+**A clip replaces the motif; it does not layer over it.** The two were drawn
+together first, and the result was worse: a real scene already carries the
+company, and lines over it only compete with the copy. `brand.motif` still
+draws the hero of every brief without footage, and still appears beside the
+spotlight further down every page.
+
+**Producing the two files** — `scripts/build-hero-video.sh <slug> <clip> [start] [duration]`
+trims, loops, encodes under a ~2.5 MB cap (stepping the quantiser until it
+fits) and cuts the poster from the encoded loop's **first frame**. That last
+part is not cosmetic: the poster is what the video fades in over, and any
+other frame shows as a jump. Two loop modes, and the choice is not free:
+`HERO_XFADE` crossfades the tail into the head, which suits drifting clouds
+and light; `HERO_LOOP=pingpong` plays the segment forward then backward, which
+is what an **orbiting** camera needs — dissolving an orbit into itself
+superimposes two angles of the same stand. The FIFA clip is a ping-pong for
+exactly that reason.
+
+**Footage is free stock (Pexels), and the source and licence go in the
+registry entry's `credit` field.** Reject anything with readable sponsor
+branding, on-screen text or identifiable faces, and anything whose motion is
+too fast to loop.
+
+**Text over footage needs more headroom than text over a flat background.**
+`hero-video.tsx` lays a 50% flat tint and a bottom gradient in the clip's own
+darkest tone (`ground`), and the hero carries `dark text-foreground` so every
+token flips for that section only — `text-foreground` is not redundant, since
+`color` inherits from the body as an already-resolved value. On top of that,
+`[data-hero-video]` mixes the accent 60% toward white and lifts the two muted
+tones. Those numbers were measured, not guessed: sampled across every frame of
+both clips, they put the eyebrow, headline and description at WCAG AA over the
+brightest frame. The stock values (40% tint, the site's muted tones) left the
+eyebrow at 2.9:1 on the stadium. **Re-measure when you add a clip**, especially
+a bright one — the Matterhorn is what set these.
 
 ---
 
