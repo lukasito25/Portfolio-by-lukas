@@ -42,8 +42,10 @@ export interface RefineChange {
 export interface RefineLocale {
   locale: string
   changes: RefineChange[]
-  /** The locale the instruction was written against. */
+  /** The locale the change was made in. */
   source: boolean
+  /** Already written — his own hand edit, shown for context only. */
+  saved?: boolean
   failed: boolean
   reason?: string
 }
@@ -51,7 +53,10 @@ export interface RefineLocale {
 export interface RefineProposal {
   target: 'brief' | 'cv' | 'letter'
   locale: string
-  instruction: string
+  /** Absent when the change came from the JSON editor rather than the box. */
+  instruction?: string
+  /** True when this is mirroring an edit he made and already saved. */
+  handEdit?: boolean
   proposed: unknown
   /** Every locale that came back, keyed by locale. What Accept writes. */
   proposedByLocale?: Record<string, unknown>
@@ -188,10 +193,10 @@ export function RefinePanel({
    * Reviewing a proposal
    * -------------------------------------------------------------- */
   if (proposal) {
-    // What Accept will actually write: every locale that came back with a
-    // change. A failed mirror is named above and simply not included.
+    // What Accept will write: everything that came back changed and is not
+    // already stored. After a hand edit that excludes his own locale.
     const applied = (proposal.locales ?? []).filter(
-      entry => !entry.failed && entry.changes.length
+      entry => !entry.failed && entry.changes.length && !entry.saved
     )
     const acceptedCount = applied.reduce(
       (total, entry) => total + entry.changes.length,
@@ -202,10 +207,12 @@ export function RefinePanel({
     return (
       <div className="rounded-lg border border-indigo-200 bg-indigo-50/40 p-4">
         <p className="mb-1 text-xs font-semibold tracking-wide text-indigo-900 uppercase">
-          Proposed change
+          {proposal.handEdit ? 'Match your edit' : 'Proposed change'}
         </p>
         <p className="mb-3 text-sm text-gray-700 italic">
-          “{proposal.instruction}”
+          {proposal.instruction
+            ? `“${proposal.instruction}”`
+            : `Your ${localeName(proposal.locale)} edit is saved. Here it is in the other languages.`}
         </p>
 
         {proposal.unchanged ? (
@@ -219,6 +226,7 @@ export function RefinePanel({
             <div>
               <p className="mb-2 text-xs font-medium text-indigo-900/70">
                 {localeName(proposal.locale)}
+                {proposal.handEdit ? ' — saved' : ''}
               </p>
               <ChangeList changes={proposal.changes} />
             </div>
@@ -226,7 +234,7 @@ export function RefinePanel({
             {mirrors.length > 0 && (
               <div className="space-y-2">
                 <p className="text-xs font-medium text-indigo-900/70">
-                  Also updating{' '}
+                  {proposal.handEdit ? 'The same change in' : 'Also updating'}{' '}
                   {mirrors.map(m => localeName(m.locale)).join(' and ')} — so
                   all three say the same thing
                 </p>
@@ -250,17 +258,19 @@ export function RefinePanel({
             <X className="mr-1 h-4 w-4" />
             {proposal.unchanged ? 'Close' : 'Reject'}
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={busy}
-            onClick={() => onRefine(proposal.instruction)}
-          >
-            <RefreshCw
-              className={`mr-1 h-4 w-4 ${busy ? 'animate-spin' : ''}`}
-            />
-            Try again
-          </Button>
+          {proposal.instruction && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={busy}
+              onClick={() => onRefine(proposal.instruction!)}
+            >
+              <RefreshCw
+                className={`mr-1 h-4 w-4 ${busy ? 'animate-spin' : ''}`}
+              />
+              Try again
+            </Button>
+          )}
           {typeof proposal.costUsd === 'number' && (
             <span className="ml-auto text-xs text-gray-400">
               ${proposal.costUsd.toFixed(4)}
@@ -270,8 +280,9 @@ export function RefinePanel({
 
         {!proposal.unchanged && (
           <p className="mt-3 text-xs text-gray-500">
-            Accepting saves every language above and records your instruction
-            alongside each, so the next application starts closer to this.
+            {proposal.handEdit
+              ? 'Accepting saves the other languages. Rejecting leaves them as they are — your own edit is already saved either way.'
+              : 'Accepting saves every language above and records your instruction alongside each, so the next application starts closer to this.'}
           </p>
         )}
       </div>

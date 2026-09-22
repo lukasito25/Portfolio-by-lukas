@@ -222,6 +222,8 @@ export default function ApplicationsClient() {
   const [refining, setRefining] = useState(false)
   const [proposal, setProposal] = useState<RefineProposal | null>(null)
   const [refineError, setRefineError] = useState<string | null>(null)
+  // Mirroring a hand edit into the other languages, after the save.
+  const [mirroring, setMirroring] = useState(false)
 
   /**
    * Whether THIS environment can generate.
@@ -613,6 +615,8 @@ export default function ApplicationsClient() {
     setError(null)
     try {
       const parsed = JSON.parse(draftJson)
+      // Captured before the write, so the mirror below can be told what moved.
+      const before = (selected.content as Record<string, unknown>)[activeLocale]
       const res = await fetch(`/api/admin/brief/${selected.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -625,6 +629,7 @@ export default function ApplicationsClient() {
       setSelected(data.brief)
       setNotice(`Saved the ${LOCALE_LABEL[activeLocale]} copy.`)
       await load()
+      void mirrorHandEdit('brief', before)
     } catch (e) {
       setError(
         e instanceof SyntaxError
@@ -688,10 +693,14 @@ export default function ApplicationsClient() {
     if (!value) return
     const store = (selected[docField] ?? {}) as Record<string, unknown>
     const key = docKey
+    const before = store[activeLocale]
     const ok = await saveDocument(
       { [docField]: { ...store, [activeLocale]: value } },
       `Saved the ${LOCALE_LABEL[activeLocale]} ${tab === 'cv' ? 'CV' : 'cover letter'}.`
     )
+    if (ok && (tab === 'cv' || tab === 'letter')) {
+      void mirrorHandEdit(tab, before)
+    }
     // The stored copy now matches, so the unsaved-edit entry is stale — keeping
     // it would make the next render show an "edit" identical to what is saved,
     // and Revert would appear to do nothing.
@@ -701,6 +710,56 @@ export default function ApplicationsClient() {
   /* ---------------------------------------------------------------- *
    * Refinement
    * ---------------------------------------------------------------- */
+
+  /**
+   * Offer the same change in the other languages, after a hand edit is saved.
+   *
+   * His edit is already stored — this only proposes the mirrors, and they are
+   * shown in the same review panel a refinement uses, because they are the
+   * same thing: model-written text that must not reach a document he sends
+   * without being read.
+   *
+   * Errors are swallowed rather than surfaced. The save succeeded; a failed
+   * mirror is a missing offer, not a lost edit, and an error banner over work
+   * that was kept is how a user learns to distrust the save button. The panel
+   * names a locale that failed when the call itself got through.
+   */
+  const mirrorHandEdit = async (
+    target: 'brief' | 'cv' | 'letter',
+    before: unknown
+  ) => {
+    if (!selected || !before) return
+
+    const field =
+      target === 'brief'
+        ? 'content'
+        : target === 'cv'
+          ? 'cvContent'
+          : 'coverLetter'
+    const store = (selected[field] ?? {}) as Record<string, unknown>
+    // Nothing to mirror into — a single-language document costs nothing here.
+    if (Object.keys(store).filter(code => code !== activeLocale).length === 0) {
+      return
+    }
+
+    setMirroring(true)
+    setRefineError(null)
+    try {
+      const res = await fetch(`/api/admin/brief/${selected.id}/mirror`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target, locale: activeLocale, before }),
+      })
+      const data = await res.json()
+      if (!res.ok) return
+      if (data.unchanged) return
+      setProposal(data)
+    } catch {
+      /* the edit is saved; the offer is not worth an error banner */
+    } finally {
+      setMirroring(false)
+    }
+  }
 
   const runRefine = async (instruction: string, warning?: string) => {
     if (!selected) return
@@ -757,9 +816,13 @@ export default function ApplicationsClient() {
     const byLocale = proposal.proposedByLocale ?? {
       [proposal.locale]: proposal.proposed,
     }
+    // `saved` marks his own hand edit, already stored — writing it again
+    // would be a no-op that reports as work done.
     const applied = proposal.locales
       ? proposal.locales
-          .filter(entry => !entry.failed && entry.changes.length)
+          .filter(
+            entry => !entry.failed && entry.changes.length && !entry.saved
+          )
           .map(entry => entry.locale)
       : [proposal.locale]
 
@@ -780,7 +843,9 @@ export default function ApplicationsClient() {
       // The saved record now holds the revision, so any unsaved edit for this
       // document is stale — dropping it lets the derived draft fall through to
       // what was actually stored. Only the locale on screen has a draft; the
-      // mirrors were never open in the editor.
+      // mirrors were never open in the editor. After a hand edit the locale on
+      // screen was not part of the proposal at all, so there is nothing to
+      // refresh there.
       const onScreen = byLocale[activeLocale]
       if (onScreen === undefined) return
       if (proposal.target === 'brief') {
@@ -1663,7 +1728,7 @@ export default function ApplicationsClient() {
                         <RefinePanel
                           target="brief"
                           locale={activeLocale}
-                          busy={refining}
+                          busy={refining || mirroring}
                           proposal={proposal}
                           error={refineError}
                           onRefine={instruction => runRefine(instruction)}
@@ -1831,7 +1896,7 @@ export default function ApplicationsClient() {
                             <RefinePanel
                               target={tab}
                               locale={activeLocale}
-                              busy={refining}
+                              busy={refining || mirroring}
                               proposal={proposal}
                               error={refineError}
                               onRefine={instruction => runRefine(instruction)}
