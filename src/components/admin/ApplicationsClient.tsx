@@ -728,11 +728,18 @@ export default function ApplicationsClient() {
   }
 
   /**
-   * Apply a proposal.
+   * Apply a proposal — every language it came back in, in one save.
    *
    * Goes through the ordinary PUT rather than saving from the refine route, so
-   * it is re-validated, the checks are recomputed, and the training pair is
-   * recorded exactly as a hand edit would be — with the instruction attached.
+   * it is re-validated, the checks are recomputed, and a training pair is
+   * recorded per locale exactly as a hand edit would be, with the instruction
+   * attached. The PUT already validates a whole locale map and diffs each one,
+   * so nothing there had to change for this.
+   *
+   * Only locales that actually moved are written. A mirror that failed, or one
+   * the model judged already correct, is left exactly as stored rather than
+   * rewritten with an identical object — which would record an empty edit pair
+   * and make the save look like it did more than it did.
    */
   const acceptProposal = async () => {
     if (!selected || !proposal) return
@@ -745,24 +752,42 @@ export default function ApplicationsClient() {
           : 'coverLetter'
 
     const store = (selected[field] ?? {}) as Record<string, unknown>
+
+    // Older responses carried one locale only; keep working with those.
+    const byLocale = proposal.proposedByLocale ?? {
+      [proposal.locale]: proposal.proposed,
+    }
+    const applied = proposal.locales
+      ? proposal.locales
+          .filter(entry => !entry.failed && entry.changes.length)
+          .map(entry => entry.locale)
+      : [proposal.locale]
+
+    const next = { ...store }
+    for (const code of applied) {
+      if (byLocale[code] !== undefined) next[code] = byLocale[code]
+    }
+
     const ok = await saveDocument(
-      {
-        [field]: { ...store, [proposal.locale]: proposal.proposed },
-        instruction: proposal.instruction,
-      },
-      'Applied.'
+      { [field]: next, instruction: proposal.instruction },
+      applied.length > 1
+        ? `Applied in ${applied.length} languages.`
+        : 'Applied.'
     )
 
     if (ok) {
       setProposal(null)
       // The saved record now holds the revision, so any unsaved edit for this
       // document is stale — dropping it lets the derived draft fall through to
-      // what was actually stored.
+      // what was actually stored. Only the locale on screen has a draft; the
+      // mirrors were never open in the editor.
+      const onScreen = byLocale[activeLocale]
+      if (onScreen === undefined) return
       if (proposal.target === 'brief') {
-        setDraftJson(JSON.stringify(proposal.proposed, null, 2))
+        setDraftJson(JSON.stringify(onScreen, null, 2))
       } else {
-        clearDocDraft(`${selected.id}:${proposal.target}:${proposal.locale}`)
-        setDocJson(JSON.stringify(proposal.proposed, null, 2))
+        clearDocDraft(`${selected.id}:${proposal.target}:${activeLocale}`)
+        setDocJson(JSON.stringify(onScreen, null, 2))
       }
     }
   }

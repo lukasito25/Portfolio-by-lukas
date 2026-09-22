@@ -922,6 +922,53 @@ education lines, the language list — and never in a bullet or a sentence, whic
 is where the tell would matter. The sanitizer exists because one clean sample
 says nothing about the next generation.
 
+### Ask for a change — and the other two languages
+
+`/admin/applications` has a refine box on each of the three documents: say what
+you want changed, read the diff, accept or reject. Nothing is written until
+Accept, and the accept goes through the ordinary `PUT`, so the revision is
+re-validated, the checks are recomputed and the training pair is recorded with
+the instruction attached. The route deliberately does not save: a model edit
+that reached a file he downloads without anyone reading it would defeat the
+point of the review screen.
+
+**A revision lands in every language, not just the one on screen.** Until
+September 2026 it did not: `POST /briefs/:id/refine` took one locale, proposed
+for that locale, and the accept wrote that key alone. The Italian and German
+copies kept the old wording and drifted a little further from the English with
+every refinement — invisible unless you switched the toggle, because each page
+reads as finished in whatever language you happen to open. These are pages sent
+to recruiters in Zurich; a German version quietly out of date with the English
+is exactly the kind of error the honesty layer exists to prevent elsewhere.
+
+**Mirrored, not re-translated.** After the source locale comes back, each other
+locale gets its own call with two things: its own current text, and the fields
+that moved in the source, before and after. It applies the equivalent change in
+its own language and returns everything else byte-identical. Re-translating the
+revised document wholesale would have been one call cheaper and would have
+overwritten whatever had already been edited by hand in Italian or German —
+which is the work the edit-learning loop most wants to keep. The instruction
+travels with the diff as well, because "cut the hedging" is a register
+judgement that has to be made in German to be made at all.
+
+Three things fall out of that:
+
+- **A locale that fails is named, not fatal.** Its mirror is skipped, the panel
+  says which one, and Accept writes the ones that did come back. A German
+  failure must not throw away a good revision and a good Italian mirror.
+- **A locale that does not exist yet is skipped silently**, and a document that
+  exists in one language costs exactly what it did before — one call.
+- **Only locales that actually moved are written.** A mirror that came back
+  identical is left as stored rather than rewritten with an equal object, which
+  would record an empty training pair and make the save look like it did more
+  than it did.
+
+The panel shows the locale you asked in expanded and the mirrors folded away,
+and the button says what it will do — "Accept 3 changes in 3 languages".
+Measured on a full brief: about two minutes and roughly three times the tokens
+of a single-locale refine, which is the price of the three documents actually
+agreeing with each other.
+
 ### Edit learning storage
 
 Edits follow the brief they came from: local SQLite in development, D1
