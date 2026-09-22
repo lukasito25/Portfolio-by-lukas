@@ -1016,11 +1016,11 @@ from the deploy; keeping it in code also keeps the generator out of it, since
 the model never sees a video field it could invent. **Adding an entry here is
 the one change to a generated brief that needs a PR.**
 
-**The clip is the company's half of the hero.** The code-drawn motif is still
-laid over it in the brand accent, so his side of the story stays on screen:
-`mesh` over the stadium is the tracking data the FIFA role is about,
-`topography` over the Matterhorn is the same ridge as contour lines. A
-`motif` on the registry entry overrides `brand.motif` for that overlay.
+**A clip replaces the motif; it does not layer over it.** The two were drawn
+together first, and the result was worse: a real scene already carries the
+company, and lines over it only compete with the copy. `brand.motif` still
+draws the hero of every brief without footage, and still appears beside the
+spotlight further down every page.
 
 **Producing the two files** — `scripts/build-hero-video.sh <slug> <clip> [start] [duration]`
 trims, loops, encodes under a ~2.5 MB cap (stepping the quantiser until it

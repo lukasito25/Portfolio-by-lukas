@@ -296,8 +296,9 @@ export function FitBriefPage({
       {/* With footage the hero is always dark: the `dark` class flips every
           token for this section only, so the copy, toggle and label go light
           without per-element edits, and the page below still follows the
-          site theme. The motif stays on top of the clip — the footage is the
-          company's half of the hero, the drawn data layer is his. */}
+          site theme. The motif is the alternative to a clip, not a layer over
+          one — a real scene already carries the company, and the drawn lines
+          over it only compete with the copy. */}
       {/* `text-foreground` is not redundant: `color` inherits as a resolved
           value from the body, so redefining --foreground on this section
           alone would leave the headline in the light theme's near-black. */}
@@ -314,18 +315,18 @@ export function FitBriefPage({
             ground={heroMedia.ground}
           />
         ) : (
-          <div
-            className="absolute inset-0"
-            style={{ background: 'var(--hero-vignette)' }}
-          />
+          <>
+            <div
+              className="absolute inset-0"
+              style={{ background: 'var(--hero-vignette)' }}
+            />
+            <HeroMotif
+              motif={brand.motif}
+              seed={slug}
+              className="pointer-events-none absolute inset-0 h-full w-full text-(--accent) opacity-[0.16]"
+            />
+          </>
         )}
-        <HeroMotif
-          motif={heroMedia?.motif ?? brand.motif}
-          seed={slug}
-          className={`pointer-events-none absolute inset-0 h-full w-full text-(--accent) ${
-            heroMedia ? 'opacity-[0.22]' : 'opacity-[0.16]'
-          }`}
-        />
 
         <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pt-10 pb-28 sm:px-6 md:pb-32 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
