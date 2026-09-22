@@ -4,6 +4,7 @@ import { dataService } from '@/lib/data-service'
 import { FitBriefPage } from '@/components/fit-brief/fit-brief-page'
 import { FitBriefContentSchema, BrandSchema } from '@/lib/fit-brief/schema'
 import { LOCALES, type Locale } from '@/lib/fit-brief/guardrails'
+import { heroMediaFor } from '@/lib/fit-brief/hero-media'
 import type { FitBriefContent } from '@/lib/fit-brief/schema'
 
 /**
@@ -113,6 +114,7 @@ export default async function BriefPage({
       slug={brief.slug}
       defaultLocale={defaultLocale}
       isDraft={brief.status !== 'published'}
+      heroMedia={heroMediaFor(brief.slug)}
     />
   )
 }

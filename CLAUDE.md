@@ -33,6 +33,7 @@ node scripts/check-pdf-pagination.mjs  # assert no split bullet / stranded headi
 npx tsx scripts/check-doc-recommendation.ts  # assert which document the recommender picks per posting
 npm run check:docs     # all of the above in order — the document gate before any document PR
 node scripts/seed-example-brief.mjs    # seed a local /brief/[slug] fixture, prints a preview URL
+scripts/build-hero-video.sh <slug> <clip> [start] [dur]  # encode a brief's hero loop + poster
 npx tsx scripts/apply.ts <url|file|->  # generate an application from the terminal
 
 npm run test:e2e       # Playwright against local (playwright.config.ts)
@@ -122,6 +123,7 @@ letter. Documented in **`CUSTOM_RECRUITER_PAGES.md` §11**; admin UI in `ADMIN.m
   - **`highlights` and `phone` on `CvContentSchema` must stay `.default(…)`.** Required would break five `safeParse` call sites for every CV generated before they existed — two of them silently. And **the admin editor reads the stored JSON, not a parsed `CvContent`**, so defaults do not apply there: read any field added after launch with `?? []` / `?? ''`. `value.highlights.map` on a pre-band CV took `/admin/applications` down in production once.
   - **Language levels are stated, never invented.** The corpus records Slovak native, English C2, Italian B2 and no German level; `validate.ts` flags any other level. The schema and prompts say the same — an earlier wording ("never levels") contradicted the validator.
 - **Generated hero art** is code-drawn and seeded from the slug. Round every computed coordinate — an unrounded `Math.cos` is a hydration mismatch (`/ubp` shipped with one).
+- **A generated brief can have a footage hero instead**, and `/brief/fifa` and `/brief/on` do. The slug → clip mapping lives in `src/lib/fit-brief/hero-media.ts` with the files under `public/brief/<slug>/`, **not** in the `brand` JSON: the clip has to be committed and deployed anyway, so this is the one change to a generated brief that needs a PR. Encode with `scripts/build-hero-video.sh` — the poster must be the loop's first frame, and an orbiting camera needs `HERO_LOOP=pingpong` because a crossfade superimposes two angles of the same building. The overlay strengths and the lifted tokens in `[data-hero-video]` were measured frame by frame to hold WCAG AA over the brightest clip; re-measure when adding one. See `CUSTOM_RECRUITER_PAGES.md` §11.
 
 ### Other libs (`src/lib/`)
 

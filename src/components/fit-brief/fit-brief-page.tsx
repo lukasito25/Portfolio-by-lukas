@@ -7,6 +7,8 @@ import { CountUp } from '@/components/motion/count-up'
 import { Marquee } from '@/components/motion/marquee'
 import { prefersReducedMotion } from '@/lib/gsap'
 import { HeroMotif } from './hero-motif'
+import { HeroVideo } from './hero-video'
+import type { HeroMedia } from '@/lib/fit-brief/hero-media'
 import type {
   Brand,
   FitBriefContent,
@@ -182,12 +184,18 @@ export function FitBriefPage({
   defaultLocale,
   /** Shown as a banner when previewing an unpublished brief. */
   isDraft = false,
+  /**
+   * Footage behind the hero, from the registry in `hero-media.ts`. When set,
+   * the hero is forced dark whatever the site theme, the way /fifa is.
+   */
+  heroMedia,
 }: {
   content: Partial<Record<Locale, FitBriefContent>>
   brand: Brand
   slug: string
   defaultLocale?: Locale
   isDraft?: boolean
+  heroMedia?: HeroMedia
 }) {
   const available = useMemo(() => {
     const present = LOCALES.filter((code): code is Locale =>
@@ -250,13 +258,30 @@ export function FitBriefPage({
       data-generated-brief
     >
       {/* Dark mode swaps to the lighter accent; a plain inline style cannot
-          express a media query, so the pairing lives in a scoped style tag. */}
+          express a media query, so the pairing lives in a scoped style tag.
+          The second selector covers a footage hero, which carries the `dark`
+          class itself: that class sets --accent on the section, which would
+          otherwise beat the light accent inherited from the root. */}
       <style>{`
-        .dark [data-generated-brief] {
+        .dark [data-generated-brief],
+        [data-generated-brief] .dark {
           --accent: ${brand.accentDark};
           --accent-soft: color-mix(in srgb, ${brand.accentDark} 15%, transparent);
           --accent-glow: color-mix(in srgb, ${brand.accentDark} 30%, transparent);
           --hero-vignette: radial-gradient(ellipse 80% 60% at 50% -10%, color-mix(in srgb, ${brand.accentDark} 16%, transparent), transparent 70%);
+        }
+        /* Text over footage needs more headroom than text over a flat dark
+           background: the accent is mixed toward white and the two muted
+           tones are lifted, which is what puts every line of the hero at
+           WCAG AA over the clip's brightest frame. The site's dark gradient
+           runs into navy, which vanishes on footage, so the headline gets a
+           light ramp instead. */
+        [data-generated-brief] [data-hero-video] {
+          --accent: color-mix(in srgb, ${brand.accentDark} 60%, white);
+          --accent-soft: color-mix(in srgb, ${brand.accentDark} 22%, transparent);
+          --text-secondary: #d7d7e3;
+          --text-tertiary: #b2b2c4;
+          --gradient-signal: linear-gradient(100deg, color-mix(in srgb, ${brand.accentDark} 55%, white) 0%, #ffffff 115%);
         }
       `}</style>
 
@@ -268,15 +293,38 @@ export function FitBriefPage({
       )}
 
       {/* ============ HERO ============ */}
-      <section className="grain relative flex min-h-[100svh] flex-col overflow-hidden">
-        <div
-          className="absolute inset-0"
-          style={{ background: 'var(--hero-vignette)' }}
-        />
+      {/* With footage the hero is always dark: the `dark` class flips every
+          token for this section only, so the copy, toggle and label go light
+          without per-element edits, and the page below still follows the
+          site theme. The motif stays on top of the clip — the footage is the
+          company's half of the hero, the drawn data layer is his. */}
+      {/* `text-foreground` is not redundant: `color` inherits as a resolved
+          value from the body, so redefining --foreground on this section
+          alone would leave the headline in the light theme's near-black. */}
+      <section
+        className={`grain relative flex min-h-[100svh] flex-col overflow-hidden ${
+          heroMedia ? 'dark text-foreground' : ''
+        }`}
+        data-hero-video={heroMedia ? '' : undefined}
+      >
+        {heroMedia ? (
+          <HeroVideo
+            video={heroMedia.video}
+            poster={heroMedia.poster}
+            ground={heroMedia.ground}
+          />
+        ) : (
+          <div
+            className="absolute inset-0"
+            style={{ background: 'var(--hero-vignette)' }}
+          />
+        )}
         <HeroMotif
-          motif={brand.motif}
+          motif={heroMedia?.motif ?? brand.motif}
           seed={slug}
-          className="pointer-events-none absolute inset-0 h-full w-full text-(--accent) opacity-[0.16]"
+          className={`pointer-events-none absolute inset-0 h-full w-full text-(--accent) ${
+            heroMedia ? 'opacity-[0.22]' : 'opacity-[0.16]'
+          }`}
         />
 
         <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pt-10 pb-28 sm:px-6 md:pb-32 lg:px-8">
