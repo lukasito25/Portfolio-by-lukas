@@ -922,6 +922,99 @@ education lines, the language list — and never in a bullet or a sentence, whic
 is where the tell would matter. The sanitizer exists because one clean sample
 says nothing about the next generation.
 
+### One change, three languages
+
+`/admin/applications` has a refine box on each of the three documents: say what
+you want changed, read the diff, accept or reject. Nothing is written until
+Accept, and the accept goes through the ordinary `PUT`, so the revision is
+re-validated, the checks are recomputed and the training pair is recorded with
+the instruction attached. The route deliberately does not save: a model edit
+that reached a file he downloads without anyone reading it would defeat the
+point of the review screen.
+
+**A change lands in every language, not just the one on screen.** Until
+September 2026 neither way of changing text did. `POST /briefs/:id/refine` took
+one locale, proposed for it, and the accept wrote that key alone; a hand edit in
+the JSON editor below the panel did the same. The Italian and German copies kept
+the old wording and drifted a little further from the English with every edit —
+invisible unless you switched the toggle, because each page reads as finished in
+whatever language you happen to open. These are pages sent to recruiters in
+Zurich; a German version quietly out of date with the English is exactly the kind
+of error the honesty layer exists to prevent elsewhere.
+
+Both routes now mirror, and they share the mechanism
+(`src/lib/fit-brief/mirror.ts`):
+
+|               | Refine box                 | JSON editor                            |
+| ------------- | -------------------------- | -------------------------------------- |
+| Route         | `POST /brief/:id/refine`   | `POST /brief/:id/mirror`               |
+| When          | before anything is saved   | after the ordinary PUT stored his edit |
+| Guidance      | his instruction + the diff | the diff alone                         |
+| Accept writes | every locale, his included | the other locales only                 |
+
+The mirror route reads the saved copy back from the record rather than trusting
+the request, so it mirrors what was actually written — if validation altered or
+rejected the save, that is what travels.
+
+**Mirrored, not re-translated.** After the source locale comes back, each other
+locale gets its own call with two things: its own current text, and the fields
+that moved in the source, before and after. It applies the equivalent change in
+its own language and returns everything else byte-identical. Re-translating the
+revised document wholesale would have been one call cheaper and would have
+overwritten whatever had already been edited by hand in Italian or German —
+which is the work the edit-learning loop most wants to keep. The instruction
+travels with the diff as well, because "cut the hedging" is a register
+judgement that has to be made in German to be made at all.
+
+**What counts as a change is every string, not just the prose.** The
+learning loop's `diffBriefContent` compares a fixed list of prose paths,
+because a changed tier label says nothing about his voice. Mirroring has the
+opposite requirement — a stat label, a chip, a heading or a row added to the
+role map all have to reach the other languages — so it uses
+`diffStringLeaves` (`mirror-diff.ts`), which walks both objects and reports
+every string leaf that differs, arrays compared by index so an addition or a
+removal travels too. Training pairs stay prose-only and are a subset of what
+the panel shows. A real hand edit that changed a stat label and a heading
+recorded **zero** training pairs and mirrored **two** fields, which is the
+difference in one line.
+
+**A mirror cannot change a citation.** Which fact a sentence rests on is not a
+language matter, so `alignFactIds()` copies the source locale's `factIds` back
+over the mirror's before the diff is taken. This is not theoretical: asked to
+carry a changed stat label into German, the model also swapped
+`runtastic.users` for another id, because the label no longer matched the
+number beside it. `validate.ts` catches an id that does not exist; nothing
+catches a real id attached to the wrong claim. Everything else the model wrote
+is left alone and shown for review — a neighbouring word often does have to
+move for another language's grammar, and reverting that would produce broken
+German.
+
+Three more things fall out of that:
+
+- **A locale that fails is named, not fatal.** Its mirror is skipped, the panel
+  says which one, and Accept writes the ones that did come back. A German
+  failure must not throw away a good revision and a good Italian mirror.
+- **A locale that does not exist yet is skipped silently**, and a document that
+  exists in one language costs exactly what it did before — one call.
+- **Only locales that actually moved are written.** A mirror that came back
+  identical is left as stored rather than rewritten with an equal object, which
+  would record an empty training pair and make the save look like it did more
+  than it did.
+
+The panel is the same in both cases: the locale the change was made in
+expanded, the mirrors folded away, and a button that says what it will do —
+"Accept 3 changes in 3 languages" from the refine box, "Accept 2 changes in 2
+languages" after a hand edit, where his own copy is already stored and is shown
+only for context. A failed mirror after a hand edit is deliberately **not** an
+error banner: the save succeeded, and a red message over work that was kept is
+how someone learns to distrust the save button.
+
+Measured on a full brief: about a minute and a half to two minutes, and two to
+three times the tokens of a single-locale call. That is the price of the three
+documents actually agreeing with each other. A save that only reformatted the
+JSON costs nothing — no diff, no calls — and neither does a document that
+exists in one language.
+
 ### Edit learning storage
 
 Edits follow the brief they came from: local SQLite in development, D1

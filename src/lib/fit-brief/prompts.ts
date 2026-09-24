@@ -344,3 +344,118 @@ export function refinePrompt(
 
   return parts.join('\n')
 }
+
+/* ------------------------------------------------------------------ *
+ * Mirroring an accepted revision into the other locales
+ * ------------------------------------------------------------------ */
+
+/**
+ * The same revision, in another language.
+ *
+ * The three locales are counterparts, not three independent documents: one is
+ * written in the posting's language and the others are translated from it. So
+ * a revision accepted in one of them is not finished until the other two say
+ * the same thing — and before this existed they silently did not, which is the
+ * worst kind of bug in an artefact sent to a recruiter, because the page looks
+ * complete in whichever language you happen to be reading.
+ *
+ * Mirroring rather than re-translating. The whole document is not regenerated
+ * from the revised source, because that would overwrite whatever he has
+ * already edited by hand in Italian or German. What travels is the change
+ * itself: these fields moved, from this to this. Everything else comes back
+ * byte-identical, which also means the diff he reviews is small enough to read.
+ *
+ * The instruction travels too, because "cut the hedging" is a register
+ * judgement that has to be made in German to be made at all — a literal
+ * translation of the revised English sentence would carry the words and lose
+ * the reason.
+ */
+export function mirrorSystem(
+  target: RefineTarget,
+  locale: Locale,
+  editLearning?: string
+): string {
+  return buildSystemPrompt(
+    `YOUR TASK
+
+A ${TARGET_LABEL[target]} exists in several languages, as counterparts of one
+another. One of them has just been revised, and it is your job to make the
+${LOCALE_LABELS[locale]} version carry the same revision.
+
+Return the complete ${LOCALE_LABELS[locale]} object in the same shape you were
+given, written in ${LOCALE_LABELS[locale]}. It is replacing what is there, so
+every field must be present.
+
+THE DISCIPLINE THAT MAKES THIS USEFUL
+
+- Only the fields that changed in the other language may change here. Every
+  other field comes back byte-identical, including its wording, its ordering
+  and its punctuation. This version has been edited by hand before; those
+  edits are not yours to tidy.
+- Make the change the way it would have been made in ${LOCALE_LABELS[locale]}
+  in the first place. You are not translating the revised sentence word for
+  word — you are applying the same intent to this language's own text, which
+  may already phrase the surrounding passage differently.
+- Where the revision cut something, cut the corresponding thing here. Where it
+  added something, add its equivalent. Where it only changed register, keep
+  the content and change the register.
+- Keep every factId exactly as it is. A mirrored change never introduces a new
+  citation, and never drops one whose sentence survives.
+- Numbers, names, job titles and company names stay as they are in this
+  version. If the revision changed a number, change it here to the same
+  number.
+
+WHAT THIS CANNOT AUTHORISE
+
+The honesty rules above hold in full. A mirrored revision may not state
+anything the source revision did not, and may not invent a language level, a
+metric or a responsibility in order to make a sentence land better in
+${LOCALE_LABELS[locale]}.`,
+    editLearning
+  )
+}
+
+export function mirrorPrompt(
+  target: RefineTarget,
+  locale: Locale,
+  current: unknown,
+  sourceLocale: Locale,
+  changes: Array<{ path: string; before: string; after: string }>,
+  instruction: string,
+  context?: { spec?: JobSpec }
+): string {
+  const parts = [
+    `The ${LOCALE_LABELS[sourceLocale]} version of this ${TARGET_LABEL[target]}`,
+    `was just revised. Apply the same revision to the ${LOCALE_LABELS[locale]}`,
+    'version below.',
+    '',
+    'WHAT HE ASKED FOR',
+    instruction,
+    '',
+    `WHAT CHANGED IN THE ${LOCALE_LABELS[sourceLocale].toUpperCase()} VERSION`,
+    ...changes.flatMap(change => [
+      `- ${change.path}`,
+      `  was:  ${change.before}`,
+      `  now:  ${change.after}`,
+    ]),
+    '',
+    'Those are the only fields that may differ in what you return. Leave every',
+    'other field exactly as it is below.',
+  ]
+
+  if (context?.spec) {
+    parts.push(
+      '',
+      'THE POSTING, for context',
+      JSON.stringify(context.spec, null, 2)
+    )
+  }
+
+  parts.push(
+    '',
+    `THE CURRENT ${LOCALE_LABELS[locale].toUpperCase()} ${TARGET_LABEL[target].toUpperCase()}`,
+    JSON.stringify(current, null, 2)
+  )
+
+  return parts.join('\n')
+}
