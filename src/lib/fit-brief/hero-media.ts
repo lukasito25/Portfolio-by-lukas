@@ -79,13 +79,10 @@ export const HERO_MEDIA: Record<string, HeroMedia> = {
    *
    * Worth knowing: this is Geneva, not Lausanne — same lake, sixty
    * kilometres apart — and someone local may well recognise the bridge.
-   *
-   * The key is the slug, and the slug is `undisclosed` because the posting
-   * was handled that way during the application; the page itself says Kura.
    */
-  undisclosed: {
-    video: '/brief/undisclosed/hero.mp4',
-    poster: '/brief/undisclosed/hero-poster.jpg',
+  kura: {
+    video: '/brief/kura/hero.mp4',
+    poster: '/brief/kura/hero-poster.jpg',
     ground: '#020A14',
     credit:
       'Pexels 7798070 (https://www.pexels.com/video/drone-footage-of-geneva-switzerland-7798070/) — free to use, no attribution required',
