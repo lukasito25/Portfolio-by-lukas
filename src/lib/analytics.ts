@@ -93,61 +93,35 @@ class Analytics {
     // Send to analytics API
     this.sendEvent(event)
   }
-
+  /**
+   * Send one event to the interaction endpoint.
+   *
+   * It used to POST to `/api/analytics`, which writes page views: the handler
+   * read `name` only to tell the two shapes apart and then dropped it, so
+   * every call here wrote a phantom extra view of the current page and lost
+   * the event entirely. The event endpoint keeps the name, the category and
+   * the properties, and cannot touch the view count.
+   */
   private async sendEvent(event: AnalyticsEvent) {
     try {
-      const response = await fetch('/api/analytics', {
+      await fetch('/api/analytics/event', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(event),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          events: [
+            {
+              name: event.name,
+              category: 'app',
+              label: event.name,
+              props: event.properties,
+              path:
+                typeof window !== 'undefined' ? window.location.pathname : '/',
+            },
+          ],
+        }),
       })
-
-      if (!response.ok) {
-        // Handle different error scenarios gracefully
-        if (response.status === 503) {
-          console.debug(
-            'Analytics service temporarily unavailable (503), skipping tracking'
-          )
-          return
-        }
-        if (response.status >= 500) {
-          console.debug(
-            'Analytics service unavailable (server error), skipping tracking'
-          )
-          return
-        }
-        if (response.status === 404) {
-          console.debug('Analytics endpoint not found (404), skipping tracking')
-          return
-        }
-
-        // For other errors, log but continue
-        console.debug(
-          `Analytics API responded with ${response.status}, skipping tracking`
-        )
-        return
-      }
-
-      // Success - optionally log in development
-      if (process.env.NODE_ENV === 'development') {
-        console.debug('Analytics event tracked successfully:', event.name)
-      }
-    } catch (error) {
-      // Gracefully handle all analytics failures - don't break the UI
-      if (error instanceof Error) {
-        // Network errors, parsing errors, etc.
-        console.debug(
-          'Analytics tracking failed (network/parsing error), continuing silently:',
-          error.message
-        )
-      } else {
-        console.debug(
-          'Analytics tracking failed (unknown error), continuing silently:',
-          error
-        )
-      }
+    } catch {
+      // Analytics must never surface to the user, and never retry into a loop.
     }
   }
 
