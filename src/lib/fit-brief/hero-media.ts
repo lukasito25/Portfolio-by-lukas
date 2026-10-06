@@ -65,6 +65,31 @@ export const HERO_MEDIA: Record<string, HeroMedia> = {
     credit:
       'Pexels 3971604 (https://www.pexels.com/video/drone-footage-of-swiss-alps-3971604/) — free to use, no attribution required',
   },
+
+  /**
+   * Lake Geneva from above, traffic crossing the Pont du Mont-Blanc.
+   *
+   * Kura builds agents that drive a real browser through work nobody is
+   * watching, which has no honest footage — every "AI" clip is a glowing
+   * brain or a circuit board, and the rule from /fifa applies: a clip that is
+   * off-domain is worse than no clip. So this follows the /brief/on
+   * precedent and uses the place instead. The role is in Lausanne, on this
+   * lake, and a candidate applying from Italy showing he is oriented to Léman
+   * is a small true signal where a server rack would be a false one.
+   *
+   * Worth knowing: this is Geneva, not Lausanne — same lake, sixty
+   * kilometres apart — and someone local may well recognise the bridge.
+   *
+   * The key is the slug, and the slug is `undisclosed` because the posting
+   * was handled that way during the application; the page itself says Kura.
+   */
+  undisclosed: {
+    video: '/brief/undisclosed/hero.mp4',
+    poster: '/brief/undisclosed/hero-poster.jpg',
+    ground: '#020A14',
+    credit:
+      'Pexels 7798070 (https://www.pexels.com/video/drone-footage-of-geneva-switzerland-7798070/) — free to use, no attribution required',
+  },
 }
 
 export function heroMediaFor(slug: string): HeroMedia | undefined {
