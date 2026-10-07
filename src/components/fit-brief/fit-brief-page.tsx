@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   CornerDownRight,
+  Download,
 } from 'lucide-react'
 import { Reveal } from '@/components/motion/reveal'
 import { CountUp } from '@/components/motion/count-up'
@@ -25,6 +26,20 @@ import type {
   RoleMapItem,
 } from '@/lib/fit-brief/schema'
 import { LOCALES, type Locale } from '@/lib/fit-brief/guardrails'
+
+/**
+ * The one string on this page that is not written by the generator.
+ *
+ * Everything else comes from `FitBriefContent`, which exists in three
+ * languages; a download control does not, so it is translated here. Keeping it
+ * out of the schema means no existing brief has to be regenerated to gain the
+ * button.
+ */
+const DOWNLOAD_LABEL: Record<Locale, string> = {
+  en: 'Download this brief as a PDF',
+  it: 'Scarica questa pagina in PDF',
+  de: 'Dieses Dossier als PDF herunterladen',
+}
 
 /**
  * The shared renderer for generated fit briefs.
@@ -669,7 +684,23 @@ export function FitBriefPage({
                   </span>
                 ))}
               </div>
-              <p className="mt-10 text-sm text-tertiary-fg">
+              {/* The thing they forward.
+                  A link is what gets lost: a recruiter who wants to pass this
+                  to a hiring manager, paste it into an ATS note or read it
+                  without signal needs a file. `download` makes the browser
+                  save rather than navigate, and the .pdf extension is what the
+                  interaction tracker keys its download event off, so a
+                  download is visible in the analytics without extra wiring. */}
+              <a
+                href={`/api/brief/${slug}/pdf?locale=${locale}`}
+                download
+                className="btn-ghost mt-10 inline-flex items-center gap-2 text-sm"
+              >
+                <Download className="h-4 w-4" />
+                {DOWNLOAD_LABEL[locale]}
+              </a>
+
+              <p className="mt-8 text-sm text-tertiary-fg">
                 {t.closing.signature}
               </p>
             </div>

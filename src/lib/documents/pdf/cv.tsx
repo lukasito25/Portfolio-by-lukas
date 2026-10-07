@@ -32,6 +32,8 @@ import type { Locale } from '@/lib/fit-brief/guardrails'
 import { DEFAULT_PDF_VARIANT, type DocVariant } from '../variants'
 import { SingleCv, SingleLetter } from './single'
 import { ColumnCv, ColumnLetter, type Photo } from './column'
+import { BriefDocument } from './brief'
+import type { FitBriefContent } from '@/lib/fit-brief/schema'
 
 const TEMPLATE_DIR = join(process.cwd(), 'templates')
 const FONT_DIR = join(TEMPLATE_DIR, 'fonts')
@@ -45,7 +47,7 @@ const FONT_DIR = join(TEMPLATE_DIR, 'fonts')
  * newspaper column rather than a document someone wrote.
  */
 let registered = false
-function registerFonts() {
+export function registerFonts() {
   if (registered) return
   Font.register({
     family: 'Geist',
@@ -125,5 +127,26 @@ export async function renderCoverLetterPdf(
   }
   return renderToBuffer(
     <SingleLetter letter={letter} cv={cv} locale={locale} variant={variant} />
+  )
+}
+
+/**
+ * The fit brief as a PDF.
+ *
+ * Lives here rather than in `brief.tsx` so font registration has exactly one
+ * home — the brief is set in the same subsetted Geist as the CV, and two
+ * registration points is how two documents end up in two typefaces.
+ */
+export async function renderBriefPdf(
+  content: FitBriefContent,
+  options: { accent: string; pageUrl: string }
+): Promise<Buffer> {
+  registerFonts()
+  return renderToBuffer(
+    <BriefDocument
+      content={content}
+      theme={{ accent: options.accent }}
+      pageUrl={options.pageUrl}
+    />
   )
 }
