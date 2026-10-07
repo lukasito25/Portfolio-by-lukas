@@ -1094,6 +1094,41 @@ box reported failure while saving correctly.
 or a build.** When a change touches Worker fields, deploy it and verify the new
 field round-trips before assuming the app is at fault.
 
+### What else rests on the same evidence
+
+Every text-bearing item the generator writes carries `factIds` into the career
+facts corpus, and `src/lib/fit-brief/evidence-links.ts` reads them back to
+compute two things nobody has to author:
+
+- **The figure a requirement is actually backed by.** "165M+ users" now sits
+  beside the claim it supports, not only in the band at the top of the page
+  where it is read once.
+- **The one other place on the page resting on the same fact**, as a quiet
+  link that scrolls to it — usually a role-map card or a spotlight pillar, so
+  a reader who doubts a one-line proof can reach the longer version.
+
+Both are **derived, never written**, which is the whole point: a computed link
+cannot invent a relationship, and no prompt, schema or existing brief had to
+change to gain them. Measured over the three published briefs: 79–89% of
+requirements acquire a link, and almost all of those point into a different
+section. Page height cost: **+2%**.
+
+Two deliberate limits. The link is capped at **one** per row — the Runtastic
+migration is cited by half the brief, and a row offering five next steps is one
+nobody leaves. And the scroll target is reached with
+`getElementById(...).scrollIntoView({ inline: 'center' })` rather than slider
+state, because the role-map track is already `overflow-x-auto` with scroll
+snap; the existing dot indicators derive from scroll position and stay in sync
+for free.
+
+**Where this came from.** An exploratory format was prototyped at
+`/lab/brief-formats` — a chaptered journey of reel, board and card overlay over
+the brief's own footage — and measured against the linear page rather than
+argued about. It lost: 8.5 screens against 5.1, first evidence 47% further
+down, and no locale toggle, which is disqualifying for trilingual Swiss
+applications. These two functions were the part of it worth keeping; the rest
+was deleted.
+
 ### A video hero for a generated brief
 
 A generated brief draws its hero in code and ships no binary assets, which is

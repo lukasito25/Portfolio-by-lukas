@@ -1,12 +1,22 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  CornerDownRight,
+} from 'lucide-react'
 import { Reveal } from '@/components/motion/reveal'
 import { CountUp } from '@/components/motion/count-up'
 import { Marquee } from '@/components/motion/marquee'
 import { prefersReducedMotion } from '@/lib/gsap'
 import { HeroMotif } from './hero-motif'
+import {
+  buildEvidenceIndex,
+  roleMapDomId,
+  pillarDomId,
+} from '@/lib/fit-brief/evidence-links'
 import { HeroVideo } from './hero-video'
 import type { HeroMedia } from '@/lib/fit-brief/hero-media'
 import type {
@@ -113,6 +123,7 @@ function RoleCardSlider({ items }: { items: RoleMapItem[] }) {
         {items.map((item, index) => (
           <article
             key={item.id}
+            id={roleMapDomId(item.id)}
             className="panel panel-hover w-[84%] shrink-0 snap-start p-6 sm:w-[54%] lg:w-[38%]"
           >
             <div className="mb-4 flex items-center justify-between gap-3">
@@ -244,6 +255,12 @@ export function FitBriefPage({
     setFilter(current => (current === next ? null : next))
 
   const marqueeItems = [...t.hero.chips, ...t.spotlight.credentials]
+
+  /**
+   * What backs each requirement, derived from the facts the generator already
+   * cited. Recomputed per locale because the requirement text is the key.
+   */
+  const evidence = buildEvidenceIndex(t)
 
   return (
     <div
@@ -434,6 +451,7 @@ export function FitBriefPage({
                 {t.spotlight.pillars.map((pillar, index) => (
                   <div
                     key={pillar.title}
+                    id={pillarDomId(index)}
                     className="rounded-xl border border-line bg-background/60 p-5"
                   >
                     <div className="font-display mb-2 flex items-baseline gap-2 text-sm font-semibold">
@@ -559,6 +577,52 @@ export function FitBriefPage({
                     <p className="mt-2 max-w-3xl text-sm leading-relaxed text-secondary-fg">
                       {row.proof}
                     </p>
+
+                    {/* The figure this claim actually rests on, and the one
+                        other place on the page that rests on it too. Both are
+                        derived from the cited facts, never written. */}
+                    {(() => {
+                      const backing = evidence.get(row.requirement)
+                      if (!backing?.stat && !backing?.related.length)
+                        return null
+                      return (
+                        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+                          {backing.stat && (
+                            <span className="flex items-baseline gap-2">
+                              <span className="font-display text-lg font-bold text-(--accent)">
+                                {backing.stat.value}
+                              </span>
+                              <span className="text-xs text-tertiary-fg">
+                                {backing.stat.label}
+                              </span>
+                            </span>
+                          )}
+                          {backing.related.map(link => (
+                            <button
+                              key={link.targetId}
+                              type="button"
+                              onClick={() =>
+                                document
+                                  .getElementById(link.targetId)
+                                  ?.scrollIntoView({
+                                    behavior: prefersReducedMotion()
+                                      ? 'auto'
+                                      : 'smooth',
+                                    block: 'center',
+                                    inline: 'center',
+                                  })
+                              }
+                              className="inline-flex items-center gap-1.5 text-xs text-tertiary-fg transition-colors hover:text-(--accent)"
+                            >
+                              <CornerDownRight className="h-3 w-3" />
+                              <span className="underline-offset-2 hover:underline">
+                                {link.title}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )
+                    })()}
                   </div>
                 )
               })}
