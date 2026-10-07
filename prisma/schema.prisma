@@ -45,18 +45,18 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  password      String?   // For credentials authentication
+  password      String? // For credentials authentication
   role          Role      @default(USER)
   accounts      Account[]
   sessions      Session[]
 
   // Portfolio content relationships
-  projects      Project[]
-  blogPosts     BlogPost[]
+  projects       Project[]
+  blogPosts      BlogPost[]
   recruiterPages RecruiterPage[]
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model VerificationToken {
@@ -69,37 +69,37 @@ model VerificationToken {
 
 // Portfolio content models
 model Project {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   title       String
-  slug        String   @unique
+  slug        String  @unique
   description String
   content     String
   excerpt     String?
 
   // Media and assets
-  thumbnail   String?
-  images      String? // JSON string of image URLs
-  demoUrl     String?
-  githubUrl   String?
+  thumbnail String?
+  images    String? // JSON string of image URLs
+  demoUrl   String?
+  githubUrl String?
 
   // Metadata
-  technologies Technology[] @relation("ProjectTechnologies")
-  category    String?
-  status      ProjectStatus @default(DRAFT)
-  featured    Boolean   @default(false)
-  sortOrder   Int       @default(0)
+  technologies Technology[]  @relation("ProjectTechnologies")
+  category     String?
+  status       ProjectStatus @default(DRAFT)
+  featured     Boolean       @default(false)
+  sortOrder    Int           @default(0)
 
   // SEO
   metaTitle       String?
   metaDescription String?
 
   // Author
-  authorId    String
-  author      User      @relation(fields: [authorId], references: [id])
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
 
   // Analytics
-  views       Int       @default(0)
-  likes       Int       @default(0)
+  views Int @default(0)
+  likes Int @default(0)
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -107,33 +107,33 @@ model Project {
 }
 
 model BlogPost {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  content     String
-  excerpt     String?
+  id      String  @id @default(cuid())
+  title   String
+  slug    String  @unique
+  content String
+  excerpt String?
 
   // Media
-  thumbnail   String?
+  thumbnail String?
 
   // Metadata
-  tags        Tag[]     @relation("BlogPostTags")
-  category    String?
-  status      PostStatus @default(DRAFT)
-  featured    Boolean   @default(false)
+  tags     Tag[]      @relation("BlogPostTags")
+  category String?
+  status   PostStatus @default(DRAFT)
+  featured Boolean    @default(false)
 
   // SEO
   metaTitle       String?
   metaDescription String?
 
   // Author
-  authorId    String
-  author      User      @relation(fields: [authorId], references: [id])
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
 
   // Analytics
-  views       Int       @default(0)
-  likes       Int       @default(0)
-  readTime    Int?      // estimated read time in minutes
+  views    Int  @default(0)
+  likes    Int  @default(0)
+  readTime Int? // estimated read time in minutes
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -141,41 +141,41 @@ model BlogPost {
 }
 
 model Technology {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  slug        String    @unique
+  id          String     @id @default(cuid())
+  name        String     @unique
+  slug        String     @unique
   description String?
-  icon        String?   // URL or icon identifier
-  color       String?   // hex color code
-  category    String?   // e.g., "Frontend", "Backend", "Database"
+  icon        String? // URL or icon identifier
+  color       String? // hex color code
+  category    String? // e.g., "Frontend", "Backend", "Database"
   level       SkillLevel @default(BEGINNER)
 
-  projects    Project[] @relation("ProjectTechnologies")
+  projects Project[] @relation("ProjectTechnologies")
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Tag {
-  id        String     @id @default(cuid())
-  name      String     @unique
-  slug      String     @unique
-  color     String?    // hex color code
+  id    String  @id @default(cuid())
+  name  String  @unique
+  slug  String  @unique
+  color String? // hex color code
 
   blogPosts BlogPost[] @relation("BlogPostTags")
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ContactSubmission {
-  id          String   @id @default(cuid())
-  name        String
-  email       String
-  subject     String?
-  message     String
-  phone       String?
-  company     String?
+  id      String  @id @default(cuid())
+  name    String
+  email   String
+  subject String?
+  message String
+  phone   String?
+  company String?
 
   // Project details
   projectType String?
@@ -184,30 +184,30 @@ model ContactSubmission {
 
   // Status tracking
   status      ContactStatus @default(NEW)
-  responded   Boolean   @default(false)
+  responded   Boolean       @default(false)
   respondedAt DateTime?
 
   // Spam protection
-  ipAddress   String?
-  userAgent   String?
+  ipAddress String?
+  userAgent String?
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Newsletter {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  name        String?
-  subscribed  Boolean  @default(true)
-  confirmed   Boolean  @default(false)
+  id         String  @id @default(cuid())
+  email      String  @unique
+  name       String?
+  subscribed Boolean @default(true)
+  confirmed  Boolean @default(false)
 
   // Tracking
-  source      String?  // where they subscribed from
-  ipAddress   String?
+  source    String? // where they subscribed from
+  ipAddress String?
 
-  subscribedAt DateTime @default(now())
-  confirmedAt  DateTime?
+  subscribedAt   DateTime  @default(now())
+  confirmedAt    DateTime?
   unsubscribedAt DateTime?
 }
 
@@ -241,56 +241,56 @@ model LocationCampaign {
 /// are stored as strings because SQLite has no JSON type; the app validates
 /// them with zod on both sides.
 model GeneratedBrief {
-  id           String    @id @default(cuid())
-  slug         String    @unique
-  companyName  String
-  roleTitle    String
-  sourceUrl    String?
-  sourceKind   String    @default("text") // url | pdf | image | text
-  status       String    @default("draft") // draft | published | archived
+  id                   String  @id @default(cuid())
+  slug                 String  @unique
+  companyName          String
+  roleTitle            String
+  sourceUrl            String?
+  sourceKind           String  @default("text") // url | pdf | image | text
+  status               String  @default("draft") // draft | published | archived
   /// Random per-brief token. A draft renders only at ?preview=<token>.
-  previewToken String
-  jobSpec      String    @default("{}")
-  content      String    @default("{}") // { en, it, de }
+  previewToken         String
+  jobSpec              String  @default("{}")
+  content              String  @default("{}") // { en, it, de }
   /// Immutable first-generation copy. Never edited — it is the baseline the
   /// edit-learning loop diffs against to work out how he rewrites things.
-  generatedContent String @default("{}")
-  cvContent    String    @default("{}")
-  coverLetter  String    @default("{}")
+  generatedContent     String  @default("{}")
+  cvContent            String  @default("{}")
+  coverLetter          String  @default("{}")
   /// Frozen first-generation copies, the document equivalents of
   /// `generatedContent`. A hand edit is diffed against the generation, not
   /// against the previous save — the pair worth learning from is "what the
   /// model wrote → what he actually sends", not the last increment.
-  generatedCvContent   String @default("{}")
-  generatedCoverLetter String @default("{}")
-  brand        String    @default("{}")
-  warnings     String    @default("[]")
+  generatedCvContent   String  @default("{}")
+  generatedCoverLetter String  @default("{}")
+  brand                String  @default("{}")
+  warnings             String  @default("[]")
   /// Whether this application is worth the time: score, band, per-must-have
   /// status and the arithmetic it was derived from. Stored rather than
   /// recomputed — it costs a model call and only moves when the posting or the
   /// brief does.
-  fitAssessment String   @default("{}")
+  fitAssessment        String  @default("{}")
   /// Checks he has reviewed and accepted, as a JSON array of stable keys
   /// (code|locale|path). Warnings are recomputed from the validators on every
   /// save, so a dismissal cannot live in `warnings` — the next edit would
   /// overwrite it. The recompute filters against this instead.
-  dismissedWarnings String @default("[]")
+  dismissedWarnings    String  @default("[]")
 
   /// Application pipeline, separate from `status` (which is page publication).
   /// not_sent | sent | acknowledged | interview | rejected | offer | withdrawn
-  applicationStatus String  @default("not_sent")
+  applicationStatus String    @default("not_sent")
   sentAt            DateTime?
   /// email | portal | linkedin | referral | other
   sentVia           String?
   /// Frozen copy of exactly what was sent. Later edits must not rewrite history.
-  sentSnapshot      String   @default("{}")
+  sentSnapshot      String    @default("{}")
   outcomeNotes      String?
 
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  publishedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
 
-  edits        ApplicationEdit[]
+  edits ApplicationEdit[]
 
   @@index([status])
   @@index([applicationStatus])
@@ -304,24 +304,24 @@ model GeneratedBrief {
 /// most direct evidence of his actual voice. Recent pairs are fed back into
 /// generation, and periodically distilled into durable style rules.
 model ApplicationEdit {
-  id        String   @id @default(cuid())
-  briefId   String
-  brief     GeneratedBrief @relation(fields: [briefId], references: [id], onDelete: Cascade)
+  id          String         @id @default(cuid())
+  briefId     String
+  brief       GeneratedBrief @relation(fields: [briefId], references: [id], onDelete: Cascade)
   /// brief | cv | letter
-  kind      String
-  locale    String
+  kind        String
+  locale      String
   /// Dotted path into the content, e.g. "hero.description".
-  path      String
-  before    String
-  after     String
+  path        String
+  before      String
+  after       String
   /// What he asked for, when the change came from a typed instruction rather
   /// than a direct hand edit. The diff shows that a sentence changed; this
   /// shows why, and the why is the part that generalises to the next
   /// application. Null for hand edits.
   instruction String?
   /// Set once a distillation run has folded this into the style rules.
-  distilled Boolean  @default(false)
-  createdAt DateTime @default(now())
+  distilled   Boolean        @default(false)
+  createdAt   DateTime       @default(now())
 
   @@index([briefId])
   @@index([distilled])
@@ -340,54 +340,54 @@ model ApplicationEdit {
 /// suggestion, or the second search costs as much attention as the first and
 /// the feature stops saving anything.
 model JobLead {
-  id           String   @id @default(cuid())
+  id             String   @id @default(cuid())
   /// Normalised posting URL — the dedupe key. One posting, one row, however
   /// many searches surface it.
-  url          String   @unique
-  title        String
-  companyName  String
-  location     String   @default("")
+  url            String   @unique
+  title          String
+  companyName    String
+  location       String   @default("")
   /// onsite | hybrid | remote | unspecified
-  workModel    String   @default("unspecified")
+  workModel      String   @default("unspecified")
   /// Compensation exactly as the posting words it. Empty when it says nothing —
   /// never an inference, because a salary he was shown and not offered is worse
   /// than no number at all.
-  salaryText   String   @default("")
-  postedText   String   @default("")
+  salaryText     String   @default("")
+  postedText     String   @default("")
   /// The posting date as YYYY-MM-DD when it could be determined, else empty.
   /// Kept alongside `postedText` because the words are what he reads and the
   /// date is what the staleness filter acts on.
-  postedIso    String   @default("")
+  postedIso      String   @default("")
   /// The board or careers-site host the posting sits on.
-  source       String   @default("")
-  summary      String   @default("")
+  source         String   @default("")
+  summary        String   @default("")
   /// JSON string[] — the requirements the search could see, which is what the
   /// lead score was computed from and all it may be held to.
-  requirements String   @default("[]")
+  requirements   String   @default("[]")
   /// live | gone | unverified. Set by an actual request to the URL, never by
   /// the model that reported it. `unverified` is its own answer: a board that
   /// blocks server requests is not a posting that has been taken down.
-  liveness     String   @default("unverified")
+  liveness       String   @default("unverified")
   /// The cheap pre-generation score, 0-100. Deliberately NOT the fit score in
   /// `GeneratedBrief.fitAssessment`: that one reads the brief's own requirement
   /// rows and cannot exist before the brief does.
-  leadScore    Int      @default(0)
-  band         String   @default("long-shot")
-  recommendation String @default("apply-if-time")
+  leadScore      Int      @default(0)
+  band           String   @default("long-shot")
+  recommendation String   @default("apply-if-time")
   /// Named when something makes this near-impossible regardless of fit. A
   /// non-empty value caps the score at 19, enforced in the route as well as in
   /// the prompt.
-  hardBlocker  String   @default("")
+  hardBlocker    String   @default("")
   /// { verdict, drivers[], risks[] }
-  scoreDetail  String   @default("{}")
+  scoreDetail    String   @default("{}")
   /// new | saved | dismissed | applied
-  state        String   @default("new")
+  state          String   @default("new")
   /// Set once this lead became an application.
-  briefId      String?
+  briefId        String?
   /// The search criteria that found it, for "why am I being shown this".
-  criteria     String   @default("{}")
-  foundAt      DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  criteria       String   @default("{}")
+  foundAt        DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([state])
   @@index([leadScore])
@@ -452,45 +452,45 @@ model ScheduledRun {
 }
 
 model Analytics {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
   // Page analytics
-  path        String
-  title       String?
+  path  String
+  title String?
 
   // User info (anonymized)
-  sessionId   String
-  ipAddress   String?
-  userAgent   String?
-  country     String?
-  city        String?
+  sessionId String
+  ipAddress String?
+  userAgent String?
+  country   String?
+  city      String?
 
   // Referrer / attribution info
-  referrer    String?
-  source      String?   // e.g., "google", "direct", "github"
-  medium      String?   // e.g., "organic", "social", "referral"
-  campaign    String?
-  ref         String?   // per-recruiter link tag from ?ref=
+  referrer String?
+  source   String? // e.g., "google", "direct", "github"
+  medium   String? // e.g., "organic", "social", "referral"
+  campaign String?
+  ref      String? // per-recruiter link tag from ?ref=
 
   // Visitor info
-  isReturning Boolean   @default(false) // first-party returning visitor (90d)
-  isOwner     Boolean   @default(false) // the site owner's own visit (excluded from the dashboard by default)
+  isReturning Boolean @default(false) // first-party returning visitor (90d)
+  isOwner     Boolean @default(false) // the site owner's own visit (excluded from the dashboard by default)
 
   // Traffic quality — see src/lib/analytics-classify.ts
-  isBot       Boolean   @default(false) // automated traffic (excluded by default)
-  botReason   String?   // cli | crawler | ai-bot | fetcher | email-scanner | headless | empty-ua
-  isHuman     Boolean   @default(false) // confirmed by the client-side beacon (JS actually ran)
-  browser     String?
-  os          String?
-  deviceType  String?   // desktop | mobile | tablet
-  refHost     String?   // normalised referrer host, 'direct' for none/self
+  isBot      Boolean @default(false) // automated traffic (excluded by default)
+  botReason  String? // cli | crawler | ai-bot | fetcher | email-scanner | headless | empty-ua
+  isHuman    Boolean @default(false) // confirmed by the client-side beacon (JS actually ran)
+  browser    String?
+  os         String?
+  deviceType String? // desktop | mobile | tablet
+  refHost    String? // normalised referrer host, 'direct' for none/self
 
   // Engagement metrics
-  duration    Int?      // time spent on page in seconds
-  scrollDepth Int?      // percentage of page scrolled (0-100)
-  bounce      Boolean   @default(false)
+  duration    Int? // time spent on page in seconds
+  scrollDepth Int? // percentage of page scrolled (0-100)
+  bounce      Boolean @default(false)
 
-  createdAt   DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@index([path])
   @@index([sessionId])
@@ -499,24 +499,24 @@ model Analytics {
 }
 
 model MediaFile {
-  id          String   @id @default(cuid())
-  filename    String
+  id           String  @id @default(cuid())
+  filename     String
   originalName String
-  mimeType    String
-  size        Int      // file size in bytes
-  url         String   // URL to access the file
-  alt         String?  // alt text for images
+  mimeType     String
+  size         Int // file size in bytes
+  url          String // URL to access the file
+  alt          String? // alt text for images
 
   // Metadata
-  width       Int?     // for images
-  height      Int?     // for images
+  width  Int? // for images
+  height Int? // for images
 
   // Organization
-  folder      String?  // virtual folder structure
-  tags        String? // JSON string for categorization
+  folder String? // virtual folder structure
+  tags   String? // JSON string for categorization
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Enums
@@ -553,39 +553,39 @@ enum ContactStatus {
 
 // Recruiter Landing Page System Models
 model RecruiterPage {
-  id           String   @id @default(cuid())
-  title        String
-  slug         String   @unique
-  companyName  String
-  companySlug  String
-  isActive     Boolean  @default(true)
+  id          String  @id @default(cuid())
+  title       String
+  slug        String  @unique
+  companyName String
+  companySlug String
+  isActive    Boolean @default(true)
 
   // Target Role & Company
-  roleName     String?
-  roleLevel    String?  // "Director", "VP", "Chief"
-  companySize  String?  // "Startup", "Growth", "Enterprise"
-  industry     String?  // "B2B SaaS", "E-commerce", "FinTech"
+  roleName    String?
+  roleLevel   String? // "Director", "VP", "Chief"
+  companySize String? // "Startup", "Growth", "Enterprise"
+  industry    String? // "B2B SaaS", "E-commerce", "FinTech"
 
   // Template & Personalization
-  templateType String   // "company-mirror", "day-one-impact", "executive-briefing"
-  customContent Json?   // Flexible content structure
+  templateType  String // "company-mirror", "day-one-impact", "executive-briefing"
+  customContent Json? // Flexible content structure
 
   // Company Research Integration
-  companyInfo  Json?    // Researched company data
-  challenges   Json?    // Identified challenges array
-  solutions    Json?    // Proposed solutions array
+  companyInfo Json? // Researched company data
+  challenges  Json? // Identified challenges array
+  solutions   Json? // Proposed solutions array
 
   // Analytics & Performance
-  views        Int      @default(0)
-  uniqueViews  Int      @default(0)
-  timeOnPage   Int?     // Average seconds
-  responses    Int      @default(0)
+  views       Int  @default(0)
+  uniqueViews Int  @default(0)
+  timeOnPage  Int? // Average seconds
+  responses   Int  @default(0)
 
   // Metadata
-  authorId     String
-  author       User     @relation(fields: [authorId], references: [id])
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
   analytics    RecruiterPageAnalytics[]
@@ -597,27 +597,61 @@ model RecruiterPage {
 }
 
 // Page Analytics Tracking
+/// One interaction inside a visit — a click, a scroll milestone, a form step.
+///
+/// Separate from `Analytics`, which is one row per page view. The two join on
+/// `sessionId` + `path`, the same key `/analytics/confirm` uses, so a visit's
+/// views and its interactions line up without a foreign key between them.
+///
+/// Nothing here identifies a person: the session id is the 30-minute `pv_sid`
+/// cookie, and `props` is a small JSON blob of UI state, never input content.
+model AnalyticsEvent {
+  id         String   @id @default(cuid())
+  sessionId  String
+  path       String
+  /// click | scroll | form | engagement | download | locale
+  name       String
+  /// outbound | contact | chrome | brief | reading | content
+  category   String?
+  /// linkedin | theme-toggle | requirement-card | cv-pdf …
+  label      String?
+  /// One small value — a percentage, a locale pair, a destination host.
+  value      String?
+  /// Anything else, as JSON.
+  props      String?
+  country    String?
+  deviceType String?
+  isOwner    Boolean  @default(false)
+  isBot      Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([path])
+  @@index([createdAt])
+  @@index([category, label])
+}
+
 model RecruiterPageAnalytics {
-  id           String       @id @default(cuid())
-  pageId       String
-  page         RecruiterPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  id     String        @id @default(cuid())
+  pageId String
+  page   RecruiterPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
   // Visitor Info
-  sessionId    String
-  ipAddress    String?
-  userAgent    String?
-  referrer     String?
+  sessionId String
+  ipAddress String?
+  userAgent String?
+  referrer  String?
 
   // Engagement Metrics
-  timeSpent    Int?         // Seconds on page
-  scrollDepth  Int?         // Percentage scrolled
-  interactions Int          @default(0)
+  timeSpent    Int? // Seconds on page
+  scrollDepth  Int? // Percentage scrolled
+  interactions Int  @default(0)
 
   // Geographic
-  country      String?
-  city         String?
+  country String?
+  city    String?
 
-  visitedAt    DateTime     @default(now())
+  visitedAt DateTime @default(now())
 
   @@index([pageId])
   @@index([sessionId])
@@ -626,22 +660,22 @@ model RecruiterPageAnalytics {
 
 // Interactive Elements Tracking
 model RecruiterPageInteraction {
-  id           String       @id @default(cuid())
-  pageId       String
-  page         RecruiterPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  id     String        @id @default(cuid())
+  pageId String
+  page   RecruiterPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
   // Interaction Details
-  sessionId    String
-  elementType  String       // "roi-calculator", "action-plan", "case-study"
-  elementId    String
-  actionType   String       // "click", "input", "download", "share"
+  sessionId   String
+  elementType String // "roi-calculator", "action-plan", "case-study"
+  elementId   String
+  actionType  String // "click", "input", "download", "share"
 
   // Data Captured
-  inputData    Json?        // User inputs for calculators
-  result       Json?        // Calculated results
-  duration     Int?         // Time spent on element
+  inputData Json? // User inputs for calculators
+  result    Json? // Calculated results
+  duration  Int? // Time spent on element
 
-  createdAt    DateTime     @default(now())
+  createdAt DateTime @default(now())
 
   @@index([pageId])
   @@index([sessionId])
@@ -650,31 +684,31 @@ model RecruiterPageInteraction {
 
 // Company Research Cache
 model CompanyResearch {
-  id             String   @id @default(cuid())
-  companyName    String   @unique
-  domain         String?
+  id          String  @id @default(cuid())
+  companyName String  @unique
+  domain      String?
 
   // Basic Info
-  size           String?  // "10-50", "100-500", "1000+"
-  industry       String?
-  stage          String?  // "Startup", "Growth", "Public"
-  location       String?
+  size     String? // "10-50", "100-500", "1000+"
+  industry String?
+  stage    String? // "Startup", "Growth", "Public"
+  location String?
 
   // Business Intelligence
-  recentNews     Json?    // Latest news and announcements
-  products       Json?    // Product portfolio
-  competitors    Json?    // Competitive landscape
-  challenges     Json?    // Identified market challenges
+  recentNews  Json? // Latest news and announcements
+  products    Json? // Product portfolio
+  competitors Json? // Competitive landscape
+  challenges  Json? // Identified market challenges
 
   // Technology Stack (if available)
-  techStack      Json?
+  techStack Json?
 
   // Update tracking
   lastResearched DateTime @default(now())
   needsUpdate    Boolean  @default(false)
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([companyName])
   @@index([industry])

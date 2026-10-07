@@ -16,6 +16,8 @@ import {
   Monitor,
   Users,
   ExternalLink,
+  MousePointerClick,
+  ScrollText,
 } from 'lucide-react'
 
 interface CountViews {
@@ -58,6 +60,22 @@ interface NameViews {
   name: string
   views: number
 }
+interface EventRow {
+  category: string
+  label: string
+  count: number
+  sessions: number
+}
+interface EventPathRow {
+  path: string
+  label: string
+  count: number
+}
+interface ScrollRow {
+  path: string
+  depth: string
+  sessions: number
+}
 interface Summary {
   timeframe: string
   totalViews: number
@@ -85,6 +103,12 @@ interface Summary {
   countries: CountViews[]
   refs: RefViews[]
   recent: RecentRow[]
+  /** Interactions. Absent until the Worker carrying them is deployed. */
+  events?: {
+    top: EventRow[]
+    byPath: EventPathRow[]
+    scrollReach: ScrollRow[]
+  }
 }
 
 /** Seconds → compact "3m 12s" / "8s". */
@@ -619,6 +643,108 @@ export function AnalyticsDashboard() {
       </Card>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Interactions */}
+        {data.events && data.events.top.length > 0 && (
+          <Card className="p-6">
+            <h3 className="mb-1 flex items-center text-lg font-semibold text-gray-900">
+              <MousePointerClick className="mr-2 h-5 w-5" />
+              What people did
+            </h3>
+            <p className="mb-4 text-sm text-gray-500">
+              Counted per interaction, and per visit — a visitor who clicks the
+              same link twice is one session, two clicks.
+            </p>
+            <div className="space-y-3">
+              {data.events.top.slice(0, 12).map(e => {
+                const top = data.events!.top[0].count || 1
+                const pct = Math.round((e.count / top) * 100)
+                return (
+                  <div
+                    key={`${e.category}:${e.label}`}
+                    className="flex items-center gap-3"
+                  >
+                    <span className="w-44 truncate text-sm text-gray-700">
+                      <span className="text-gray-400">{e.category}</span>{' '}
+                      {e.label}
+                    </span>
+                    <div className="h-2 flex-1 rounded-full bg-gray-200">
+                      <div
+                        className="h-2 rounded-full bg-indigo-600"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="w-24 text-right text-sm text-gray-600">
+                      {e.count} · {e.sessions} visit
+                      {e.sessions === 1 ? '' : 's'}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </Card>
+        )}
+
+        {/* How far down each page people get */}
+        {data.events && data.events.scrollReach.length > 0 && (
+          <Card className="p-6">
+            <h3 className="mb-1 flex items-center text-lg font-semibold text-gray-900">
+              <ScrollText className="mr-2 h-5 w-5" />
+              How far they read
+            </h3>
+            <p className="mb-4 text-sm text-gray-500">
+              Visits that reached each depth. The drop between 50% and 100% is
+              where a page loses people.
+            </p>
+            <div className="space-y-4">
+              {Object.entries(
+                data.events.scrollReach.reduce<Record<string, ScrollRow[]>>(
+                  (acc, row) => {
+                    ;(acc[row.path] ||= []).push(row)
+                    return acc
+                  },
+                  {}
+                )
+              )
+                .sort(
+                  (a, b) =>
+                    Math.max(...b[1].map(r => r.sessions)) -
+                    Math.max(...a[1].map(r => r.sessions))
+                )
+                .slice(0, 8)
+                .map(([path, rows]) => {
+                  const start = Math.max(...rows.map(r => r.sessions)) || 1
+                  return (
+                    <div key={path}>
+                      <p className="mb-1.5 truncate text-sm font-medium text-gray-800">
+                        {prettyPath(path)}
+                      </p>
+                      <div className="flex gap-1.5">
+                        {['25', '50', '75', '100'].map(depth => {
+                          const row = rows.find(r => r.depth === depth)
+                          const reached = row?.sessions ?? 0
+                          const pct = Math.round((reached / start) * 100)
+                          return (
+                            <div key={depth} className="flex-1">
+                              <div className="h-8 overflow-hidden rounded bg-gray-100">
+                                <div
+                                  className="h-full bg-indigo-500/80"
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                              <p className="mt-1 text-center text-[11px] text-gray-500">
+                                {depth}% · {reached}
+                              </p>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
+          </Card>
+        )}
+
         {/* Countries overview */}
         <Card className="p-6">
           <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-900">
