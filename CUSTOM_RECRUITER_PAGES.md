@@ -1144,14 +1144,22 @@ Three things learned building it, all of which cost a render to find:
   The corpus exists because the generator was inventing a dead LinkedIn
   handle; a hand-written document is no more trustworthy than a generated one.
 
-**What `minPresenceAhead` being dead means for the CV.** It is the only thing
-standing between the CV and letter designs and a stranded heading, and
-`check-pdf-pagination` asserts the outcome rather than the mechanism — so the
-gate passes because the sample content happens not to strand, not because the
-documents are protected. The brief does not rely on it: each heading is glued
-to its first child inside a `wrap={false}` block, which is the same guarantee
-by a mechanism that demonstrably works. **The CV and letter designs still rely
-on the dead prop and should be moved to the same pattern.**
+**The CV and letter designs now use the same pattern.** `minPresenceAhead` was
+the only thing standing between them and a stranded heading, so every section
+heading in `single.tsx` and `column.tsx` is wrapped with its first entry in a
+`<Keep>` — and every role header now travels with its company line and first
+bullet, which is what its own comment always claimed it did.
+
+Be clear about what that is and is not proven by. The _mechanism_ is proven:
+on the brief PDF a heading stranded with `minPresenceAhead` and stopped
+stranding with `wrap={false}`, and `check:brief-pdf` fails if the glue is
+removed. The _CV fix_ is not proven by its gate: `check-pdf-pagination` was
+widened from 24 to 144 renders — the summary is now padded a line at a time,
+because a bullet-count sweep moves a break in jumps too coarse to ever land on
+a heading — and it still passes with a heading deliberately unglued. The
+sample content simply never puts a section heading at a page foot. The fix is
+structurally right and uses a mechanism that works here; the gate cannot
+currently tell the difference.
 
 **The brief has its own gate: `npm run check:brief-pdf`.** It renders every
 brief in every locale and asserts two things, each with a negative control:
