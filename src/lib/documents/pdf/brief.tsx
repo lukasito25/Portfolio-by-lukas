@@ -10,8 +10,12 @@
  * Its own format rather than one of the six CV designs, because a brief is a
  * different document — an argument mapped against a posting, not a career in
  * reverse chronology. It borrows the exploratory prototype's language instead:
- * numbered movements, the figures given room, a verdict beside every
- * requirement.
+ * numbered movements and the figures given room.
+ *
+ * No match/transferable badge, though the page carries one. On screen that
+ * tier is a filter the reader drives; printed beside every line it reads as a
+ * self-assessment nobody asked for, and "TRANSFERABLE" in a document that gets
+ * forwarded is a caveat travelling without the paragraph that answers it.
  *
  * **It renders only what the page already says.** Every string here comes from
  * `FitBriefContent`, which the honesty layer has already validated against the
@@ -20,8 +24,8 @@
  * citation checks for free.
  *
  * Density is handled with hierarchy, not with cuts: every section is present,
- * but a requirement is a bold line with its verdict to the right and its proof
- * small underneath, so the document is scanned rather than read. Trimming the
+ * but a requirement is a bold line with its proof small underneath, so the
+ * document is scanned rather than read. Trimming the
  * prose would have meant deciding what a recruiter does not need to see, which
  * is the page's job and not this file's.
  */
@@ -34,11 +38,34 @@ import {
   Link,
   StyleSheet,
 } from '@react-pdf/renderer'
-import type { Style } from '@react-pdf/types'
 import type { FitBriefContent } from '@/lib/fit-brief/schema'
+import { getFact } from '@/lib/career-facts'
 import ink from '../ink.json'
 
 const hex = (value: string) => `#${value}`
+
+/**
+ * The contact line, read from the corpus rather than typed here.
+ *
+ * It was typed here, with the gmail address — which `contact.email` explicitly
+ * flags as the 2018-era one and says never to use. Hardcoding contact details
+ * is precisely what the corpus exists to stop: the generator was inventing a
+ * dead LinkedIn handle until they were made citable facts, and a hand-written
+ * document is no more trustworthy than a generated one.
+ */
+function contactLine(): string {
+  const strip = (id: string) =>
+    getFact(id)
+      ?.claim.replace(/^[A-Za-z ]+:\s*/, '')
+      .trim()
+  return [
+    'Senior Product Manager',
+    strip('contact.email'),
+    'Based in Italy, working internationally',
+  ]
+    .filter(Boolean)
+    .join(' · ')
+}
 
 /** Paper is white, so the brief's light-mode accent is the right one. */
 export interface BriefTheme {
@@ -103,23 +130,12 @@ const styles = StyleSheet.create({
   },
 
   /* movements */
-  sectionHead: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   numeral: { fontSize: 13, fontWeight: 700 },
   sectionTitle: { fontSize: 11.5, fontWeight: 700, letterSpacing: -0.2 },
 
   /* a requirement and its answer */
   row: { marginTop: 11 },
-  rowTop: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
   requirement: { flex: 1, fontSize: 9.5, fontWeight: 600, lineHeight: 1.35 },
-  verdict: {
-    fontSize: 6.5,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-    fontWeight: 600,
-    paddingVertical: 2.5,
-    paddingHorizontal: 6,
-    borderRadius: 7,
-  },
   proof: {
     fontSize: 8.5,
     lineHeight: 1.45,
@@ -169,29 +185,79 @@ const styles = StyleSheet.create({
  *
  * `minPresenceAhead` is the rule the CV designs already follow: a heading that
  * lands as the last line of a page has stranded its own section overleaf.
+ *
+ * 130, not the 56 this shipped with. The number has to cover the heading, its
+ * rule, and the whole of the first item beneath it — a role-map card is a tag,
+ * a title and three lines of body, about 70pt on its own. At 56 the heading
+ * cleared the break and the card did not, which put "02 How my experience maps
+ * to the work" alone at the foot of page one. Reserving less than the first
+ * child needs is the same bug as reserving nothing.
+ */
+/**
+ * A movement heading, glued to whatever comes first beneath it.
+ *
+ * `minPresenceAhead` is how the CV designs do this and it does nothing in
+ * react-pdf 4.9.0 — verified by raising it from 56 to 130 and rebuilding
+ * clean, with "02 How my experience maps to the work" still sitting alone at
+ * the foot of page one. (`render` on a Text is dead in the same version, so
+ * the two are likely the same regression.)
+ *
+ * `wrap={false}` is not dead: it is what keeps a requirement and its proof
+ * together, which held through every test. So the heading does not reserve
+ * space ahead of itself — it simply refuses to be separated from its first
+ * child, which is the same guarantee by a mechanism that works.
  */
 function Movement({
   numeral,
   title,
   accent,
+  first,
 }: {
   numeral: string
   title: string
   accent: string
+  /** Rendered inside the unbreakable block, so the heading never lands alone. */
+  first: React.ReactNode
 }) {
   return (
-    <View style={{ marginTop: 22 }} minPresenceAhead={56}>
-      <View style={styles.sectionHead}>
+    <View style={{ marginTop: 22 }} wrap={false}>
+      <Text style={styles.sectionTitle}>
         <Text style={[styles.numeral, { color: accent }]}>{numeral}</Text>
-        <Text style={styles.sectionTitle}>{title}</Text>
-      </View>
+        {'   '}
+        {title}
+      </Text>
       <View
-        style={{
-          height: 1,
-          backgroundColor: hex(ink.hairline),
-          marginTop: 7,
-        }}
+        style={{ height: 1, backgroundColor: hex(ink.hairline), marginTop: 7 }}
       />
+      {first}
+    </View>
+  )
+}
+
+/** A requirement and its proof are one thought and never split. */
+function Requirement({
+  row,
+}: {
+  row: FitBriefContent['profileMatchSection']['panels'][number]['rows'][number]
+}) {
+  return (
+    <View style={styles.row} wrap={false}>
+      <Text style={styles.requirement}>{row.requirement}</Text>
+      <Text style={styles.proof}>{row.proof}</Text>
+    </View>
+  )
+}
+
+function WorkItem({
+  item,
+}: {
+  item: FitBriefContent['roleMapSection']['items'][number]
+}) {
+  return (
+    <View style={styles.card} wrap={false}>
+      <Text style={styles.cardTag}>{item.tag}</Text>
+      <Text style={styles.cardTitle}>{item.title}</Text>
+      <Text style={styles.cardBody}>{item.body}</Text>
     </View>
   )
 }
@@ -208,15 +274,6 @@ export function BriefDocument({
 }) {
   const accent = theme.accent
   const rows = content.profileMatchSection.panels.flatMap(p => p.rows)
-
-  const verdictStyle = (isMatch: boolean): Style =>
-    isMatch
-      ? { backgroundColor: hex(ink.accentSoft), color: accent }
-      : {
-          borderWidth: 1,
-          borderColor: hex(ink.hairline),
-          color: hex(ink.tertiary),
-        }
 
   return (
     <Document
@@ -239,10 +296,7 @@ export function BriefDocument({
 
         <View>
           <Text style={styles.name}>Lukáš Hošala</Text>
-          <Text style={styles.contact}>
-            Senior Product Manager · hosala.lukas@gmail.com · Based in Italy,
-            working internationally
-          </Text>
+          <Text style={styles.contact}>{contactLine()}</Text>
         </View>
         <View style={styles.rule} />
 
@@ -269,19 +323,10 @@ export function BriefDocument({
           numeral="01"
           title={content.profileMatchSection.heading}
           accent={accent}
+          first={rows[0] ? <Requirement row={rows[0]} /> : null}
         />
-        {rows.map(row => (
-          // A requirement and its proof are one thought; splitting them across
-          // a page break leaves a claim with no answer under it.
-          <View key={row.requirement} style={styles.row} wrap={false}>
-            <View style={styles.rowTop}>
-              <Text style={styles.requirement}>{row.requirement}</Text>
-              <Text style={[styles.verdict, verdictStyle(row.isMatch)]}>
-                {row.tierLabel}
-              </Text>
-            </View>
-            <Text style={styles.proof}>{row.proof}</Text>
-          </View>
+        {rows.slice(1).map(row => (
+          <Requirement key={row.requirement} row={row} />
         ))}
 
         {/* ---- 02 the work ---- */}
@@ -289,13 +334,14 @@ export function BriefDocument({
           numeral="02"
           title={content.roleMapSection.heading}
           accent={accent}
+          first={
+            content.roleMapSection.items[0] ? (
+              <WorkItem item={content.roleMapSection.items[0]} />
+            ) : null
+          }
         />
-        {content.roleMapSection.items.map(item => (
-          <View key={item.id} style={styles.card} wrap={false}>
-            <Text style={styles.cardTag}>{item.tag}</Text>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.cardBody}>{item.body}</Text>
-          </View>
+        {content.roleMapSection.items.slice(1).map(item => (
+          <WorkItem key={item.id} item={item} />
         ))}
 
         {/* ---- 03 the project ---- */}
@@ -303,16 +349,22 @@ export function BriefDocument({
           numeral="03"
           title={content.spotlight.heading}
           accent={accent}
+          first={
+            <>
+              <View style={{ flexDirection: 'row', gap: 8, marginTop: 9 }}>
+                <Text style={[styles.cardTag, { color: accent }]}>
+                  {content.spotlight.chip}
+                </Text>
+                <Text style={styles.cardTag}>
+                  {content.spotlight.statusBadge}
+                </Text>
+              </View>
+              <Text style={[styles.proof, { marginTop: 5 }]}>
+                {content.spotlight.lede}
+              </Text>
+            </>
+          }
         />
-        <View style={{ flexDirection: 'row', gap: 8, marginTop: 9 }}>
-          <Text style={[styles.cardTag, { color: accent }]}>
-            {content.spotlight.chip}
-          </Text>
-          <Text style={styles.cardTag}>{content.spotlight.statusBadge}</Text>
-        </View>
-        <Text style={[styles.proof, { marginTop: 5 }]}>
-          {content.spotlight.lede}
-        </Text>
         {content.spotlight.pillars.map(pillar => (
           <View key={pillar.title} style={styles.card} wrap={false}>
             <Text style={styles.cardTitle}>{pillar.title}</Text>
@@ -328,10 +380,16 @@ export function BriefDocument({
         </View>
 
         {/* ---- 04 where it stops short ---- */}
-        <Movement numeral="04" title={content.gap.heading} accent={accent} />
-        <Text style={[styles.proof, { marginTop: 9, maxWidth: 460 }]}>
-          {content.gap.body}
-        </Text>
+        <Movement
+          numeral="04"
+          title={content.gap.heading}
+          accent={accent}
+          first={
+            <Text style={[styles.proof, { marginTop: 9, maxWidth: 460 }]}>
+              {content.gap.body}
+            </Text>
+          }
+        />
 
         {/* ---- close ---- */}
         <View style={{ marginTop: 22 }} wrap={false}>

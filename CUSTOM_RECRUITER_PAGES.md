@@ -1131,11 +1131,32 @@ Three things learned building it, all of which cost a render to find:
 - **`fixed` belongs on the leaf, and the leaf must be declared before the
   flowing content.** On an absolutely positioned wrapper, or placed after the
   body, it renders nothing and says nothing about it.
-- **`render={({ pageNumber }) => …}` produces nothing in react-pdf 4.9.0.**
-  Verified by extracting the shipped `column` and `classic` CVs, which carry
-  the same footer and show no page numbers on a two-page document either — so
-  this is a pre-existing library condition, not a property of the brief. The
-  brief carries the page URL alone rather than a dead element.
+- **Two react-pdf props are dead in 4.9.0, and both fail silently.**
+  `render={({ pageNumber }) => …}` produces nothing — verified by extracting
+  the shipped `column` and `classic` CVs, which carry the same footer and show
+  no page numbers on a two-page document either. And **`minPresenceAhead` does
+  nothing**: raised from 56 to 130 on a `View`, then moved onto the `Text` the
+  way `column.tsx` uses it, rebuilt clean each time, and "02 How my experience
+  maps to the work" still sat alone at the foot of page one.
+- **Contact details come from the corpus, never typed.** This shipped with
+  `hosala.lukas@gmail.com` hardcoded in the letterhead — the address
+  `contact.email` explicitly flags as the 2018-era one and says never to use.
+  The corpus exists because the generator was inventing a dead LinkedIn
+  handle; a hand-written document is no more trustworthy than a generated one.
+
+**What `minPresenceAhead` being dead means for the CV.** It is the only thing
+standing between the CV and letter designs and a stranded heading, and
+`check-pdf-pagination` asserts the outcome rather than the mechanism — so the
+gate passes because the sample content happens not to strand, not because the
+documents are protected. The brief does not rely on it: each heading is glued
+to its first child inside a `wrap={false}` block, which is the same guarantee
+by a mechanism that demonstrably works. **The CV and letter designs still rely
+on the dead prop and should be moved to the same pattern.**
+
+Note also that `check-pdf-pagination` only covers the CV and letter renders,
+and its `HEADINGS` regex matches CV section labels — so it would not have
+caught the brief's stranded heading even if it ran over it. Adding the brief to
+the gate is worth doing.
 
 The new route needs its own `outputFileTracingIncludes` entry in
 `next.config.ts`, for the same reason the admin document route does: `pdfkit`
