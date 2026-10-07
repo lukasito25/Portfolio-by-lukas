@@ -1153,10 +1153,22 @@ to its first child inside a `wrap={false}` block, which is the same guarantee
 by a mechanism that demonstrably works. **The CV and letter designs still rely
 on the dead prop and should be moved to the same pattern.**
 
-Note also that `check-pdf-pagination` only covers the CV and letter renders,
-and its `HEADINGS` regex matches CV section labels — so it would not have
-caught the brief's stranded heading even if it ran over it. Adding the brief to
-the gate is worth doing.
+**The brief has its own gate: `npm run check:brief-pdf`.** It renders every
+brief in every locale and asserts two things, each with a negative control:
+
+- **No two runs drawn on top of one another.** This shipped broken: a
+  `flex: 1` left on the requirement after the verdict badge was removed
+  collapsed its height to nothing in a column layout, and every proof
+  paragraph printed over its own heading — nine of them on page one, in a
+  document meant to be forwarded. It was found by reading the file, not by any
+  check, which is why the check now exists.
+- **No section heading alone at the foot of a page.**
+
+It is a separate script rather than part of `npm run check:docs` because it
+needs the dev server — `check:docs` is a chain of offline renders and folding
+an HTTP dependency into it would cost that. `check-pdf-pagination` would not
+have caught either defect anyway: it covers the CV and letter renders only, and
+its `HEADINGS` regex matches CV section labels.
 
 The new route needs its own `outputFileTracingIncludes` entry in
 `next.config.ts`, for the same reason the admin document route does: `pdfkit`

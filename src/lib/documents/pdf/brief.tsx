@@ -135,7 +135,10 @@ const styles = StyleSheet.create({
 
   /* a requirement and its answer */
   row: { marginTop: 11 },
-  requirement: { flex: 1, fontSize: 9.5, fontWeight: 600, lineHeight: 1.35 },
+  // No `flex: 1`. It was there to share a flex row with the verdict badge;
+  // once the badge went, the row became a plain column and the flex collapsed
+  // the heading's height to nothing, so the proof was drawn on top of it.
+  requirement: { fontSize: 9.5, fontWeight: 600, lineHeight: 1.35 },
   proof: {
     fontSize: 8.5,
     lineHeight: 1.45,

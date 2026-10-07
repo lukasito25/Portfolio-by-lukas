@@ -32,6 +32,7 @@ node scripts/check-pdf-text.mjs        # assert what an ATS reads out of each PD
 node scripts/check-pdf-pagination.mjs  # assert no split bullet / stranded heading at any page break
 npx tsx scripts/check-doc-recommendation.ts  # assert which document the recommender picks per posting
 npm run check:docs     # all of the above in order — the document gate before any document PR
+npm run check:brief-pdf # the brief PDF: no overlapping text, no stranded heading (needs the dev server)
 node scripts/seed-example-brief.mjs    # seed a local /brief/[slug] fixture, prints a preview URL
 scripts/build-hero-video.sh <slug> <clip> [start] [dur]  # encode a brief's hero loop + poster
 npx tsx scripts/apply.ts <url|file|->  # generate an application from the terminal
