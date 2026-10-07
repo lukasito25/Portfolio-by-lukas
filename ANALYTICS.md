@@ -153,6 +153,105 @@ view excludes owner traffic and _declared_ bots; UA-spoofing scanners then surfa
 > admin GET endpoint now normalizes those values to explicit ISO-8601 UTC (`…Z`) before they
 > reach the client, and the dashboard renders them with the zone shown.
 
+## Interactions — what people do on a page
+
+Page views say someone arrived. Events say what they did once they were there:
+a link followed, the theme switched, a document downloaded, how far down the
+page they read.
+
+### Why it is a separate table and a separate endpoint
+
+There were two earlier attempts and neither worked.
+
+`src/components/analytics-provider.tsx` was written to capture exactly this —
+idle/active, email copies, outbound clicks, scroll milestones — and **was never
+mounted anywhere**. It also imports `AnalyticsClient`, which `src/lib/analytics.ts`
+does not export, and calls `analytics.trackInteraction()`, which was never
+written; it would not compile if anything imported it. None of it has ever run.
+It is left in place only so this note has something to point at.
+
+The second attempt was live and quietly lossy. `src/lib/analytics.ts` **is**
+used — by the contact form, the chatbot and the project carousel — and it
+POSTed its events to `/api/analytics`, which writes **page views**. That
+route's `normalize()` reads `body.name` only to tell the two body shapes apart
+and then never copies it into the row. So every `trackFormSubmission('contact_form')`
+wrote a second, phantom view of `/contact` and lost the event entirely. The
+view counts in this dashboard were inflated by it.
+
+Hence: events get their own table, their own Worker route and their own
+endpoint, with **no code path by which an event can become a view**.
+
+### The flow
+
+```
+InteractionTracker (every page)        src/components/analytics/interaction-tracker.tsx
+  → batched, flushed on a 2s timer or when the tab hides
+  → POST /api/analytics/event           src/app/api/analytics/event/route.ts
+      session taken from the pv_sid cookie, never the body
+  → Worker POST /analytics/events       cloudflare-api/src/routes/analytics.ts
+  → D1 AnalyticsEvent
+```
+
+Read back by `GET /analytics/summary`, which now returns an `events` object
+alongside the view aggregates, rendered by the two panels at the bottom of
+`/admin/analytics`.
+
+### What is captured
+
+| name       | category              | label                             | value                       |
+| ---------- | --------------------- | --------------------------------- | --------------------------- |
+| `click`    | `outbound`            | `linkedin`, `github`, or the host | the host                    |
+| `click`    | `contact`             | `email`, `phone`                  | —                           |
+| `click`    | `chrome`              | `nav`, `theme-toggle`             | the path, or the aria-label |
+| `click`    | _(from `data-track`)_ | whatever the element declares     | `data-track-value`          |
+| `download` | `content`             | the filename                      | —                           |
+| `form`     | `contact`             | `started`                         | the form name               |
+| `scroll`   | `reading`             | `depth`                           | `25`, `50`, `75`, `100`     |
+
+Anything can opt in by name with `data-track="…"` plus optional
+`data-track-category` / `data-track-value`; the delegated listener picks it up
+with no wiring. That marker wins over the generic link handling.
+
+### Decisions worth keeping
+
+- **Delegated listeners, not a hook.** An opt-in `useTrackEvent()` means the
+  next button someone adds is untracked and the gap is invisible. One
+  `document` listener covers everything that exists and everything added later.
+- **The session is the `pv_sid` cookie**, read server-side from the request, so
+  events join to the page view they happened inside — and a caller cannot
+  invent a session. The old library minted its own in-memory
+  `session_<timestamp>` which could never be joined to anything.
+- **Milestones fire on crossing, not equalling.** The earlier attempt tested
+  `[25,50,75,90].includes(pct)`, so a fast scroll from 48 to 61 reported
+  nothing at all.
+- **Batched.** A reader scrolling a long brief produces four milestones in a
+  few seconds; four round trips is three too many, and on a phone it is three
+  radio wake-ups too many.
+- **Never input content.** A form records that it was started and its name.
+  `props` is capped at 500 bytes, because an uncapped blob is how a tracking
+  table becomes a place personal data accidentally lands.
+- **The same opt-out as views.** `hasOptedOut()` in the browser, `pv_optout`
+  checked again on the server for a stale tab. `/admin` is skipped entirely.
+- **The privacy page says so.** `/privacy` states that interactions are
+  recorded against the session identifier and that typed content is not. If
+  the event vocabulary above grows beyond "which part of the page", that
+  paragraph has to grow with it.
+
+### Deploying it
+
+The Worker and the migration go **before** the app, as always:
+
+```bash
+cd cloudflare-api
+npx wrangler d1 execute portfolio-db --remote --file=migrations/add_analytics_events.sql
+npx wrangler deploy
+```
+
+Until both have run, `summary.events` is absent and the dashboard simply does
+not render the two panels — which is why they are written to tolerate it.
+
+---
+
 ## API Endpoints
 
 ### Analytics Data Collection

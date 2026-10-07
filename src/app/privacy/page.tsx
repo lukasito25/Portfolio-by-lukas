@@ -57,7 +57,15 @@ export default function PrivacyPage() {
             your network resolves to, the referring website, browser, operating
             system and device type, how long you stayed and how far you
             scrolled, plus a short-lived session identifier and a flag for
-            whether you have visited before.{' '}
+            whether you have visited before. The site also records{' '}
+            <strong className="text-foreground">
+              which parts of a page you interact with
+            </strong>{' '}
+            — a link followed, a theme switched, a section opened, how far down
+            a page you read — against that same session identifier, so I can
+            tell which parts of a page are useful and which are ignored. What
+            you type is never recorded: a contact form registers that it was
+            started, never its contents.{' '}
             <strong className="text-foreground">
               Your IP address is never stored
             </strong>{' '}
