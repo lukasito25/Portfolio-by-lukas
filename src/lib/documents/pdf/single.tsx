@@ -18,7 +18,7 @@
  *
  * - **Tracking stays under ~0.08em.** Past that, pdf.js reads glyph gaps as
  *   spaces and "SUMMARY" extracts as "S U M M A R Y".
- * - **A heading never strands at a page foot** — `minPresenceAhead` keeps it
+ * - **A heading never strands at a page foot** — a `<Keep>` block keeps it
  *   with what follows — and a role never splits, so no title sits alone at the
  *   bottom of page one.
  * - **Dates sit hard right** on the same line as the title, so the eye reads
@@ -526,9 +526,24 @@ function Letterhead({
  * Section heading
  * ------------------------------------------------------------------ */
 
+/**
+ * Two nodes that must not be separated by a page break.
+ *
+ * `minPresenceAhead` is what this used to be, and it does nothing in react-pdf
+ * 4.9.0 — raising it and rebuilding clean changes nothing, the same way
+ * `render` on a Text produces no page number. So nothing reserves space ahead
+ * of a heading any more; a heading simply travels inside the same unbreakable
+ * block as the first thing beneath it, which is the same guarantee by a
+ * mechanism that demonstrably works.
+ */
+const Keep = ({ children }: { children: React.ReactNode }) => (
+  <View wrap={false}>{children}</View>
+)
+
 const Section = ({ theme, label }: { theme: Theme; label: string }) => {
-  // Keeps the heading with at least a few lines of what follows.
-  const ahead = { minPresenceAhead: 48 }
+  // No `minPresenceAhead`: it is a no-op in this version. Callers wrap the
+  // heading and its first child in <Keep> instead.
+  const ahead = {}
   switch (theme.heading) {
     case 'bar':
       return (
@@ -610,49 +625,81 @@ const StatBand = ({ theme, cv }: { theme: Theme; cv: CvContent }) =>
     </View>
   ) : null
 
-const Roles = ({ theme, cv }: { theme: Theme; cv: CvContent }) => (
+const Roles = ({
+  theme,
+  cv,
+  lead,
+}: {
+  theme: Theme
+  cv: CvContent
+  /** The section heading, carried inside the first role's unbreakable block. */
+  lead?: React.ReactNode
+}) => (
   <>
-    {cv.roles.map(role => (
-      // A role may break across pages — refusing to leaves a third of page
-      // one blank — but its header keeps at least two bullets with it, so a
-      // title never sits alone at a page foot.
-      <View key={role.roleId} style={s.role}>
-        <View style={s.roleRow} minPresenceAhead={60}>
-          <Text style={[s.roleTitle, { color: theme.ink }]}>{role.title}</Text>
-          <Text style={[s.rolePeriod, { color: theme.secondary }]}>
-            {role.period}
+    {cv.roles.map((role, index) => {
+      const [first, ...rest] = role.bullets
+      const Bullet = ({
+        b,
+        i,
+      }: {
+        b: (typeof role.bullets)[number]
+        i: number
+      }) => (
+        // A bullet is one to three lines and never splits: a glyph alone
+        // at a page foot with its sentence on the next page is the
+        // emptiest thing a CV can show.
+        <View key={i} style={s.bullet} wrap={false}>
+          <Text style={[s.glyph, { color: theme.accent }]}>•</Text>
+          <Text style={[s.bulletText, { color: theme.ink }]}>
+            {b.label ? <Text style={s.bold}>{b.label}: </Text> : null}
+            {b.text}
           </Text>
         </View>
-        <View style={s.roleRow}>
-          <Text style={[s.roleCompany, { color: theme.accent }]}>
-            {role.company}
-          </Text>
-          <Text style={[s.roleLocation, { color: theme.tertiary }]}>
-            {role.location}
-          </Text>
-        </View>
-        <View
-          style={
-            theme.heading === 'spine'
-              ? [s.bulletsSpine, { borderLeftColor: hex(ink.hairlineStrong) }]
-              : s.bullets
-          }
-        >
-          {role.bullets.map((b, i) => (
-            // A bullet is one to three lines and never splits: a glyph alone
-            // at a page foot with its sentence on the next page is the
-            // emptiest thing a CV can show.
-            <View key={i} style={s.bullet} wrap={false}>
-              <Text style={[s.glyph, { color: theme.accent }]}>•</Text>
-              <Text style={[s.bulletText, { color: theme.ink }]}>
-                {b.label ? <Text style={s.bold}>{b.label}: </Text> : null}
-                {b.text}
+      )
+      const bulletBox =
+        theme.heading === 'spine'
+          ? [s.bulletsSpine, { borderLeftColor: hex(ink.hairlineStrong) }]
+          : s.bullets
+
+      return (
+        // A role may break across pages — refusing to leaves a third of page
+        // one blank — but its header travels with the company line and the
+        // first bullet, so a title never sits alone at a page foot.
+        <View key={role.roleId} style={s.role}>
+          <Keep>
+            {index === 0 ? lead : null}
+            <View style={s.roleRow}>
+              <Text style={[s.roleTitle, { color: theme.ink }]}>
+                {role.title}
+              </Text>
+              <Text style={[s.rolePeriod, { color: theme.secondary }]}>
+                {role.period}
               </Text>
             </View>
-          ))}
+            <View style={s.roleRow}>
+              <Text style={[s.roleCompany, { color: theme.accent }]}>
+                {role.company}
+              </Text>
+              <Text style={[s.roleLocation, { color: theme.tertiary }]}>
+                {role.location}
+              </Text>
+            </View>
+            {first ? (
+              <View style={bulletBox}>
+                <Bullet b={first} i={0} />
+              </View>
+            ) : null}
+          </Keep>
+          {rest.length > 0 ? (
+            <View style={bulletBox}>
+              {rest.map((b, i) => (
+                <Bullet key={i + 1} b={b} i={i + 1} />
+              ))}
+            </View>
+          ) : null}
         </View>
-      </View>
-    ))}
+      )
+    })}
   </>
 )
 
@@ -661,11 +708,23 @@ function Body({ theme, cv }: { theme: Theme; cv: CvContent }) {
     <>
       <StatBand theme={theme} cv={cv} />
 
-      <Section theme={theme} label="Summary" />
-      <Text style={[s.summary, { color: theme.ink }]}>{cv.summary}</Text>
+      <Keep>
+        <Section theme={theme} label="Summary" />
+        <Text style={[s.summary, { color: theme.ink }]}>{cv.summary}</Text>
+      </Keep>
 
-      <Section theme={theme} label="Skills" />
-      {cv.skills.map(group => (
+      <Keep>
+        <Section theme={theme} label="Skills" />
+        {cv.skills[0] ? (
+          <Text style={[s.skill, { color: theme.ink }]}>
+            <Text style={s.bold}>{cv.skills[0].group}: </Text>
+            <Text style={{ color: theme.secondary }}>
+              {cv.skills[0].items.join(' · ')}
+            </Text>
+          </Text>
+        ) : null}
+      </Keep>
+      {cv.skills.slice(1).map(group => (
         <Text key={group.group} style={[s.skill, { color: theme.ink }]}>
           <Text style={s.bold}>{group.group}: </Text>
           <Text style={{ color: theme.secondary }}>
@@ -674,11 +733,31 @@ function Body({ theme, cv }: { theme: Theme; cv: CvContent }) {
         </Text>
       ))}
 
-      <Section theme={theme} label="Work Experience" />
-      <Roles theme={theme} cv={cv} />
+      <Roles
+        theme={theme}
+        cv={cv}
+        lead={<Section theme={theme} label="Work Experience" />}
+      />
 
-      <Section theme={theme} label="Education" />
-      {cv.education.map(e => (
+      <Keep>
+        <Section theme={theme} label="Education" />
+        {cv.education[0] ? (
+          <View style={s.entryRow}>
+            <Text style={[s.entryMain, { color: theme.ink }]}>
+              <Text style={s.bold}>{cv.education[0].qualification}</Text>
+              <Text style={{ color: theme.secondary }}>
+                {` — ${cv.education[0].institution}`}
+              </Text>
+            </Text>
+            {cv.education[0].detail ? (
+              <Text style={[s.entryAside, { color: theme.tertiary }]}>
+                {cv.education[0].detail}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+      </Keep>
+      {cv.education.slice(1).map(e => (
         <View key={`${e.qualification}-${e.institution}`} style={s.entryRow}>
           <Text style={[s.entryMain, { color: theme.ink }]}>
             <Text style={s.bold}>{e.qualification}</Text>
@@ -696,8 +775,20 @@ function Body({ theme, cv }: { theme: Theme; cv: CvContent }) {
 
       {cv.certifications.length > 0 && (
         <>
-          <Section theme={theme} label="Certifications & Training" />
-          {cv.certifications.map(c => (
+          <Keep>
+            <Section theme={theme} label="Certifications & Training" />
+            <View style={s.entryRow}>
+              <Text style={[s.entryMain, { color: theme.ink }]}>
+                {cv.certifications[0].entry}
+              </Text>
+              {cv.certifications[0].year ? (
+                <Text style={[s.entryAside, { color: theme.tertiary }]}>
+                  {cv.certifications[0].year}
+                </Text>
+              ) : null}
+            </View>
+          </Keep>
+          {cv.certifications.slice(1).map(c => (
             <View key={c.entry} style={s.entryRow}>
               <Text style={[s.entryMain, { color: theme.ink }]}>{c.entry}</Text>
               {c.year ? (
@@ -710,10 +801,12 @@ function Body({ theme, cv }: { theme: Theme; cv: CvContent }) {
         </>
       )}
 
-      <Section theme={theme} label="Languages" />
-      <Text style={[s.entry, { color: theme.ink }]}>
-        {cv.languages.join('   ·   ')}
-      </Text>
+      <Keep>
+        <Section theme={theme} label="Languages" />
+        <Text style={[s.entry, { color: theme.ink }]}>
+          {cv.languages.join('   ·   ')}
+        </Text>
+      </Keep>
     </>
   )
 }

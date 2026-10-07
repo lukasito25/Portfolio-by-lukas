@@ -32,6 +32,13 @@ const nextConfig: NextConfig = {
       './node_modules/pdfkit/js/data/**',
       './templates/**',
     ],
+    // The public brief PDF renders through the same pdfkit path and needs the
+    // same files traced, for the same reason.
+    '/api/brief/[slug]/pdf': [
+      './node_modules/pdfkit/js/standard-fonts/**',
+      './node_modules/pdfkit/js/data/**',
+      './templates/**',
+    ],
   },
   webpack: config => {
     // Exclude cloudflare-api from webpack processing

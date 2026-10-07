@@ -1094,6 +1094,99 @@ box reported failure while saving correctly.
 or a build.** When a change touches Worker fields, deploy it and verify the new
 field round-trips before assuming the app is at fault.
 
+### The brief as a PDF — the thing they forward
+
+A page is a link, and a link is what gets lost. A recruiter who likes a
+candidate forwards something to a hiring manager, pastes it into an ATS note,
+or reads on a train with no signal, and in all three the artefact that travels
+is a PDF. Both reviews of the exploratory format landed on the same gap: there
+was nothing to attach.
+
+`GET /api/brief/<slug>/pdf?locale=en` renders one, and a quiet control sits at
+the foot of every brief. It is the **only public document route in the app** —
+every other one is session-gated, because a CV is drafted privately before it
+is sent. This one exists so the person it was written for can take it away, and
+gating it would defeat the point. "Public" means exactly as public as the page:
+a draft 404s without `?preview=<token>`, the brief is `noindex` and absent from
+the sitemap, and the rules are duplicated from `/brief/[slug]/page.tsx` rather
+than shared, so loosening that page cannot silently loosen this route.
+
+**Its own format** (`src/lib/documents/pdf/brief.tsx`), not one of the six CV
+designs: a brief is an argument mapped against a posting, not a career in
+reverse chronology. It borrows the prototype's language — numbered movements,
+the figures given room, a verdict beside every requirement — and renders
+**only what the page already says**. Every string comes from
+`FitBriefContent`, which the honesty layer has already validated, so the file
+and the page cannot disagree and the PDF inherits the citation checks for free.
+Density is handled with hierarchy rather than cuts: a requirement is a bold
+line with its verdict to the right and its proof small underneath, so three
+pages are scanned rather than read.
+
+Three things learned building it, all of which cost a render to find:
+
+- **Tracking still has to stay under ~0.08em.** The eyebrow shipped at 0.16em
+  and extracted as `F I FA · Z U R I C H`, which is the exact failure
+  `check-pdf-text` exists to catch for the CV designs. The brief is not yet in
+  that gate.
+- **`fixed` belongs on the leaf, and the leaf must be declared before the
+  flowing content.** On an absolutely positioned wrapper, or placed after the
+  body, it renders nothing and says nothing about it.
+- **Two react-pdf props are dead in 4.9.0, and both fail silently.**
+  `render={({ pageNumber }) => …}` produces nothing — verified by extracting
+  the shipped `column` and `classic` CVs, which carry the same footer and show
+  no page numbers on a two-page document either. And **`minPresenceAhead` does
+  nothing**: raised from 56 to 130 on a `View`, then moved onto the `Text` the
+  way `column.tsx` uses it, rebuilt clean each time, and "02 How my experience
+  maps to the work" still sat alone at the foot of page one.
+- **Contact details come from the corpus, never typed.** This shipped with
+  `hosala.lukas@gmail.com` hardcoded in the letterhead — the address
+  `contact.email` explicitly flags as the 2018-era one and says never to use.
+  The corpus exists because the generator was inventing a dead LinkedIn
+  handle; a hand-written document is no more trustworthy than a generated one.
+
+**The CV and letter designs now use the same pattern.** `minPresenceAhead` was
+the only thing standing between them and a stranded heading, so every section
+heading in `single.tsx` and `column.tsx` is wrapped with its first entry in a
+`<Keep>` — and every role header now travels with its company line and first
+bullet, which is what its own comment always claimed it did.
+
+Be clear about what that is and is not proven by. The _mechanism_ is proven:
+on the brief PDF a heading stranded with `minPresenceAhead` and stopped
+stranding with `wrap={false}`, and `check:brief-pdf` fails if the glue is
+removed. The _CV fix_ is not proven by its gate: `check-pdf-pagination` was
+widened from 24 to 144 renders — the summary is now padded a line at a time,
+because a bullet-count sweep moves a break in jumps too coarse to ever land on
+a heading — and it still passes with a heading deliberately unglued. The
+sample content simply never puts a section heading at a page foot. The fix is
+structurally right and uses a mechanism that works here; the gate cannot
+currently tell the difference.
+
+**The brief has its own gate: `npm run check:brief-pdf`.** It renders every
+brief in every locale and asserts two things, each with a negative control:
+
+- **No two runs drawn on top of one another.** This shipped broken: a
+  `flex: 1` left on the requirement after the verdict badge was removed
+  collapsed its height to nothing in a column layout, and every proof
+  paragraph printed over its own heading — nine of them on page one, in a
+  document meant to be forwarded. It was found by reading the file, not by any
+  check, which is why the check now exists.
+- **No section heading alone at the foot of a page.**
+
+It is a separate script rather than part of `npm run check:docs` because it
+needs the dev server — `check:docs` is a chain of offline renders and folding
+an HTTP dependency into it would cost that. `check-pdf-pagination` would not
+have caught either defect anyway: it covers the CV and letter renders only, and
+its `HEADINGS` regex matches CV section labels.
+
+The new route needs its own `outputFileTracingIncludes` entry in
+`next.config.ts`, for the same reason the admin document route does: `pdfkit`
+loads its built-in fonts through a package `#imports` subpath the tracer does
+not follow, and without it the lambda ships without `pdfkit/js/standard-fonts/`
+and dies at module load. That shipped once already.
+
+The download is visible in analytics with no extra wiring — the interaction
+tracker keys its `download` event off the `.pdf` extension.
+
 ### What else rests on the same evidence
 
 Every text-bearing item the generator writes carries `factIds` into the career

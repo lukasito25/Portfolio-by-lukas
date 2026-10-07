@@ -61,9 +61,20 @@ const DESIGNS = ['classic', 'rule', 'panel', 'field', 'dossier', 'column']
 const HEADINGS =
   /^(SUMMARY|SKILLS|WORK EXPERIENCE|EDUCATION|LANGUAGES|CERTIFICATIONS & TRAINING|CONTACT)$/
 
-/** The sample's roles three times over, each with `extra` bullets more. */
-const longer = extra => ({
+/**
+ * The sample's roles three times over, each with `extra` bullets more, and the
+ * summary padded by `pad` lines.
+ *
+ * The bullet sweep alone moves a break in jumps of a bullet, which is coarse
+ * enough that no run ever landed one on a section heading — so the
+ * stranded-heading check passed for years over designs whose only protection
+ * was `minPresenceAhead`, which does nothing in react-pdf 4.9.0. Padding the
+ * summary walks the whole document down the page a line at a time, which is
+ * what puts a heading at a page foot if anything can.
+ */
+const longer = (extra, pad = 0) => ({
   ...cv,
+  summary: cv.summary + ' Lorem ipsum dolor sit amet.'.repeat(pad),
   roles: [...cv.roles, ...cv.roles, ...cv.roles].map((role, i) => ({
     ...role,
     roleId: `${role.roleId}-${i}`,
@@ -84,10 +95,24 @@ function boundaryProblems(pages) {
       problems.push(`page ${page.num} ends with a lone bullet`)
     if (HEADINGS.test(last))
       problems.push(`page ${page.num} ends with the heading "${last}"`)
-    if (page.num > 1 && /^[a-z]/.test(first))
-      problems.push(
-        `page ${page.num} begins mid-sentence: "${first.slice(0, 40)}"`
-      )
+    // A page begins mid-sentence only if the page before it *ended* mid-
+    // sentence. Testing the opening character alone flags "adidas
+    // International Marketing B.V." — a role header at the top of a page,
+    // which is correct typesetting — because the employer's name is a
+    // lowercase brand. The previous page's last line is what settles it.
+    const previous = pages[pages.indexOf(page) - 1]
+    if (page.num > 1 && /^[a-z]/.test(first) && previous) {
+      const prevLines = previous.text
+        .split('\n')
+        .map(l => l.trim())
+        .filter(Boolean)
+      const prevLast = prevLines[prevLines.length - 1] ?? ''
+      if (!/[.!?:;,»”"')\]]$/.test(prevLast)) {
+        problems.push(
+          `page ${page.num} begins mid-sentence: "${first.slice(0, 40)}"`
+        )
+      }
+    }
   }
   return problems
 }
@@ -96,16 +121,29 @@ let failed = false
 let renders = 0
 console.log('')
 
+/**
+ * Break positions to try. The bullet count moves a break coarsely; the summary
+ * padding walks it down a line at a time, which is what gets a break to land
+ * on a section heading rather than near one.
+ */
+const SWEEP = []
+for (const extra of [0, 1, 2, 3]) {
+  for (const pad of [0, 1, 2, 3, 4, 5]) SWEEP.push([extra, pad])
+}
+
 for (const design of DESIGNS) {
   const found = []
-  for (const extra of [0, 1, 2, 3]) {
-    const buffer = await renderCvPdf(longer(extra), { variant: design, photo })
+  for (const [extra, pad] of SWEEP) {
+    const buffer = await renderCvPdf(longer(extra, pad), {
+      variant: design,
+      photo,
+    })
     renders++
     const parser = new PDFParse({ data: buffer })
     const { pages } = await parser.getText()
     await parser.destroy()
     for (const problem of boundaryProblems(pages)) {
-      found.push(`+${extra} bullets: ${problem}`)
+      found.push(`+${extra} bullets +${pad} lines: ${problem}`)
     }
   }
   if (found.length) {
@@ -113,7 +151,9 @@ for (const design of DESIGNS) {
     console.log(`  ✗ ${design}`)
     for (const f of found) console.log(`      ${f}`)
   } else {
-    console.log(`  ✓ ${design} — clean boundaries at four break positions`)
+    console.log(
+      `  ✓ ${design} — clean boundaries at ${SWEEP.length} break positions`
+    )
   }
 }
 

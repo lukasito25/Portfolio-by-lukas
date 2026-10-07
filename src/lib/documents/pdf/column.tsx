@@ -354,10 +354,18 @@ const href = (link: string) =>
  * ------------------------------------------------------------------ */
 
 // A rail label keeps at least its first entry with it when the rail runs on
-// to a second page.
-const Box = ({ label }: { label: string }) => (
-  <View style={styles.box} minPresenceAhead={44}>
+// to a second page. `children` is that entry: `minPresenceAhead` used to
+// stand in for it and does nothing in this version.
+const Box = ({
+  label,
+  children,
+}: {
+  label: string
+  children?: React.ReactNode
+}) => (
+  <View style={styles.box} wrap={false}>
     <Text style={styles.boxLabel}>{label.toUpperCase()}</Text>
+    {children}
   </View>
 )
 
@@ -428,10 +436,20 @@ const NameBlock = ({ name, headline }: { name: string; headline: string }) => {
   )
 }
 
+/**
+ * Two nodes a page break must not come between.
+ *
+ * `minPresenceAhead` was doing this job and does nothing in react-pdf 4.9.0 —
+ * raising it and rebuilding clean changes nothing, the same way `render` on a
+ * Text produces no page number. A heading now travels inside the same
+ * unbreakable block as the first thing under it.
+ */
+const Keep = ({ children }: { children: React.ReactNode }) => (
+  <View wrap={false}>{children}</View>
+)
+
 const Section = ({ label }: { label: string }) => (
-  <Text minPresenceAhead={48} style={styles.section}>
-    {label}
-  </Text>
+  <Text style={styles.section}>{label}</Text>
 )
 
 /** Page number, only when there is more than one page. */
@@ -539,41 +557,74 @@ function CvDocument({ cv, photo }: { cv: CvContent; photo?: Photo }) {
         </View>
 
         {/* 3. The body, flowing down the main column and onto further pages. */}
-        <Section label="Summary" />
-        <Text style={styles.summary}>{cv.summary}</Text>
+        <Keep>
+          <Section label="Summary" />
+          <Text style={styles.summary}>{cv.summary}</Text>
+        </Keep>
 
-        <Section label="Work Experience" />
-        {cv.roles.map(role => (
-          <View key={role.roleId} style={styles.role}>
-            <View style={styles.roleHeader} minPresenceAhead={60}>
-              <Text style={styles.roleCompany}>{role.company}</Text>
-              <Text style={styles.rolePeriod}>{role.period}</Text>
+        {cv.roles.map((role, index) => {
+          const [first, ...rest] = role.bullets
+          const Bullet = ({
+            b,
+            i,
+          }: {
+            b: (typeof role.bullets)[number]
+            i: number
+          }) => (
+            // Never split a bullet: the production example that prompted
+            // this had a lone "•" at the foot of page one.
+            <View key={i} style={styles.bullet} wrap={false}>
+              <Text style={styles.bulletGlyph}>•</Text>
+              <Text style={styles.bulletText}>
+                {b.label ? (
+                  <Text style={styles.bulletLabel}>{b.label}: </Text>
+                ) : null}
+                {b.text}
+              </Text>
             </View>
-            <Text style={styles.roleSubtitle}>
-              {[role.title, role.location].filter(Boolean).join(' | ')}
-            </Text>
-            <View style={styles.bullets}>
-              {role.bullets.map((b, i) => (
-                // Never split a bullet: the production example that prompted
-                // this had a lone "•" at the foot of page one.
-                <View key={i} style={styles.bullet} wrap={false}>
-                  <Text style={styles.bulletGlyph}>•</Text>
-                  <Text style={styles.bulletText}>
-                    {b.label ? (
-                      <Text style={styles.bulletLabel}>{b.label}: </Text>
-                    ) : null}
-                    {b.text}
-                  </Text>
+          )
+          return (
+            <View key={role.roleId} style={styles.role}>
+              <Keep>
+                {index === 0 ? <Section label="Work Experience" /> : null}
+                <View style={styles.roleHeader}>
+                  <Text style={styles.roleCompany}>{role.company}</Text>
+                  <Text style={styles.rolePeriod}>{role.period}</Text>
                 </View>
-              ))}
+                <Text style={styles.roleSubtitle}>
+                  {[role.title, role.location].filter(Boolean).join(' | ')}
+                </Text>
+                {first ? (
+                  <View style={styles.bullets}>
+                    <Bullet b={first} i={0} />
+                  </View>
+                ) : null}
+              </Keep>
+              {rest.length > 0 ? (
+                <View style={styles.bullets}>
+                  {rest.map((b, i) => (
+                    <Bullet key={i + 1} b={b} i={i + 1} />
+                  ))}
+                </View>
+              ) : null}
             </View>
-          </View>
-        ))}
+          )
+        })}
 
         {cv.certifications.length > 0 && (
           <>
-            <Section label="Certifications & Training" />
-            {cv.certifications.map(c => (
+            <Keep>
+              <Section label="Certifications & Training" />
+              <Text style={styles.entry}>
+                {cv.certifications[0].year ? (
+                  <Text style={styles.entryYear}>
+                    {`${cv.certifications[0].year} — `}
+                  </Text>
+                ) : null}
+                {cv.certifications[0].entry}
+              </Text>
+            </Keep>
+            {cv.certifications.slice(1).map(c => (
               <Text key={c.entry} style={styles.entry}>
                 {c.year ? (
                   <Text style={styles.entryYear}>{`${c.year} — `}</Text>
